@@ -93,25 +93,31 @@
 
     <script>
         // CONFIG: Change this to your PocketBase URL
-        const POCKETBASE_URL = 'http://your-server:8090';
-        
-        const SERVICES = [
-            { id: 1, name: 'Haircut', duration: 35, price: 40 },
-            { id: 2, name: 'Haircut and Beard', duration: 40, price: 50 },
-            { id: 3, name: 'High School Cuts', duration: 30, price: 30 },
-            { id: 4, name: 'Hair Dye (Black)', duration: 15, price: 30 },
-            { id: 5, name: 'Hair Dye/Bleach', duration: 40, price: 70 },
-            { id: 6, name: 'Pensioners Haircut', duration: 30, price: 30 },
-            { id: 7, name: 'Facials', duration: 60, price: 100 },
-            { id: 8, name: 'Braiding', duration: 120, price: 200 }
-        ];
+        const POCKETBASE_URL = 'http://170.64.153.193:8090';
+        let SERVICES = [];
         
         // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadServices();
             renderServices();
             setupDatePicker();
             setupForm();
         });
+        
+        async function loadServices() {
+            try {
+                const res = await fetch(`${POCKETBASE_URL}/api/collections/services/records`);
+                const data = await res.json();
+                SERVICES = data.items.map(s => ({
+                    id: s.id,
+                    name: s.name,
+                    duration: s.duration,
+                    price: s.price
+                }));
+            } catch (e) {
+                console.error('Failed to load services:', e);
+            }
+        }
         
         function renderServices() {
             const container = document.getElementById('servicesList');
@@ -157,7 +163,7 @@
         }
         
         async function submitBooking(bookingData) {
-            // Create user first
+            // Create user first (auth collection)
             const userResponse = await fetch(`${POCKETBASE_URL}/api/collections/users/records`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -169,7 +175,6 @@
             });
             
             if (!userResponse.ok) throw new Error('Failed to create account');
-            
             const user = await userResponse.json();
             
             // Create booking
@@ -177,8 +182,12 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    user: user.id,
-                    service: bookingData.service_id,
+                    user_id: user.id,
+                    user_name: bookingData.name,
+                    user_email: bookingData.email,
+                    user_phone: bookingData.phone,
+                    service_id: bookingData.service_id,
+                    service_name: bookingData.service_name,
                     date_time: bookingData.date_time,
                     status: 'pending'
                 })
@@ -220,14 +229,13 @@
                 };
                 
                 try {
-                    // In production, uncomment this:
-                    // await submitBooking(bookingData);
+                    await submitBooking(bookingData);
                     
-                    // Show success for demo
                     document.getElementById('bookingForm').style.display = 'none';
                     document.getElementById('successMessage').style.display = 'block';
                     
                 } catch (error) {
+                    console.error(error);
                     document.getElementById('serviceError').textContent = 'Booking failed. Please try again.';
                     btn.disabled = false;
                     btn.textContent = 'Book Now';
