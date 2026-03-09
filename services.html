@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Services - Coollooks23</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #1a1a1a; color: #fff; padding: 40px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        h1 { color: #C9A84C; text-align: center; margin-bottom: 30px; }
+        .back { display: inline-block; color: #999; text-decoration: none; margin-bottom: 20px; }
+        .back:hover { color: #C9A84C; }
+        .service-row { display: flex; justify-content: space-between; padding: 15px 20px; background: #2d2d2d; margin-bottom: 10px; border-radius: 8px; }
+        .service-name { font-size: 18px; }
+        .service-price { color: #C9A84C; font-weight: 600; font-size: 18px; }
+        .service-duration { color: #666; font-size: 14px; }
+        .book-btn { display: block; width: 100%; padding: 15px; background: #C9A84C; color: #000; text-align: center; text-decoration: none; font-weight: 600; margin-top: 30px; border-radius: 8px; }
+        .book-btn:hover { background: #b8973f; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back">← Back</a>
+        <h1>Our Services</h1>
+        <div id="servicesList">Loading...</div>
+        <a href="coollooks23-full-site.html" class="book-btn">Book Appointment</a>
+    </div>
+    <script>
+        fetch('http://170.64.153.193:8090/api/collections/services/records')
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('servicesList').innerHTML = data.items.map(s => 
+                    '<div class="service-row"><div><div class="service-name">' + s.name + '</div><div class="service-duration">' + s.duration + ' min</div></div><div class="service-price">$' + s.price + '</div></div>'
+                ).join('');
+            });
+    </script>
+</body>
+</html>

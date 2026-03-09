@@ -11,13 +11,10 @@
         h1 { color: #C9A84C; font-size: 48px; margin-bottom: 10px; }
         p { color: #999; font-size: 18px; margin-bottom: 40px; }
         .links { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
-        .link-card { background: white; padding: 30px 40px; border-radius: 16px; text-decoration: none; color: #333; transition: transform 0.3s, box-shadow 0.3s; display: block; }
+        .link-card { background: white; padding: 30px 40px; border-radius: 16px; text-decoration: none; color: #333; transition: transform 0.3s, box-shadow 0.3s; display: block; min-width: 200px; }
         .link-card:hover { transform: translateY(-5px); box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
         .link-card h2 { font-size: 24px; margin-bottom: 10px; }
         .link-card p { color: #666; font-size: 14px; margin: 0; }
-        .booking { background: #C9A84C; }
-        .booking h2 { color: white; }
-        .admin { background: white; }
     </style>
 </head>
 <body>
@@ -26,12 +23,17 @@
         <p>Barberz & Hair Styling</p>
         
         <div class="links">
-            <a href="booking-widget.html" class="link-card booking">
+            <a href="coollooks23-full-site.html" class="link-card">
                 <h2>📅 Book Now</h2>
-                <p>Schedule your appointment</p>
+                <p>Full site with booking</p>
             </a>
             
-            <a href="admin.html" class="link-card admin">
+            <a href="services.html" class="link-card">
+                <h2>✂️ Services</h2>
+                <p>Price list</p>
+            </a>
+            
+            <a href="admin.html" class="link-card">
                 <h2>⚙️ Admin</h2>
                 <p>Manage bookings</p>
             </a>
