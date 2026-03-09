@@ -163,26 +163,12 @@
         }
         
         async function submitBooking(bookingData) {
-            // Create user first (auth collection)
-            const userResponse = await fetch(`${POCKETBASE_URL}/api/collections/users/records`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    email: bookingData.email,
-                    name: bookingData.name,
-                    phone: bookingData.phone
-                })
-            });
-            
-            if (!userResponse.ok) throw new Error('Failed to create account');
-            const user = await userResponse.json();
-            
-            // Create booking
+            // Guest booking - create booking directly with customer info (no account required)
             const bookingResponse = await fetch(`${POCKETBASE_URL}/api/collections/bookings/records`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    user_id: user.id,
+                    user_id: 'guest_' + Date.now(),
                     user_name: bookingData.name,
                     user_email: bookingData.email,
                     user_phone: bookingData.phone,
@@ -195,7 +181,8 @@
             
             if (!bookingResponse.ok) throw new Error('Failed to create booking');
             
-            return user;
+            const booking = await bookingResponse.json();
+            return booking;
         }
         
         function setupForm() {
