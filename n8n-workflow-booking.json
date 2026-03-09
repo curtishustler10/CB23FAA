@@ -1,0 +1,83 @@
+{
+  "name": "Coollooks23 Booking System",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "booking",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "webhook",
+      "name": "Webhook - New Booking",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "coollooks23-booking"
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "users",
+        "columns": {
+          "email": "={{ $json.email }}",
+          "phone": "={{ $json.phone }}",
+          "name": "={{ $json.name }}"
+        },
+        "options": {}
+      },
+      "id": "create-user",
+      "name": "Create User",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "bookings",
+        "columns": {
+          "user_id": "={{ $json.id }}",
+          "service_id": "={{ $json.service_id }}",
+          "date_time": "={{ $json.date_time }}",
+          "status": "pending"
+        },
+        "options": {}
+      },
+      "id": "create-booking",
+      "name": "Create Booking",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "resource": "email",
+        "fromEmail": "bookings@coollooks23.com.au",
+        "to": "={{ $json.email }}",
+        "subject": "Booking Confirmed - Coollooks23",
+        "text": "Hi {{ $json.name }},\n\nYour booking at Coollooks23 has been confirmed!\n\nService: {{ $json.service_name }}\nDate: {{ $json.date_time }}\n\nSee you soon!\n\nCoollooks23 Team",
+        "options": {}
+      },
+      "id": "send-email",
+      "name": "Send Confirmation Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 1,
+      "position": [850, 300]
+    }
+  ],
+  "connections": {
+    "Webhook - New Booking": {
+      "main": [[{"node": "Create User", "type": "main", "index": 0}]]
+    },
+    "Create User": {
+      "main": [[{"node": "Create Booking", "type": "main", "index": 0}]]
+    },
+    "Create Booking": {
+      "main": [[{"node": "Send Confirmation Email", "type": "main", "index": 0}]]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "id": "coollooks23-booking-workflow"
+}

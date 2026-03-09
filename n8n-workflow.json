@@ -1,0 +1,85 @@
+{
+  "name": "Coollooks23 Booking Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "booking",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "coollooks23-booking"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "collection": "users",
+        "email": "{{ $json.email }}",
+        "name": "{{ $json.name }}",
+        "phone": "{{ $json.phone }}",
+        "options": {}
+      },
+      "id": "create-user",
+      "name": "Create User",
+      "type": "n8n-nodes-base.pocketbase",
+      "typeVersion": 1,
+      "position": [450, 300],
+      "credentials": {"pocketbaseApi": "PocketBase Creds"}
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "collection": "bookings",
+        "user": "{{ $json.id }}",
+        "service": "{{ $json.service_id }}",
+        "dateTime": "{{ $json.date_time }}",
+        "status": "pending",
+        "options": {}
+      },
+      "id": "create-booking",
+      "name": "Create Booking",
+      "type": "n8n-nodes-base.pocketbase",
+      "typeVersion": 1,
+      "position": [650, 300],
+      "credentials": {"pocketbaseApi": "PocketBase Creds"}
+    },
+    {
+      "parameters": {
+        "subject": "Booking Confirmed - Coollooks23",
+        "to": "{{ $json.email }}",
+        "body": "Hi {{ $json.name }}! Your booking is confirmed.\n\nService: {{ $json.service_name }}\nDate: {{ $json.date_time }}\n\nSubscribe for $70/month for unlimited bookings!",
+        "options": {}
+      },
+      "id": "send-email",
+      "name": "Send Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 3,
+      "position": [850, 300],
+      "credentials": {"gmailOAuth2": "Gmail"}
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{"node": "Create User", "type": "main", "index": 0}]]
+    },
+    "Create User": {
+      "main": [[{"node": "Create Booking", "type": "main", "index": 0}]]
+    },
+    "Create Booking": {
+      "main": [[{"node": "Send Email", "type": "main", "index": 0}]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2026-03-09T14:00:00.000Z",
+  "versionId": "1"
+}

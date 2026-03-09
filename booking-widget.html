@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Now - Coollooks23</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        .booking-widget { max-width: 500px; margin: 0 auto; padding: 20px; background: #fff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .widget-header { text-align: center; margin-bottom: 24px; }
+        .widget-header h2 { color: #1a1a1a; font-size: 24px; margin-bottom: 8px; }
+        .widget-header p { color: #666; font-size: 14px; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; margin-bottom: 6px; color: #333; font-weight: 500; font-size: 14px; }
+        .form-group input, .form-group select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #C9A84C; }
+        .service-option { display: flex; justify-content: space-between; align-items: center; padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 8px; cursor: pointer; transition: all 0.3s; }
+        .service-option:hover { border-color: #C9A84C; }
+        .service-option.selected { border-color: #C9A84C; background: #fdf8f0; }
+        .service-name { font-weight: 500; }
+        .service-details { color: #666; font-size: 13px; }
+        .service-price { color: #C9A84C; font-weight: 600; }
+        .date-time-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .submit-btn { width: 100%; padding: 14px; background: #C9A84C; color: #fff; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: background 0.3s; }
+        .submit-btn:hover { background: #b8973f; }
+        .submit-btn:disabled { background: #ccc; cursor: not-allowed; }
+        .success-message { text-align: center; padding: 40px 20px; }
+        .success-icon { width: 60px; height: 60px; background: #4CAF50; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; color: white; font-size: 30px; }
+        .error-message { color: #f44336; font-size: 14px; margin-top: 8px; }
+        .subscription-note { background: #f5f5f5; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 13px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="booking-widget" id="bookingWidget">
+        <div class="widget-header">
+            <h2>Book Your Appointment</h2>
+            <p>Coollooks23 Barberz</p>
+        </div>
+        
+        <div class="subscription-note">
+            💎 <strong>Subscribe $70/month</strong> for unlimited bookings!
+        </div>
+        
+        <form id="bookingForm">
+            <!-- Service Selection -->
+            <div class="form-group">
+                <label>Select Service</label>
+                <div id="servicesList"></div>
+                <input type="hidden" id="selectedService" required>
+                <div class="error-message" id="serviceError"></div>
+            </div>
+            
+            <!-- Personal Details -->
+            <div class="form-group">
+                <label>Your Name</label>
+                <input type="text" id="customerName" placeholder="John Smith" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="customerEmail" placeholder="john@example.com" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Phone</label>
+                <input type="tel" id="customerPhone" placeholder="+61 400 000 000" required>
+            </div>
+            
+            <!-- Date & Time -->
+            <div class="date-time-group">
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" id="bookingDate" required>
+                </div>
+                <div class="form-group">
+                    <label>Time</label>
+                    <select id="bookingTime" required>
+                        <option value="">Select time</option>
+                    </select>
+                </div>
+            </div>
+            
+            <button type="submit" class="submit-btn" id="submitBtn">Book Now</button>
+        </form>
+        
+        <div class="success-message" id="successMessage" style="display: none;">
+            <div class="success-icon">✓</div>
+            <h3>Booking Confirmed!</h3>
+            <p style="margin-top: 12px; color: #666;">We've sent a confirmation to your email.</p>
+            <p style="margin-top: 8px; color: #666;">Subscribe for $70/month for unlimited bookings!</p>
+        </div>
+    </div>
+
+    <script>
+        // CONFIG: Change this to your PocketBase URL
+        const POCKETBASE_URL = 'http://your-server:8090';
+        
+        const SERVICES = [
+            { id: 1, name: 'Haircut', duration: 35, price: 40 },
+            { id: 2, name: 'Haircut and Beard', duration: 40, price: 50 },
+            { id: 3, name: 'High School Cuts', duration: 30, price: 30 },
+            { id: 4, name: 'Hair Dye (Black)', duration: 15, price: 30 },
+            { id: 5, name: 'Hair Dye/Bleach', duration: 40, price: 70 },
+            { id: 6, name: 'Pensioners Haircut', duration: 30, price: 30 },
+            { id: 7, name: 'Facials', duration: 60, price: 100 },
+            { id: 8, name: 'Braiding', duration: 120, price: 200 }
+        ];
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            renderServices();
+            setupDatePicker();
+            setupForm();
+        });
+        
+        function renderServices() {
+            const container = document.getElementById('servicesList');
+            container.innerHTML = SERVICES.map(s => `
+                <div class="service-option" data-id="${s.id}" onclick="selectService(${s.id})">
+                    <div>
+                        <div class="service-name">${s.name}</div>
+                        <div class="service-details">${s.duration} min</div>
+                    </div>
+                    <div class="service-price">$${s.price}</div>
+                </div>
+            `).join('');
+        }
+        
+        function selectService(id) {
+            document.querySelectorAll('.service-option').forEach(el => el.classList.remove('selected'));
+            document.querySelector(`[data-id="${id}"]`).classList.add('selected');
+            document.getElementById('selectedService').value = id;
+            document.getElementById('serviceError').textContent = '';
+            updateTimeSlots();
+        }
+        
+        function setupDatePicker() {
+            const dateInput = document.getElementById('bookingDate');
+            const today = new Date();
+            const maxDate = new Date();
+            maxDate.setMonth(maxDate.getMonth() + 2);
+            
+            dateInput.min = today.toISOString().split('T')[0];
+            dateInput.max = maxDate.toISOString().split('T')[0];
+            dateInput.addEventListener('change', updateTimeSlots);
+        }
+        
+        function updateTimeSlots() {
+            const select = document.getElementById('bookingTime');
+            const slots = [];
+            for (let hour = 8; hour < 18; hour++) {
+                slots.push(`${hour.toString().padStart(2, '0')}:00`);
+                slots.push(`${hour.toString().padStart(2, '0')}:30`);
+            }
+            select.innerHTML = '<option value="">Select time</option>' + 
+                slots.map(t => `<option value="${t}">${t}</option>`).join('');
+        }
+        
+        async function submitBooking(bookingData) {
+            // Create user first
+            const userResponse = await fetch(`${POCKETBASE_URL}/api/collections/users/records`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: bookingData.email,
+                    name: bookingData.name,
+                    phone: bookingData.phone
+                })
+            });
+            
+            if (!userResponse.ok) throw new Error('Failed to create account');
+            
+            const user = await userResponse.json();
+            
+            // Create booking
+            const bookingResponse = await fetch(`${POCKETBASE_URL}/api/collections/bookings/records`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    user: user.id,
+                    service: bookingData.service_id,
+                    date_time: bookingData.date_time,
+                    status: 'pending'
+                })
+            });
+            
+            if (!bookingResponse.ok) throw new Error('Failed to create booking');
+            
+            return user;
+        }
+        
+        function setupForm() {
+            document.getElementById('bookingForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const btn = document.getElementById('submitBtn');
+                btn.disabled = true;
+                btn.textContent = 'Booking...';
+                
+                const serviceId = document.getElementById('selectedService').value;
+                if (!serviceId) {
+                    document.getElementById('serviceError').textContent = 'Please select a service';
+                    btn.disabled = false;
+                    btn.textContent = 'Book Now';
+                    return;
+                }
+                
+                const service = SERVICES.find(s => s.id === parseInt(serviceId));
+                const date = document.getElementById('bookingDate').value;
+                const time = document.getElementById('bookingTime').value;
+                
+                const bookingData = {
+                    name: document.getElementById('customerName').value,
+                    email: document.getElementById('customerEmail').value,
+                    phone: document.getElementById('customerPhone').value,
+                    service_id: serviceId,
+                    service_name: service.name,
+                    service_price: service.price,
+                    date_time: `${date}T${time}:00`
+                };
+                
+                try {
+                    // In production, uncomment this:
+                    // await submitBooking(bookingData);
+                    
+                    // Show success for demo
+                    document.getElementById('bookingForm').style.display = 'none';
+                    document.getElementById('successMessage').style.display = 'block';
+                    
+                } catch (error) {
+                    document.getElementById('serviceError').textContent = 'Booking failed. Please try again.';
+                    btn.disabled = false;
+                    btn.textContent = 'Book Now';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
