@@ -901,6 +901,42 @@
 </head>
 <body>
 
+<!-- FORCE BOOKING MODAL -->
+<script>
+window.openBookingModal = function() {
+  console.log("Opening booking modal");
+  var modal = document.getElementById("bookingModal");
+  if (!modal) {
+    console.error("Modal not found!");
+    alert("Modal not found - contact support");
+    return;
+  }
+  modal.style.display = "block";
+  modal.classList.add("open");
+  loadServices();
+  setupDateTime();
+};
+
+window.closeBookingModal = function() {
+  var modal = document.getElementById("bookingModal");
+  if (modal) {
+    modal.style.display = "none";
+    modal.classList.remove("open");
+  }
+};
+
+// Auto-attach click handlers
+document.addEventListener("click", function(e) {
+  var text = e.target.textContent || "";
+  if (text.indexOf("BOOK") !== -1 || e.target.classList.contains("booking-trigger")) {
+    e.preventDefault();
+    e.stopPropagation();
+    openBookingModal();
+  }
+});
+</script>
+
+
 <!-- Geometric BG -->
 <div class="geo-bg" aria-hidden="true">
   <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
@@ -920,18 +956,18 @@
   <a href="#masters" onclick="closeMenu()">Hair Stylists</a>
   <a href="#blog" onclick="closeMenu()">Blog</a>
   <a href="#contact" onclick="closeMenu()">Contact</a>
-  <a href="#"  class="btn-mobile">BOOK NOW</a>
+  <a href="javascript:void(0)" onclick="openBookingModal(); return false;"  class="btn-mobile">BOOK NOW</a>
 </div>
 
 <!-- NAV -->
 <nav id="navbar">
-  <a href="#" class="nav-logo"><img src="brand assets/logo_off1.png" alt="Coollooks 23"><div class="nav-logo-text">COOLLOOKS<span>BARBERZ</span></div></a>
+  <a href="javascript:void(0)" onclick="openBookingModal(); return false;" class="nav-logo"><img src="brand assets/logo_off1.png" alt="Coollooks 23"><div class="nav-logo-text">COOLLOOKS<span>BARBERZ</span></div></a>
   <ul class="nav-links">
     <li><a href="#services">Services</a></li>
     <li><a href="#masters">Hair Stylists</a></li>
     <li><a href="#blog">Blog</a></li>
     <li><a href="#contact">Contact</a></li>
-    <li><a href="#"  class="btn-nav">BOOK NOW</a></li>
+    <li><a href="javascript:void(0)" onclick="openBookingModal(); return false;"  class="btn-nav">BOOK NOW</a></li>
   </ul>
   <button class="hamburger" onclick="openMenu()" aria-label="Open menu">
     <span></span><span></span><span></span>
@@ -943,7 +979,7 @@
   <div class="hero-left">
     <p class="hero-eyebrow">Premium Barbershop — Slacks Creek</p>
     <h1 class="hero-headline">COOL<br><em>LOOKS</em><br>23</h1>
-    <a href="#"  class="hero-cta">BOOK NOW</a>
+    <a href="javascript:void(0)" onclick="openBookingModal(); return false;"  class="hero-cta">BOOK NOW</a>
     <div class="hero-address">
       1-3 Noel Street, Slacks Creek QLD 4127<br>
       +61 470 224 498<br>
@@ -1085,7 +1121,7 @@
       </div>
 
       <div class="services-cta">
-        <a href="#"  class="btn-primary">BOOK NOW</a>
+        <a href="javascript:void(0)" onclick="openBookingModal(); return false;"  class="btn-primary">BOOK NOW</a>
       </div>
     </div>
 
@@ -1170,7 +1206,7 @@
       <h3 class="blog-title">What Makes a Great Barbershop? (And How to Find One Near You)</h3>
       <p class="blog-excerpt">Not all barbershops are created equal. A truly great barbershop goes beyond a clean cut — it's the atmosphere, the skill of the barbers, and the way you feel walking out the door.</p>
       <div class="blog-footer">
-        <a href="#" class="blog-link">Read More →</a>
+        <a href="javascript:void(0)" onclick="openBookingModal(); return false;" class="blog-link">Read More →</a>
       </div>
     </article>
 
@@ -1180,7 +1216,7 @@
       <h3 class="blog-title">Black Hair Types Explained: 4A, 4B & 4C and How to Care for Each</h3>
       <p class="blog-excerpt">Understanding your curl pattern is the foundation of a healthy hair routine. Whether you're 4A, 4B, or 4C, each type has unique needs that generic advice simply doesn't cover.</p>
       <div class="blog-footer">
-        <a href="#" class="blog-link">Read More →</a>
+        <a href="javascript:void(0)" onclick="openBookingModal(); return false;" class="blog-link">Read More →</a>
       </div>
     </article>
 
@@ -1190,7 +1226,7 @@
       <h3 class="blog-title">Top Braiding Styles for 2025: Box Braids, Cornrows & Knotless Explained</h3>
       <p class="blog-excerpt">Braiding is more than a hairstyle — it's a tradition rooted in culture, identity, and artistry. Find out which protective style suits your hair texture and lifestyle in 2025.</p>
       <div class="blog-footer">
-        <a href="#" class="blog-link">Read More →</a>
+        <a href="javascript:void(0)" onclick="openBookingModal(); return false;" class="blog-link">Read More →</a>
       </div>
     </article>
 
@@ -1210,11 +1246,11 @@
       </div>
       <div class="contact-item">
         <p class="contact-label">Phone</p>
-        <p class="contact-value"><a href="#" >+61 470 224 498</a></p>
+        <p class="contact-value"><a href="javascript:void(0)" onclick="openBookingModal(); return false;" >+61 470 224 498</a></p>
       </div>
       <div class="contact-item">
         <p class="contact-label">Book</p>
-        <p class="contact-value"><a href="#"  class="btn-primary" style="display:inline-block;margin-top:0.5rem;">CALL TO BOOK</a></p>
+        <p class="contact-value"><a href="javascript:void(0)" onclick="openBookingModal(); return false;"  class="btn-primary" style="display:inline-block;margin-top:0.5rem;">CALL TO BOOK</a></p>
       </div>
     </div>
 
@@ -1269,7 +1305,7 @@
     <li><a href="#masters">Hair Stylists</a></li>
     <li><a href="#blog">Blog</a></li>
     <li><a href="#contact">Contact</a></li>
-    <li><a href="admin.html">Admin</a></li><li><a href="#">Privacy Policy</a></li>
+    <li><a href="admin.html">Admin</a></li><li><a href="javascript:void(0)" onclick="openBookingModal(); return false;">Privacy Policy</a></li>
   </ul>
   <p class="footer-copy">© 2025 COOLLOOKS23. All rights reserved.</p>
 </footer>
@@ -1422,7 +1458,7 @@
     });
 
   document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('a[href="#"]').forEach(function(link) {
+    document.querySelectorAll('a[href="javascript:void(0)" onclick="openBookingModal(); return false;"]').forEach(function(link) {
       if (link.textContent.includes('BOOK NOW') || link.classList.contains('btn-nav') || link.classList.contains('btn-mobile') || link.classList.contains('hero-cta') || link.classList.contains('btn-primary')) {
         link.addEventListener('click', function(e) {
           e.preventDefault();
