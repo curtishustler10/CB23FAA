@@ -920,7 +920,7 @@
   <a href="#masters" onclick="closeMenu()">Hair Stylists</a>
   <a href="#blog" onclick="closeMenu()">Blog</a>
   <a href="#contact" onclick="closeMenu()">Contact</a>
-  <a href="#" onclick="openBookingModal(); return false;" class="btn-mobile">BOOK NOW</a>
+  <a href="#"  class="btn-mobile">BOOK NOW</a>
 </div>
 
 <!-- NAV -->
@@ -931,7 +931,7 @@
     <li><a href="#masters">Hair Stylists</a></li>
     <li><a href="#blog">Blog</a></li>
     <li><a href="#contact">Contact</a></li>
-    <li><a href="#" onclick="openBookingModal(); return false;" class="btn-nav">BOOK NOW</a></li>
+    <li><a href="#"  class="btn-nav">BOOK NOW</a></li>
   </ul>
   <button class="hamburger" onclick="openMenu()" aria-label="Open menu">
     <span></span><span></span><span></span>
@@ -943,7 +943,7 @@
   <div class="hero-left">
     <p class="hero-eyebrow">Premium Barbershop — Slacks Creek</p>
     <h1 class="hero-headline">COOL<br><em>LOOKS</em><br>23</h1>
-    <a href="#" onclick="openBookingModal(); return false;" class="hero-cta">BOOK NOW</a>
+    <a href="#"  class="hero-cta">BOOK NOW</a>
     <div class="hero-address">
       1-3 Noel Street, Slacks Creek QLD 4127<br>
       +61 470 224 498<br>
@@ -1085,7 +1085,7 @@
       </div>
 
       <div class="services-cta">
-        <a href="#" onclick="openBookingModal(); return false;" class="btn-primary">BOOK NOW</a>
+        <a href="#"  class="btn-primary">BOOK NOW</a>
       </div>
     </div>
 
@@ -1210,11 +1210,11 @@
       </div>
       <div class="contact-item">
         <p class="contact-label">Phone</p>
-        <p class="contact-value"><a href="#" onclick="openBookingModal(); return false;">+61 470 224 498</a></p>
+        <p class="contact-value"><a href="#" >+61 470 224 498</a></p>
       </div>
       <div class="contact-item">
         <p class="contact-label">Book</p>
-        <p class="contact-value"><a href="#" onclick="openBookingModal(); return false;" class="btn-primary" style="display:inline-block;margin-top:0.5rem;">CALL TO BOOK</a></p>
+        <p class="contact-value"><a href="#"  class="btn-primary" style="display:inline-block;margin-top:0.5rem;">CALL TO BOOK</a></p>
       </div>
     </div>
 
@@ -1344,6 +1344,7 @@
 
   <script>
     const POCKETBASE_URL = "http://170.64.153.193:8090";
+    console.log("PocketBase URL:", POCKETBASE_URL);
     let services = [];
     
     async function loadServices() {
@@ -1352,7 +1353,7 @@
         const data = await res.json();
         services = data.items;
         renderServices();
-      } catch(e) { console.error(e); }
+      } catch(e) { console.error(e); alert("Could not load services. Please try again."); }
     }
     
     function renderServices() {
@@ -1410,6 +1411,17 @@
         document.getElementById("bookingSuccess").style.display = "block";
       } catch(err) { alert("Booking failed. Please try again."); btn.disabled = false; btn.textContent = "Book Now"; }
     });
+
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('a[href="#"]').forEach(function(link) {
+      if (link.textContent.includes('BOOK NOW') || link.classList.contains('btn-nav') || link.classList.contains('btn-mobile') || link.classList.contains('hero-cta') || link.classList.contains('btn-primary')) {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          openBookingModal();
+        });
+      }
+    });
+  });
   </script>
 </body>
 </html>
