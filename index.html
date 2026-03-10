@@ -983,7 +983,7 @@
 
       <div class="service-category">
         <p class="cat-title">Mens</p>
-        <div class="service-row">
+        <div class="service-row"> onclick="openBookingFromService(this)"
           <div class="service-info">
             <div class="service-name">Haircut</div>
             <div class="service-duration">35 min</div>
@@ -991,7 +991,7 @@
           <div class="service-dots"></div>
           <div class="service-price">$40</div>
         </div>
-        <div class="service-row">
+        <div class="service-row"> onclick="openBookingFromService(this)"
           <div class="service-info">
             <div class="service-name">Haircut & Beard</div>
             <div class="service-duration">40 min</div>
@@ -1003,7 +1003,7 @@
 
       <div class="service-category">
         <p class="cat-title">Kids</p>
-        <div class="service-row">
+        <div class="service-row"> onclick="openBookingFromService(this)"
           <div class="service-info">
             <div class="service-name">High School Cuts</div>
             <div class="service-duration">30 min</div>
@@ -1015,7 +1015,7 @@
 
       <div class="service-category">
         <p class="cat-title">Styling</p>
-        <div class="service-row">
+        <div class="service-row"> onclick="openBookingFromService(this)"
           <div class="service-info">
             <div class="service-name">Hair Dye (Black)</div>
             <div class="service-duration">15 min</div>
@@ -1023,7 +1023,7 @@
           <div class="service-dots"></div>
           <div class="service-price">$30</div>
         </div>
-        <div class="service-row">
+        <div class="service-row"> onclick="openBookingFromService(this)"
           <div class="service-info">
             <div class="service-name">Hair Dye / Bleach</div>
             <div class="service-duration">40 min</div>
@@ -1035,7 +1035,7 @@
 
       <div class="service-category">
         <p class="cat-title">Cut</p>
-        <div class="service-row">
+        <div class="service-row"> onclick="openBookingFromService(this)"
           <div class="service-info">
             <div class="service-name">Pensioners Haircut</div>
             <div class="service-duration">30 min</div>
@@ -1047,7 +1047,7 @@
 
       <div class="service-category">
         <p class="cat-title">Face</p>
-        <div class="service-row">
+        <div class="service-row"> onclick="openBookingFromService(this)"
           <div class="service-info">
             <div class="service-name">Facials</div>
             <div class="service-duration">60 min</div>
@@ -1059,7 +1059,7 @@
 
       <div class="service-category">
         <p class="cat-title">Extra</p>
-        <div class="service-row">
+        <div class="service-row"> onclick="openBookingFromService(this)"
           <div class="service-info">
             <div class="service-name">Braiding</div>
             <div class="service-duration">120 min</div>
@@ -1494,6 +1494,21 @@
         document.getElementById("bookingDetails").innerHTML = selectedService.name + "<br>" + date + " at " + time + (barber ? "<br>Barber: " + barber : "");
       } catch(err) { alert("Booking failed. Please try again."); btn.disabled = false; btn.textContent = "Confirm Booking"; }
     }
+    
+    window.openBookingFromService = function(el) {
+      const name = el.querySelector('.service-name')?.textContent;
+      const price = el.querySelector('.service-price')?.textContent;
+      openBookingModal();
+      // Pre-select this service after modal opens
+      setTimeout(() => {
+        const opts = document.querySelectorAll('.booking-service-option');
+        opts.forEach(opt => {
+          if (name && opt.textContent.includes(name.replace('&', '').trim())) {
+            opt.click();
+          }
+        });
+      }, 200);
+    };
     
     window.closeBookingModal = function() { 
       document.getElementById("bookingModal").classList.remove("open");
