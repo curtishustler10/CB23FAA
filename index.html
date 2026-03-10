@@ -1354,13 +1354,13 @@
     let services = [];
     let selectedService = null;
     
-    // Fallback services - must match PocketBase
+    // Fallback services - must match HTML exactly
     services = [
       {id: "1", name: "Haircut", price: 40, duration: 35},
-      {id: "2", name: "Haircut + Beard", price: 50, duration: 40},
+      {id: "2", name: "Haircut & Beard", price: 50, duration: 40},
       {id: "3", name: "High School Cuts", price: 30, duration: 30},
       {id: "4", name: "Hair Dye (Black)", price: 30, duration: 15},
-      {id: "5", name: "Hair Dye/Bleach", price: 70, duration: 40},
+      {id: "5", name: "Hair Dye / Bleach", price: 70, duration: 40},
       {id: "6", name: "Pensioners Haircut", price: 30, duration: 30},
       {id: "7", name: "Facials", price: 100, duration: 60},
       {id: "8", name: "Braiding", price: 200, duration: 120}
@@ -1496,18 +1496,25 @@
     }
     
     window.openBookingFromService = function(el) {
-      const name = el.querySelector('.service-name')?.textContent;
-      const price = el.querySelector('.service-price')?.textContent;
+      const nameEl = el.querySelector('.service-name');
+      let name = nameEl ? nameEl.textContent.trim() : '';
+      // Clean up name - remove extra whitespace
+      name = name.replace(/\s+/g, ' ');
+      console.log('Clicked service:', name);
       openBookingModal();
       // Pre-select this service after modal opens
       setTimeout(() => {
         const opts = document.querySelectorAll('.booking-service-option');
+        const cleanName = name.replace(/[&\/]/g, '').trim().toLowerCase();
+        console.log('Looking for:', cleanName);
         opts.forEach(opt => {
-          if (name && opt.textContent.includes(name.replace('&', '').trim())) {
+          const optText = opt.textContent.toLowerCase().replace(/[&\/]/g, '').trim();
+          console.log('Checking:', optText);
+          if (optText.includes(cleanName) || cleanName.includes(optText)) {
             opt.click();
           }
         });
-      }, 200);
+      }, 300);
     };
     
     window.closeBookingModal = function() { 
