@@ -983,7 +983,7 @@
 
       <div class="service-category">
         <p class="cat-title">Mens</p>
-        <div class="service-row"> onclick="openBookingFromService(this)"
+        <div class="service-row" onclick="openBookingFromService(this)" style="cursor:pointer;">
           <div class="service-info">
             <div class="service-name">Haircut</div>
             <div class="service-duration">35 min</div>
@@ -991,7 +991,7 @@
           <div class="service-dots"></div>
           <div class="service-price">$40</div>
         </div>
-        <div class="service-row"> onclick="openBookingFromService(this)"
+        <div class="service-row" onclick="openBookingFromService(this)" style="cursor:pointer;">
           <div class="service-info">
             <div class="service-name">Haircut & Beard</div>
             <div class="service-duration">40 min</div>
@@ -1003,7 +1003,7 @@
 
       <div class="service-category">
         <p class="cat-title">Kids</p>
-        <div class="service-row"> onclick="openBookingFromService(this)"
+        <div class="service-row" onclick="openBookingFromService(this)" style="cursor:pointer;">
           <div class="service-info">
             <div class="service-name">High School Cuts</div>
             <div class="service-duration">30 min</div>
@@ -1015,7 +1015,7 @@
 
       <div class="service-category">
         <p class="cat-title">Styling</p>
-        <div class="service-row"> onclick="openBookingFromService(this)"
+        <div class="service-row" onclick="openBookingFromService(this)" style="cursor:pointer;">
           <div class="service-info">
             <div class="service-name">Hair Dye (Black)</div>
             <div class="service-duration">15 min</div>
@@ -1023,7 +1023,7 @@
           <div class="service-dots"></div>
           <div class="service-price">$30</div>
         </div>
-        <div class="service-row"> onclick="openBookingFromService(this)"
+        <div class="service-row" onclick="openBookingFromService(this)" style="cursor:pointer;">
           <div class="service-info">
             <div class="service-name">Hair Dye / Bleach</div>
             <div class="service-duration">40 min</div>
@@ -1035,7 +1035,7 @@
 
       <div class="service-category">
         <p class="cat-title">Cut</p>
-        <div class="service-row"> onclick="openBookingFromService(this)"
+        <div class="service-row" onclick="openBookingFromService(this)" style="cursor:pointer;">
           <div class="service-info">
             <div class="service-name">Pensioners Haircut</div>
             <div class="service-duration">30 min</div>
@@ -1047,7 +1047,7 @@
 
       <div class="service-category">
         <p class="cat-title">Face</p>
-        <div class="service-row"> onclick="openBookingFromService(this)"
+        <div class="service-row" onclick="openBookingFromService(this)" style="cursor:pointer;">
           <div class="service-info">
             <div class="service-name">Facials</div>
             <div class="service-duration">60 min</div>
@@ -1059,7 +1059,7 @@
 
       <div class="service-category">
         <p class="cat-title">Extra</p>
-        <div class="service-row"> onclick="openBookingFromService(this)"
+        <div class="service-row" onclick="openBookingFromService(this)" style="cursor:pointer;">
           <div class="service-info">
             <div class="service-name">Braiding</div>
             <div class="service-duration">120 min</div>
@@ -1450,10 +1450,10 @@
     function renderTimeSlots() {
       const container = document.getElementById("timeSlots");
       let html = "";
-      for (let h = 8; h < 18; h++) {
-        html += '<div class="time-slot" onclick="selectTime(this, ' + h + ':00)">' + h + ':00</div>';
-        if (h < 17) html += '<div class="time-slot" onclick="selectTime(this, ' + h + ':30)">' + h + ':30</div>';
-      }
+      const times = ["08:00","08:30","09:00","09:30","10:00","10:30","11:00","11:30","12:00","12:30","13:00","13:30","14:00","14:30","15:00","15:30","16:00","16:30","17:00","17:30"];
+      times.forEach(time => {
+        html += '<div class="time-slot" onclick="selectTime(this,\'' + time + '\')">' + time + '</div>';
+      });
       container.innerHTML = html;
     }
     
@@ -1493,6 +1493,25 @@
         document.getElementById("bookingSuccess").style.display = "block";
         document.getElementById("bookingDetails").innerHTML = selectedService.name + "<br>" + date + " at " + time + (barber ? "<br>Barber: " + barber : "");
       } catch(err) { alert("Booking failed. Please try again."); btn.disabled = false; btn.textContent = "Confirm Booking"; }
+    }
+    
+        function renderServices() {
+      const container = document.getElementById("bookingServices");
+      if (!container) return;
+      container.innerHTML = services.map(s =>
+        '<div class="booking-service-option" data-id="' + s.id + '" data-name="' + s.name + '" data-price="' + s.price + '" onclick="selectService(this)" style="padding:10px 14px;margin:4px 0;border:1px solid rgba(242,240,235,0.15);cursor:pointer;border-radius:4px;transition:all 0.2s;"><span style="font-weight:500;">' + s.name + '</span><span style="float:right;color:var(--accent);">$' + s.price + '</span></div>'
+      ).join('');
+    }
+    
+    function selectService(el) {
+      document.querySelectorAll('.booking-service-option').forEach(o => {
+        o.classList.remove('selected');
+        o.style.background = '';
+        o.style.borderColor = 'rgba(242,240,235,0.15)';
+      });
+      el.classList.add('selected');
+      el.style.background = 'rgba(201,168,76,0.15)';
+      el.style.borderColor = 'var(--accent)';
     }
     
     window.openBookingFromService = function(el) {
