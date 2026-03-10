@@ -876,7 +876,7 @@
   .booking-form-group { margin-bottom: 15px; }
   .booking-form-group label { display: block; color: #fff; margin-bottom: 5px; font-size: 14px; }
   .booking-form-group input, .booking-form-group select { width: 100%; padding: 12px; background: #333; border: 1px solid #444; color: #fff; border-radius: 8px; }
-  .booking-service-option { display: flex; justify-content: space-between; padding: 12px; background: #333; border: 1px solid #444; border-radius: 8px; margin-bottom: 8px; cursor: pointer; }
+  .booking-service-option { cursor: pointer;  display: flex; justify-content: space-between; padding: 12px; background: #333; border: 1px solid #444; border-radius: 8px; margin-bottom: 8px; cursor: pointer; }
   .booking-service-option:hover, .booking-service-option.selected { border-color: #C9A84C; }
   .booking-submit { width: 100%; padding: 14px; background: #C9A84C; color: #000; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
   .booking-submit:hover { background: #b8973f; }
@@ -1354,24 +1354,49 @@
     let services = [];
     let selectedService = null;
     
-    // Fallback services
+    // Fallback services - must match PocketBase
     services = [
-      {id: "1", name: "Haircut", price: 35, duration: 30},
-      {id: "2", name: "Haircut & Beard", price: 45, duration: 45},
-      {id: "3", name: "Beard Trim", price: 20, duration: 15},
-      {id: "4", name: "Full Service", price: 70, duration: 60}
+      {id: "1", name: "Haircut", price: 40, duration: 35},
+      {id: "2", name: "Haircut + Beard", price: 50, duration: 40},
+      {id: "3", name: "High School Cuts", price: 30, duration: 30},
+      {id: "4", name: "Hair Dye (Black)", price: 30, duration: 15},
+      {id: "5", name: "Hair Dye/Bleach", price: 70, duration: 40},
+      {id: "6", name: "Pensioners Haircut", price: 30, duration: 30},
+      {id: "7", name: "Facials", price: 100, duration: 60},
+      {id: "8", name: "Braiding", price: 200, duration: 120}
     ];
     
-    // Click on service opens modal directly
+    // Click on any service element opens modal
     document.addEventListener("click", function(e) {
-      // Check if clicked on a service card
-      const serviceCard = e.target.closest('.service-card') || e.target.closest('.service-item') || e.target.closest('.services .col');
+      // Check for service card clicks
+      const serviceCard = e.target.closest('.service-card') || 
+                          e.target.closest('.service-item') || 
+                          e.target.closest('.services .col') ||
+                          e.target.closest('.service');
       if (serviceCard) {
-        const name = serviceCard.querySelector('h3, .service-name, h4')?.textContent;
-        const price = serviceCard.querySelector('.price, .service-price, .amount')?.textContent;
-        if (name && (price || serviceCard.querySelector('.service-price'))) {
-          e.preventDefault();
-          openBookingModal(name);
+        e.preventDefault();
+        const name = serviceCard.querySelector('h3')?.textContent || 
+                     serviceCard.querySelector('h4')?.textContent ||
+                     serviceCard.querySelector('.service-name')?.textContent;
+        if (name) {
+          openBookingModal();
+          // Pre-select this service
+          setTimeout(() => {
+            const opts = document.querySelectorAll('.booking-service-option');
+            opts.forEach(opt => {
+              if (opt.textContent.includes(name)) {
+                opt.click();
+              }
+            });
+          }, 100);
+        }
+      }
+      
+      // Also handle BOOK NOW in services section
+      if (e.target.classList.contains('btn-primary') || e.target.classList.contains('book-btn')) {
+        const href = e.target.getAttribute('href') || '';
+        if (href === '#services' || href === 'services' || href === '') {
+          // Already scrolling, let it happen
         }
       }
     });
