@@ -866,26 +866,11 @@
     footer { padding: 2rem; flex-direction: column; align-items: flex-start; gap: 1.5rem; }
     .footer-links { gap: 1rem; }
   }
-  /* BOOKING MODAL */
-  .booking-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; overflow-y: auto; padding: 20px; }
-  .booking-modal.open { display: block; }
-  .booking-modal-content { max-width: 500px; margin: 40px auto; background: #1a1a1a; border-radius: 12px; padding: 30px; position: relative; }
-  .booking-modal-close { position: absolute; top: 15px; right: 20px; font-size: 30px; color: #fff; cursor: pointer; background: none; border: none; }
-  .booking-modal h2 { color: #C9A84C; margin-bottom: 20px; }
-  .booking-form-group { margin-bottom: 15px; }
-  .booking-form-group label { display: block; color: #fff; margin-bottom: 5px; font-size: 14px; }
-  .booking-form-group input, .booking-form-group select { width: 100%; padding: 12px; background: #333; border: 1px solid #444; color: #fff; border-radius: 8px; }
-  .booking-service-option { display: flex; justify-content: space-between; padding: 12px; background: #333; border: 1px solid #444; border-radius: 8px; margin-bottom: 8px; cursor: pointer; }
-  .booking-service-option:hover, .booking-service-option.selected { border-color: #C9A84C; }
-  .booking-submit { width: 100%; padding: 14px; background: #C9A84C; color: #000; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
-  .booking-submit:hover { background: #b8973f; }
-  .booking-success { display: none; text-align: center; padding: 40px 20px; }
-  .booking-success h3 { color: #4CAF50; margin-bottom: 10px; }
 
   /* BOOKING MODAL */
-  .booking-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; overflow-y: auto; padding: 20px; }
+  .booking-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 9999; overflow-y: auto; padding: 20px; }
   .booking-modal.open { display: block; }
-  .booking-modal-content { max-width: 500px; margin: 40px auto; background: #1a1a1a; border-radius: 12px; padding: 30px; position: relative; }
+  .booking-modal-content { max-width: 500px; margin: 40px auto; background: #1a1a1a; border-radius: 12px; padding: 30px; position: relative; border: 2px solid #C9A84C; }
   .booking-modal-close { position: absolute; top: 15px; right: 20px; font-size: 30px; color: #fff; cursor: pointer; background: none; border: none; }
   .booking-modal h2 { color: #C9A84C; margin-bottom: 20px; }
   .booking-form-group { margin-bottom: 15px; }
@@ -896,46 +881,10 @@
   .booking-submit { width: 100%; padding: 14px; background: #C9A84C; color: #000; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
   .booking-submit:hover { background: #b8973f; }
   .booking-success { display: none; text-align: center; padding: 40px 20px; }
-  .booking-success h3 { color: #4CAF50; margin-bottom: 10px; }
+  .booking-success h3 { color: #C9A84C; margin-bottom: 10px; }
 </style>
 </head>
 <body>
-
-<!-- FORCE BOOKING MODAL -->
-<script>
-window.openBookingModal = function() {
-  console.log("Opening booking modal");
-  var modal = document.getElementById("bookingModal");
-  if (!modal) {
-    console.error("Modal not found!");
-    alert("Modal not found - contact support");
-    return;
-  }
-  modal.style.display = "block";
-  modal.classList.add("open");
-  loadServices();
-  setupDateTime();
-};
-
-window.closeBookingModal = function() {
-  var modal = document.getElementById("bookingModal");
-  if (modal) {
-    modal.style.display = "none";
-    modal.classList.remove("open");
-  }
-};
-
-// Auto-attach click handlers
-document.addEventListener("click", function(e) {
-  var text = e.target.textContent || "";
-  if (text.indexOf("BOOK") !== -1 || e.target.classList.contains("booking-trigger")) {
-    e.preventDefault();
-    e.stopPropagation();
-    openBookingModal();
-  }
-});
-</script>
-
 
 <!-- Geometric BG -->
 <div class="geo-bg" aria-hidden="true">
@@ -956,18 +905,18 @@ document.addEventListener("click", function(e) {
   <a href="#masters" onclick="closeMenu()">Hair Stylists</a>
   <a href="#blog" onclick="closeMenu()">Blog</a>
   <a href="#contact" onclick="closeMenu()">Contact</a>
-  <a href="javascript:void(0)" onclick="openBookingModal(); return false;"  class="btn-mobile">BOOK NOW</a>
+  <a href="tel:+61470224498" class="btn-mobile">BOOK NOW</a>
 </div>
 
 <!-- NAV -->
 <nav id="navbar">
-  <a href="javascript:void(0)" onclick="openBookingModal(); return false;" class="nav-logo"><img src="brand assets/logo_off1.png" alt="Coollooks 23"><div class="nav-logo-text">COOLLOOKS<span>BARBERZ</span></div></a>
+  <a href="#" class="nav-logo"><img src="brand assets/logo_off1.png" alt="Coollooks 23"><div class="nav-logo-text">COOLLOOKS<span>BARBERZ</span></div></a>
   <ul class="nav-links">
     <li><a href="#services">Services</a></li>
     <li><a href="#masters">Hair Stylists</a></li>
     <li><a href="#blog">Blog</a></li>
     <li><a href="#contact">Contact</a></li>
-    <li><a href="javascript:void(0)" onclick="openBookingModal(); return false;"  class="btn-nav">BOOK NOW</a></li>
+    <li><a href="tel:+61470224498" class="btn-nav">BOOK NOW</a></li>
   </ul>
   <button class="hamburger" onclick="openMenu()" aria-label="Open menu">
     <span></span><span></span><span></span>
@@ -979,7 +928,7 @@ document.addEventListener("click", function(e) {
   <div class="hero-left">
     <p class="hero-eyebrow">Premium Barbershop — Slacks Creek</p>
     <h1 class="hero-headline">COOL<br><em>LOOKS</em><br>23</h1>
-    <a href="javascript:void(0)" onclick="openBookingModal(); return false;"  class="hero-cta">BOOK NOW</a>
+    <a href="tel:+61470224498" class="hero-cta">BOOK NOW</a>
     <div class="hero-address">
       1-3 Noel Street, Slacks Creek QLD 4127<br>
       +61 470 224 498<br>
@@ -1121,7 +1070,7 @@ document.addEventListener("click", function(e) {
       </div>
 
       <div class="services-cta">
-        <a href="javascript:void(0)" onclick="openBookingModal(); return false;"  class="btn-primary">BOOK NOW</a>
+        <a href="tel:+61470224498" class="btn-primary">BOOK NOW</a>
       </div>
     </div>
 
@@ -1206,7 +1155,7 @@ document.addEventListener("click", function(e) {
       <h3 class="blog-title">What Makes a Great Barbershop? (And How to Find One Near You)</h3>
       <p class="blog-excerpt">Not all barbershops are created equal. A truly great barbershop goes beyond a clean cut — it's the atmosphere, the skill of the barbers, and the way you feel walking out the door.</p>
       <div class="blog-footer">
-        <a href="javascript:void(0)" onclick="openBookingModal(); return false;" class="blog-link">Read More →</a>
+        <a href="#" class="blog-link">Read More →</a>
       </div>
     </article>
 
@@ -1216,7 +1165,7 @@ document.addEventListener("click", function(e) {
       <h3 class="blog-title">Black Hair Types Explained: 4A, 4B & 4C and How to Care for Each</h3>
       <p class="blog-excerpt">Understanding your curl pattern is the foundation of a healthy hair routine. Whether you're 4A, 4B, or 4C, each type has unique needs that generic advice simply doesn't cover.</p>
       <div class="blog-footer">
-        <a href="javascript:void(0)" onclick="openBookingModal(); return false;" class="blog-link">Read More →</a>
+        <a href="#" class="blog-link">Read More →</a>
       </div>
     </article>
 
@@ -1226,7 +1175,7 @@ document.addEventListener("click", function(e) {
       <h3 class="blog-title">Top Braiding Styles for 2025: Box Braids, Cornrows & Knotless Explained</h3>
       <p class="blog-excerpt">Braiding is more than a hairstyle — it's a tradition rooted in culture, identity, and artistry. Find out which protective style suits your hair texture and lifestyle in 2025.</p>
       <div class="blog-footer">
-        <a href="javascript:void(0)" onclick="openBookingModal(); return false;" class="blog-link">Read More →</a>
+        <a href="#" class="blog-link">Read More →</a>
       </div>
     </article>
 
@@ -1246,11 +1195,11 @@ document.addEventListener("click", function(e) {
       </div>
       <div class="contact-item">
         <p class="contact-label">Phone</p>
-        <p class="contact-value"><a href="javascript:void(0)" onclick="openBookingModal(); return false;" >+61 470 224 498</a></p>
+        <p class="contact-value"><a href="tel:+61470224498">+61 470 224 498</a></p>
       </div>
       <div class="contact-item">
         <p class="contact-label">Book</p>
-        <p class="contact-value"><a href="javascript:void(0)" onclick="openBookingModal(); return false;"  class="btn-primary" style="display:inline-block;margin-top:0.5rem;">CALL TO BOOK</a></p>
+        <p class="contact-value"><a href="tel:+61470224498" class="btn-primary" style="display:inline-block;margin-top:0.5rem;">CALL TO BOOK</a></p>
       </div>
     </div>
 
@@ -1305,7 +1254,7 @@ document.addEventListener("click", function(e) {
     <li><a href="#masters">Hair Stylists</a></li>
     <li><a href="#blog">Blog</a></li>
     <li><a href="#contact">Contact</a></li>
-    <li><a href="admin.html">Admin</a></li><li><a href="javascript:void(0)" onclick="openBookingModal(); return false;">Privacy Policy</a></li>
+    <li><a href="#">Privacy Policy</a></li>
   </ul>
   <p class="footer-copy">© 2025 COOLLOOKS23. All rights reserved.</p>
 </footer>
@@ -1380,29 +1329,19 @@ document.addEventListener("click", function(e) {
 
   <script>
     const POCKETBASE_URL = "http://170.64.153.193:8090";
-    console.log("PocketBase URL:", POCKETBASE_URL);
     let services = [];
     
-    async function loadServices() {
-      try {
-        const res = await fetch(POCKETBASE_URL + "/api/collections/services/records");
-        const data = await res.json();
-        services = data.items;
-        renderServices();
-      } catch(e) { 
-        console.error("Failed to load services:", e);
-        services = [
-          {id: "1", name: "Haircut", price: 35, duration: 30},
-          {id: "2", name: "Haircut & Beard", price: 45, duration: 45},
-          {id: "3", name: "Beard Trim", price: 20, duration: 15},
-          {id: "4", name: "Full Service", price: 70, duration: 60}
-        ];
-        renderServices();
-      }
-    }
+    // Fallback services in case API fails
+    services = [
+      {id: "1", name: "Haircut", price: 35, duration: 30},
+      {id: "2", name: "Haircut & Beard", price: 45, duration: 45},
+      {id: "3", name: "Beard Trim", price: 20, duration: 15},
+      {id: "4", name: "Full Service", price: 70, duration: 60}
+    ];
     
     function renderServices() {
       const container = document.getElementById("bookingServices");
+      if (!container) return;
       container.innerHTML = services.map(s => '<div class="booking-service-option" data-id="' + s.id + '" data-name="' + s.name + '" data-price="' + s.price + '" onclick="selectService(this)"><span>' + s.name + '</span><span>$' + s.price + '</span></div>').join("");
     }
     
@@ -1412,11 +1351,24 @@ document.addEventListener("click", function(e) {
       document.getElementById("selectedService").value = JSON.stringify({id: el.dataset.id, name: el.dataset.name, price: el.dataset.price});
     }
     
-    function openBookingModal() { document.getElementById("bookingModal").classList.add("open"); loadServices(); setupDateTime(); }
-    function closeBookingModal() { document.getElementById("bookingModal").classList.remove("open"); }
+    window.openBookingModal = function() { 
+      document.getElementById("bookingModal").classList.add("open"); 
+      document.body.style.overflow = "hidden";
+      renderServices();
+      setupDateTime();
+    };
+    
+    window.closeBookingModal = function() { 
+      document.getElementById("bookingModal").classList.remove("open");
+      document.body.style.overflow = "";
+      // Reset form
+      document.getElementById("bookingForm").style.display = "block";
+      document.getElementById("bookingSuccess").style.display = "none";
+    };
     
     function setupDateTime() {
       const dateInput = document.getElementById("bookingDate");
+      if (!dateInput) return;
       const today = new Date();
       const maxDate = new Date(); maxDate.setMonth(maxDate.getMonth() + 2);
       dateInput.min = today.toISOString().split("T")[0];
@@ -1428,45 +1380,50 @@ document.addEventListener("click", function(e) {
       timeSelect.innerHTML = "<option value="">Select time</option>" + slots;
     }
     
-    document.getElementById("bookingForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const btn = document.getElementById("bookingSubmit");
-      btn.disabled = true; btn.textContent = "Booking...";
-      
-      const svc = JSON.parse(document.getElementById("selectedService").value);
-      const date = document.getElementById("bookingDate").value;
-      const time = document.getElementById("bookingTime").value;
-      
-      try {
-        await fetch(POCKETBASE_URL + "/api/collections/bookings/records", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            user_id: "guest_" + Date.now(),
-            user_name: document.getElementById("customerName").value,
-            user_email: document.getElementById("customerEmail").value,
-            user_phone: document.getElementById("customerPhone").value,
-            service_id: svc.id,
-            service_name: svc.name,
-            date_time: date + "T" + time + ":00Z",
-            status: "pending"
-          })
-        });
-        document.getElementById("bookingForm").style.display = "none";
-        document.getElementById("bookingSuccess").style.display = "block";
-      } catch(err) { alert("Booking failed. Please try again."); btn.disabled = false; btn.textContent = "Book Now"; }
-    });
-
-  document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('a[href="javascript:void(0)" onclick="openBookingModal(); return false;"]').forEach(function(link) {
-      if (link.textContent.includes('BOOK NOW') || link.classList.contains('btn-nav') || link.classList.contains('btn-mobile') || link.classList.contains('hero-cta') || link.classList.contains('btn-primary')) {
-        link.addEventListener('click', function(e) {
+    document.addEventListener("DOMContentLoaded", function() {
+      const form = document.getElementById("bookingForm");
+      if (form) {
+        form.addEventListener("submit", async (e) => {
           e.preventDefault();
-          openBookingModal();
+          const btn = document.getElementById("bookingSubmit");
+          btn.disabled = true; btn.textContent = "Booking...";
+          
+          try {
+            const svc = JSON.parse(document.getElementById("selectedService").value);
+            const date = document.getElementById("bookingDate").value;
+            const time = document.getElementById("bookingTime").value;
+            
+            await fetch(POCKETBASE_URL + "/api/collections/bookings/records", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                user_id: "guest_" + Date.now(),
+                user_name: document.getElementById("customerName").value,
+                user_email: document.getElementById("customerEmail").value,
+                user_phone: document.getElementById("customerPhone").value,
+                service_id: svc.id,
+                service_name: svc.name,
+                date_time: date + "T" + time + ":00Z",
+                status: "pending"
+              })
+            });
+            document.getElementById("bookingForm").style.display = "none";
+            document.getElementById("bookingSuccess").style.display = "block";
+          } catch(err) { alert("Booking failed. Please try again."); btn.disabled = false; btn.textContent = "Book Now"; }
         });
       }
     });
-  });
+    
+    // Auto-attach click handlers to BOOK buttons
+    document.addEventListener("click", function(e) {
+      var text = e.target.textContent || "";
+      var href = e.target.getAttribute("href") || "";
+      if (text.indexOf("BOOK") !== -1 || href.indexOf("tel:") !== -1) {
+        e.preventDefault();
+        e.stopPropagation();
+        openBookingModal();
+      }
+    });
   </script>
 </body>
 </html>
