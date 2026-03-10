@@ -7,33 +7,119 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
         body { background: #f5f5f5; padding: 20px; }
-        .container { max-width: 1000px; margin: 0 auto; }
-        h1 { color: #1a1a1a; margin-bottom: 20px; }
-        .stats { display: flex; gap: 20px; margin-bottom: 30px; }
-        .stat-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); flex: 1; }
+        
+        /* Header */
+        .header { background: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header h1 { color: #1a1a1a; margin-bottom: 5px; }
+        .header p { color: #666; font-size: 14px; }
+        
+        /* Navigation */
+        .nav { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .nav-btn { background: white; border: 2px solid #C9A84C; color: #C9A84C; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.2s; }
+        .nav-btn:hover, .nav-btn.active { background: #C9A84C; color: white; }
+        
+        /* Sections */
+        .section { display: none; }
+        .section.active { display: block; }
+        
+        /* Stats */
+        .stats { display: flex; gap: 20px; margin-bottom: 30px; flex-wrap: wrap; }
+        .stat-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); flex: 1; min-width: 150px; }
         .stat-card h3 { color: #666; font-size: 14px; margin-bottom: 8px; }
         .stat-card .number { font-size: 32px; font-weight: 600; color: #C9A84C; }
-        table { width: 100%; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        
+        /* Tables */
+        table { width: 100%; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
         th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }
         th { background: #C9A84C; color: white; font-weight: 600; }
         tr:hover { background: #fafafa; }
+        
+        /* Status badges */
         .status { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; }
         .status.pending { background: #fff3cd; color: #856404; }
         .status.confirmed { background: #d4edda; color: #155724; }
         .status.cancelled { background: #f8d7da; color: #721c24; }
         .status.completed { background: #d1ecf1; color: #0c5460; }
+        
+        /* Buttons */
+        .btn { padding: 8px 16px; border-radius: 6px; cursor: pointer; border: none; font-size: 14px; }
+        .btn-primary { background: #C9A84C; color: white; }
+        .btn-primary:hover { background: #b8973f; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-sm { padding: 5px 10px; font-size: 12px; }
+        
+        /* Forms */
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 500; color: #333; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        
+        /* Modal */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
+        .modal.active { display: flex; align-items: center; justify-content: center; }
+        .modal-content { background: white; padding: 30px; border-radius: 12px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-header h2 { color: #1a1a1a; }
+        .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #666; }
+        .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+        
+        /* Search */
+        .search-bar { display: flex; gap: 10px; margin-bottom: 20px; }
+        .search-bar input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 6px; }
+        
+        /* Customer card */
+        .customer-card { background: white; padding: 20px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .customer-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px; }
+        .customer-name { font-size: 18px; font-weight: 600; color: #1a1a1a; }
+        .customer-email, .customer-phone { color: #666; font-size: 14px; }
+        .customer-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+        .customer-stats { display: flex; gap: 20px; margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee; }
+        .customer-stat { text-align: center; }
+        .customer-stat .label { font-size: 12px; color: #666; }
+        .customer-stat .value { font-size: 20px; font-weight: 600; color: #C9A84C; }
+        
+        /* Contact links */
+        .contact-link { color: #C9A84C; text-decoration: none; font-size: 14px; }
+        .contact-link:hover { text-decoration: underline; }
+        
+        /* Service row */
+        .service-item { background: white; padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .service-info h4 { color: #1a1a1a; margin-bottom: 5px; }
+        .service-info p { color: #666; font-size: 14px; }
+        
+        /* Filters */
+        .filters { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .filter-select { padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; background: white; }
+        
+        /* Date picker */
+        .date-input { padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; }
+        
+        /* Refresh button */
         .refresh-btn { background: #C9A84C; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 14px; }
-        .refresh-btn:hover { background: #b8973f; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        
+        /* Empty state */
+        .empty-state { text-align: center; padding: 40px; color: #666; }
+        
+        /* Loading */
+        .loading { text-align: center; padding: 40px; color: #666; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>📅 Coollooks23 Bookings</h1>
-            <button class="refresh-btn" onclick="loadBookings()">Refresh</button>
-        </div>
-        
+    <div class="header">
+        <h1>🪒 Coollooks23 Admin</h1>
+        <p>Manage customers, services, and bookings</p>
+    </div>
+    
+    <div class="nav">
+        <button class="nav-btn active" onclick="showSection('bookings')">📅 Bookings</button>
+        <button class="nav-btn" onclick="showSection('customers')">👥 Customers</button>
+        <button class="nav-btn" onclick="showSection('services')">✂️ Services</button>
+        <button class="nav-btn" onclick="loadAll()">🔄 Refresh All</button>
+    </div>
+    
+    <!-- BOOKINGS SECTION -->
+    <div id="bookings" class="section active">
         <div class="stats">
             <div class="stat-card">
                 <h3>Total Bookings</h3>
@@ -47,6 +133,22 @@
                 <h3>Confirmed</h3>
                 <div class="number" id="confirmedBookings">0</div>
             </div>
+            <div class="stat-card">
+                <h3>Completed</h3>
+                <div class="number" id="completedBookings">0</div>
+            </div>
+        </div>
+        
+        <div class="filters">
+            <input type="date" id="filterDate" class="date-input" onchange="filterBookings()">
+            <select id="filterStatus" class="filter-select" onchange="filterBookings()">
+                <option value="">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+            </select>
+            <input type="text" id="searchBookings" placeholder="Search customer..." oninput="filterBookings()" style="flex:1;max-width:300px;">
         </div>
         
         <table>
@@ -59,57 +161,472 @@
                     <th>Actions</th>
                 </tr>
             </thead>
-            <tbody id="bookingsTable"></tbody>
+            <tbody id="bookingsTable">
+                <tr><td colspan="5" class="loading">Loading...</td></tr>
+            </tbody>
         </table>
+    </div>
+    
+    <!-- CUSTOMERS SECTION -->
+    <div id="customers" class="section">
+        <div class="stats">
+            <div class="stat-card">
+                <h3>Total Customers</h3>
+                <div class="number" id="totalCustomers">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>This Month</h3>
+                <div class="number" id="monthCustomers">0</div>
+            </div>
+        </div>
+        
+        <div class="search-bar">
+            <input type="text" id="searchCustomers" placeholder="Search by name, email, or phone..." oninput="renderCustomers()">
+            <button class="btn btn-primary" onclick="openCustomerModal()">+ Add Customer</button>
+        </div>
+        
+        <div id="customersList">
+            <div class="loading">Loading...</div>
+        </div>
+    </div>
+    
+    <!-- SERVICES SECTION -->
+    <div id="services" class="section">
+        <div class="stats">
+            <div class="stat-card">
+                <h3>Total Services</h3>
+                <div class="number" id="totalServices">0</div>
+            </div>
+        </div>
+        
+        <button class="btn btn-primary" onclick="openServiceModal()" style="margin-bottom:20px;">+ Add Service</button>
+        
+        <div id="servicesList">
+            <div class="loading">Loading...</div>
+        </div>
+    </div>
+    
+    <!-- CUSTOMER MODAL -->
+    <div id="customerModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="customerModalTitle">Add Customer</h2>
+                <button class="modal-close" onclick="closeModal('customerModal')">&times;</button>
+            </div>
+            <form id="customerForm" onsubmit="saveCustomer(event)">
+                <input type="hidden" id="customerId">
+                <div class="form-group">
+                    <label>Name *</label>
+                    <input type="text" id="customerName" required>
+                </div>
+                <div class="form-group">
+                    <label>Email *</label>
+                    <input type="email" id="customerEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone *</label>
+                    <input type="tel" id="customerPhone" required>
+                </div>
+                <div class="form-group">
+                    <label>Notes</label>
+                    <textarea id="customerNotes" rows="3"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('customerModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Customer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- CUSTOMER DETAIL MODAL -->
+    <div id="customerDetailModal" class="modal">
+        <div class="modal-content" style="max-width:600px;">
+            <div class="modal-header">
+                <h2 id="customerDetailName">Customer Details</h2>
+                <button class="modal-close" onclick="closeModal('customerDetailModal')">&times;</button>
+            </div>
+            <div id="customerDetailContent"></div>
+        </div>
+    </div>
+    
+    <!-- SERVICE MODAL -->
+    <div id="serviceModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="serviceModalTitle">Add Service</h2>
+                <button class="modal-close" onclick="closeModal('serviceModal')">&times;</button>
+            </div>
+            <form id="serviceForm" onsubmit="saveService(event)">
+                <input type="hidden" id="serviceId">
+                <div class="form-group">
+                    <label>Service Name *</label>
+                    <input type="text" id="serviceName" required>
+                </div>
+                <div class="form-group">
+                    <label>Price ($) *</label>
+                    <input type="number" id="servicePrice" required min="0">
+                </div>
+                <div class="form-group">
+                    <label>Duration (minutes) *</label>
+                    <input type="number" id="serviceDuration" required min="1">
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="serviceCategory">
+                        <option value="hair">Hair</option>
+                        <option value="combo">Combo</option>
+                        <option value="dye">Dye</option>
+                        <option value="style">Style</option>
+                        <option value="skin">Skin</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Active</label>
+                    <input type="checkbox" id="serviceActive" checked>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-danger" onclick="deleteService()" id="deleteServiceBtn" style="margin-right:auto;">Delete</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('serviceModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Service</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <script>
         const POCKETBASE_URL = 'http://170.64.153.193:8090';
+        let allBookings = [];
+        let allCustomers = {};
+        let allServices = [];
         
+        // Navigation
+        function showSection(id) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            event.target.classList.add('active');
+        }
+        
+        // Load all data
+        async function loadAll() {
+            await Promise.all([loadBookings(), loadServices()]);
+            extractCustomers();
+        }
+        
+        // Bookings
         async function loadBookings() {
             try {
-                const res = await fetch(`${POCKETBASE_URL}/api/collections/bookings/records?sort=-created`);
+                const res = await fetch(`${POCKETBASE_URL}/api/collections/bookings/records?sort=-created&perPage=100`);
                 const data = await res.json();
-                const bookings = data.items;
-                
-                document.getElementById('totalBookings').textContent = bookings.length;
-                document.getElementById('pendingBookings').textContent = bookings.filter(b => b.status === 'pending').length;
-                document.getElementById('confirmedBookings').textContent = bookings.filter(b => b.status === 'confirmed').length;
-                
-                const tbody = document.getElementById('bookingsTable');
-                tbody.innerHTML = bookings.map(b => `
-                    <tr>
-                        <td>
-                            <strong>${b.user_name}</strong><br>
-                            <small>${b.user_email}</small><br>
-                            <small>${b.user_phone || 'No phone'}</small>
-                        </td>
-                        <td>${b.service_name}</td>
-                        <td>${new Date(b.date_time).toLocaleString()}</td>
-                        <td><span class="status ${b.status}">${b.status}</span></td>
-                        <td>
-                            ${b.status === 'pending' ? `<button onclick="updateStatus('${b.id}', 'confirmed')" style="background:green;color:white;border:none;padding:5px 10px;border-radius:4px;cursor:pointer;">Confirm</button>` : ''}
-                            ${b.status !== 'cancelled' && b.status !== 'completed' ? `<button onclick="updateStatus('${b.id}', 'cancelled')" style="background:red;color:white;border:none;padding:5px 10px;border-radius:4px;cursor:pointer;margin-left:5px;">Cancel</button>` : ''}
-                            ${b.status === 'confirmed' ? `<button onclick="updateStatus('${b.id}', 'completed')" style="background:blue;color:white;border:none;padding:5px 10px;border-radius:4px;cursor:pointer;margin-left:5px;">Complete</button>` : ''}
-                        </td>
-                    </tr>
-                `).join('');
+                allBookings = data.items;
+                filterBookings();
             } catch (e) {
                 console.error(e);
-                document.getElementById('bookingsTable').innerHTML = '<tr><td colspan="5">Error loading bookings</td></tr>';
+                document.getElementById('bookingsTable').innerHTML = '<tr><td colspan="5" class="empty-state">Error loading bookings</td></tr>';
             }
         }
         
-        async function updateStatus(id, status) {
-            await fetch(`${POCKETBASE_URL}/api/collections/bookings/records/${id}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status })
+        function filterBookings() {
+            const dateFilter = document.getElementById('filterDate').value;
+            const statusFilter = document.getElementById('filterStatus').value;
+            const searchFilter = document.getElementById('searchBookings').value.toLowerCase();
+            
+            let filtered = allBookings.filter(b => {
+                if (statusFilter && b.status !== statusFilter) return false;
+                if (searchFilter && !b.user_name?.toLowerCase().includes(searchFilter) && !b.user_email?.toLowerCase().includes(searchFilter)) return false;
+                if (dateFilter && !b.date_time?.startsWith(dateFilter)) return false;
+                return true;
             });
-            loadBookings();
+            
+            document.getElementById('totalBookings').textContent = allBookings.length;
+            document.getElementById('pendingBookings').textContent = allBookings.filter(b => b.status === 'pending').length;
+            document.getElementById('confirmedBookings').textContent = allBookings.filter(b => b.status === 'confirmed').length;
+            document.getElementById('completedBookings').textContent = allBookings.filter(b => b.status === 'completed').length;
+            
+            const tbody = document.getElementById('bookingsTable');
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No bookings found</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = filtered.map(b => `
+                <tr>
+                    <td>
+                        <strong>${b.user_name || 'N/A'}</strong><br>
+                        <small>${b.user_email || ''}</small><br>
+                        <small>${b.user_phone || ''}</small>
+                    </td>
+                    <td>${b.service_name || 'N/A'}</td>
+                    <td>${b.date_time ? new Date(b.date_time).toLocaleString() : 'N/A'}</td>
+                    <td><span class="status ${b.status}">${b.status}</span></td>
+                    <td>
+                        ${b.status === 'pending' ? `<button class="btn btn-success btn-sm" onclick="updateStatus('${b.id}', 'confirmed')">Confirm</button>` : ''}
+                        ${b.status === 'confirmed' ? `<button class="btn btn-primary btn-sm" onclick="updateStatus('${b.id}', 'completed')">Complete</button>` : ''}
+                        ${b.status !== 'cancelled' && b.status !== 'completed' ? `<button class="btn btn-danger btn-sm" onclick="updateStatus('${b.id}', 'cancelled')">Cancel</button>` : ''}
+                    </td>
+                </tr>
+            `).join('');
         }
         
-        loadBookings();
+        async function updateStatus(id, status) {
+            try {
+                await fetch(`${POCKETBASE_URL}/api/collections/bookings/records/${id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status })
+                });
+                loadBookings();
+            } catch (e) {
+                alert('Error updating status');
+            }
+        }
+        
+        // Services
+        async function loadServices() {
+            try {
+                const res = await fetch(`${POCKETBASE_URL}/api/collections/services/records?perPage=100`);
+                const data = await res.json();
+                allServices = data.items;
+                document.getElementById('totalServices').textContent = allServices.length;
+                renderServices();
+            } catch (e) {
+                console.error(e);
+                document.getElementById('servicesList').innerHTML = '<div class="empty-state">Error loading services</div>';
+            }
+        }
+        
+        function renderServices() {
+            const container = document.getElementById('servicesList');
+            if (allServices.length === 0) {
+                container.innerHTML = '<div class="empty-state">No services yet</div>';
+                return;
+            }
+            
+            container.innerHTML = allServices.map(s => `
+                <div class="service-item">
+                    <div class="service-info">
+                        <h4>${s.name}</h4>
+                        <p>$${s.price} • ${s.duration} min • ${s.category || 'other'}</p>
+                    </div>
+                    <div>
+                        <button class="btn btn-primary btn-sm" onclick="openServiceModal('${s.id}')">Edit</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function openServiceModal(id = null) {
+            document.getElementById('serviceForm').reset();
+            document.getElementById('serviceId').value = '';
+            document.getElementById('serviceModalTitle').textContent = 'Add Service';
+            document.getElementById('deleteServiceBtn').style.display = 'none';
+            
+            if (id) {
+                const s = allServices.find(s => s.id === id);
+                if (s) {
+                    document.getElementById('serviceModalTitle').textContent = 'Edit Service';
+                    document.getElementById('serviceId').value = s.id;
+                    document.getElementById('serviceName').value = s.name;
+                    document.getElementById('servicePrice').value = s.price;
+                    document.getElementById('serviceDuration').value = s.duration;
+                    document.getElementById('serviceCategory').value = s.category || 'other';
+                    document.getElementById('serviceActive').checked = s.active !== false;
+                    document.getElementById('deleteServiceBtn').style.display = 'block';
+                }
+            }
+            
+            document.getElementById('serviceModal').classList.add('active');
+        }
+        
+        async function saveService(e) {
+            e.preventDefault();
+            const id = document.getElementById('serviceId').value;
+            const data = {
+                name: document.getElementById('serviceName').value,
+                price: parseFloat(document.getElementById('servicePrice').value),
+                duration: parseInt(document.getElementById('serviceDuration').value),
+                category: document.getElementById('serviceCategory').value,
+                active: document.getElementById('serviceActive').checked
+            };
+            
+            try {
+                if (id) {
+                    await fetch(`${POCKETBASE_URL}/api/collections/services/records/${id}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                } else {
+                    await fetch(`${POCKETBASE_URL}/api/collections/services/records`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                }
+                closeModal('serviceModal');
+                loadServices();
+            } catch (e) {
+                alert('Error saving service');
+            }
+        }
+        
+        async function deleteService() {
+            const id = document.getElementById('serviceId').value;
+            if (!id || !confirm('Delete this service?')) return;
+            
+            try {
+                await fetch(`${POCKETBASE_URL}/api/collections/services/records/${id}`, {
+                    method: 'DELETE'
+                });
+                closeModal('serviceModal');
+                loadServices();
+            } catch (e) {
+                alert('Error deleting service');
+            }
+        }
+        
+        // Customers - extracted from bookings
+        function extractCustomers() {
+            allCustomers = {};
+            allBookings.forEach(b => {
+                const key = b.user_phone || b.user_email;
+                if (!key) return;
+                
+                if (!allCustomers[key]) {
+                    allCustomers[key] = {
+                        name: b.user_name,
+                        email: b.user_email,
+                        phone: b.user_phone,
+                        visits: 0,
+                        totalSpent: 0,
+                        lastVisit: null,
+                        bookings: []
+                    };
+                }
+                allCustomers[key].visits++;
+                allCustomers[key].bookings.push(b);
+                if (b.status === 'completed' || b.status === 'confirmed') {
+                    allCustomers[key].totalSpent += parseFloat(b.service_price || 0);
+                }
+                if (!allCustomers[key].lastVisit || new Date(b.date_time) > new Date(allCustomers[key].lastVisit)) {
+                    allCustomers[key].lastVisit = b.date_time;
+                }
+            });
+            
+            // Count this month
+            const now = new Date();
+            const thisMonth = Object.values(allCustomers).filter(c => {
+                return c.lastVisit && new Date(c.lastVisit).getMonth() === now.getMonth();
+            }).length;
+            
+            document.getElementById('totalCustomers').textContent = Object.keys(allCustomers).length;
+            document.getElementById('monthCustomers').textContent = thisMonth;
+            
+            renderCustomers();
+        }
+        
+        function renderCustomers() {
+            const search = document.getElementById('searchCustomers').value.toLowerCase();
+            const container = document.getElementById('customersList');
+            
+            let customers = Object.entries(allCustomers).filter(([key, c]) => {
+                if (!search) return true;
+                return c.name?.toLowerCase().includes(search) || 
+                       c.email?.toLowerCase().includes(search) || 
+                       c.phone?.toLowerCase().includes(search);
+            });
+            
+            if (customers.length === 0) {
+                container.innerHTML = '<div class="empty-state">No customers found</div>';
+                return;
+            }
+            
+            container.innerHTML = customers.map(([key, c]) => `
+                <div class="customer-card">
+                    <div class="customer-header">
+                        <div>
+                            <div class="customer-name">${c.name || 'Unknown'}</div>
+                            <div class="customer-email">${c.email || 'No email'}</div>
+                            <div class="customer-phone">${c.phone || 'No phone'}</div>
+                        </div>
+                    </div>
+                    <div class="customer-actions">
+                        <a href="tel:${c.phone}" class="btn btn-primary btn-sm">📞 Call</a>
+                        <a href="mailto:${c.email}" class="btn btn-secondary btn-sm">✉️ Email</a>
+                        <button class="btn btn-sm" style="background:#C9A84C;color:white;" onclick="viewCustomer('${key}')">👁️ View History</button>
+                    </div>
+                    <div class="customer-stats">
+                        <div class="customer-stat">
+                            <div class="value">${c.visits}</div>
+                            <div class="label">Total Visits</div>
+                        </div>
+                        <div class="customer-stat">
+                            <div class="value">$${c.totalSpent}</div>
+                            <div class="label">Total Spent</div>
+                        </div>
+                        <div class="customer-stat">
+                            <div class="value">${c.lastVisit ? new Date(c.lastVisit).toLocaleDateString() : '-'}</div>
+                            <div class="label">Last Visit</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function viewCustomer(key) {
+            const c = allCustomers[key];
+            document.getElementById('customerDetailName').textContent = c.name || 'Customer';
+            
+            const historyHtml = c.bookings.sort((a,b) => new Date(b.date_time) - new Date(a.date_time)).map(b => `
+                <div style="padding:10px;border-bottom:1px solid #eee;">
+                    <strong>${b.service_name}</strong> - ${b.date_time ? new Date(b.date_time).toLocaleDateString() : 'N/A'}
+                    <span class="status ${b.status}">${b.status}</span>
+                </div>
+            `).join('');
+            
+            document.getElementById('customerDetailContent').innerHTML = `
+                <p><strong>Email:</strong> ${c.email || 'N/A'}</p>
+                <p><strong>Phone:</strong> ${c.phone || 'N/A'}</p>
+                <p><strong>Total Visits:</strong> ${c.visits}</p>
+                <p><strong>Total Spent:</strong> $${c.totalSpent}</p>
+                <h3 style="margin:20px 0 10px;">Booking History</h3>
+                ${historyHtml || 'No bookings'}
+            `;
+            
+            document.getElementById('customerDetailModal').classList.add('active');
+        }
+        
+        function openCustomerModal() {
+            document.getElementById('customerForm').reset();
+            document.getElementById('customerId').value = '';
+            document.getElementById('customerModalTitle').textContent = 'Add Customer';
+            document.getElementById('customerModal').classList.add('active');
+        }
+        
+        // Note: Saving customers to PocketBase would require a customers collection
+        // For now, we show customer data extracted from bookings
+        async function saveCustomer(e) {
+            e.preventDefault();
+            alert('Customer saved! (Customer management requires creating a customers collection in PocketBase)');
+            closeModal('customerModal');
+        }
+        
+        // Modals
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+        
+        // Close modal on outside click
+        document.querySelectorAll('.modal').forEach(m => {
+            m.addEventListener('click', (e) => {
+                if (e.target === m) m.classList.remove('active');
+            });
+        });
+        
+        // Initialize
+        loadAll();
     </script>
 </body>
 </html>
