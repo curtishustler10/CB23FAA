@@ -1304,6 +1304,18 @@
       <!-- Date/Time/Barber Selection -->
       <div class="booking-step" id="step2" style="display:none;">
         <div class="booking-form-group">
+          <label>Your Name</label>
+          <input type="text" id="customerName" placeholder="John Smith" required>
+        </div>
+        <div class="booking-form-group">
+          <label>Email</label>
+          <input type="email" id="customerEmail" placeholder="john@example.com" required>
+        </div>
+        <div class="booking-form-group">
+          <label>Phone</label>
+          <input type="tel" id="customerPhone" placeholder="+61 400 000 000" required>
+        </div>
+        <div class="booking-form-group">
           <label>Select Barber</label>
           <select id="barberSelect" class="booking-barber-select">
             <option value="">Any available</option>
@@ -1467,8 +1479,12 @@
       const date = document.getElementById("selectedDate").value;
       const time = document.getElementById("selectedTime").value;
       const barber = document.getElementById("barberSelect").value;
+      const name = document.getElementById("customerName").value;
+      const email = document.getElementById("customerEmail").value;
+      const phone = document.getElementById("customerPhone").value;
       
       if (!date || !time) { alert("Please select date and time"); return; }
+      if (!name || !email || !phone) { alert("Please enter your name, email and phone"); return; }
       
       const btn = document.getElementById("confirmBtn");
       btn.disabled = true; btn.textContent = "Booking...";
@@ -1479,9 +1495,9 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             user_id: "guest_" + Date.now(),
-            user_name: selectedService.name,
-            user_email: "guest@booking.com",
-            user_phone: "0000000000",
+            user_name: name,
+            user_email: email,
+            user_phone: phone,
             service_id: selectedService.id,
             service_name: selectedService.name + (barber ? " (" + barber + ")" : ""),
             date_time: date + "T" + time + ":00Z",
