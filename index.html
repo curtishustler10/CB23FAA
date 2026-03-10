@@ -905,7 +905,7 @@
   <a href="#masters" onclick="closeMenu()">Hair Stylists</a>
   <a href="#blog" onclick="closeMenu()">Blog</a>
   <a href="#contact" onclick="closeMenu()">Contact</a>
-  <a href="tel:+61470224498" class="btn-mobile">BOOK NOW</a>
+  <a href="#services" onclick="closeMenu()">BOOK NOW</a>
 </div>
 
 <!-- NAV -->
@@ -916,7 +916,7 @@
     <li><a href="#masters">Hair Stylists</a></li>
     <li><a href="#blog">Blog</a></li>
     <li><a href="#contact">Contact</a></li>
-    <li><a href="tel:+61470224498" class="btn-nav">BOOK NOW</a></li>
+    <li><a href="#services">BOOK NOW</a></li>
   </ul>
   <button class="hamburger" onclick="openMenu()" aria-label="Open menu">
     <span></span><span></span><span></span>
@@ -928,7 +928,7 @@
   <div class="hero-left">
     <p class="hero-eyebrow">Premium Barbershop — Slacks Creek</p>
     <h1 class="hero-headline">COOL<br><em>LOOKS</em><br>23</h1>
-    <a href="tel:+61470224498" class="hero-cta">BOOK NOW</a>
+    <a href="#services" class="hero-cta">BOOK NOW</a>
     <div class="hero-address">
       1-3 Noel Street, Slacks Creek QLD 4127<br>
       +61 470 224 498<br>
@@ -1070,7 +1070,7 @@
       </div>
 
       <div class="services-cta">
-        <a href="tel:+61470224498" class="btn-primary">BOOK NOW</a>
+        <a href="#services" class="btn-primary">BOOK NOW</a>
       </div>
     </div>
 
@@ -1199,7 +1199,7 @@
       </div>
       <div class="contact-item">
         <p class="contact-label">Book</p>
-        <p class="contact-value"><a href="tel:+61470224498" class="btn-primary" style="display:inline-block;margin-top:0.5rem;">CALL TO BOOK</a></p>
+        <p class="contact-value"><a href="#services" class="btn-primary" style="display:inline-block;margin-top:0.5rem;">CALL TO BOOK</a></p>
       </div>
     </div>
 
@@ -1285,53 +1285,76 @@
   document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
 </script>
 
+
   <!-- BOOKING MODAL -->
   <div class="booking-modal" id="bookingModal">
     <div class="booking-modal-content">
       <button class="booking-modal-close" onclick="closeBookingModal()">×</button>
-      <h2>Book Your Appointment</h2>
-      <form id="bookingForm">
+      <h2>Book Appointment</h2>
+      
+      <!-- Service Selection -->
+      <div class="booking-step" id="step1">
         <div class="booking-form-group">
           <label>Select Service</label>
           <div id="bookingServices"></div>
-          <input type="hidden" id="selectedService" required>
         </div>
+        <button type="button" class="booking-submit" onclick="goToStep2()">Continue</button>
+      </div>
+      
+      <!-- Date/Time/Barber Selection -->
+      <div class="booking-step" id="step2" style="display:none;">
         <div class="booking-form-group">
-          <label>Your Name</label>
-          <input type="text" id="customerName" placeholder="John Smith" required>
-        </div>
-        <div class="booking-form-group">
-          <label>Email</label>
-          <input type="email" id="customerEmail" placeholder="john@example.com" required>
-        </div>
-        <div class="booking-form-group">
-          <label>Phone</label>
-          <input type="tel" id="customerPhone" placeholder="+61 400 000 000" required>
-        </div>
-        <div class="booking-form-group">
-          <label>Date</label>
-          <input type="date" id="bookingDate" required>
-        </div>
-        <div class="booking-form-group">
-          <label>Time</label>
-          <select id="bookingTime" required>
-            <option value="">Select time</option>
+          <label>Select Barber</label>
+          <select id="barberSelect" class="booking-barber-select">
+            <option value="">Any available</option>
+            <option value="maurice">Maurice</option>
+            <option value="scorpion">Scorpion</option>
+            <option value="obama">Obama</option>
           </select>
         </div>
-        <button type="submit" class="booking-submit" id="bookingSubmit">Book Now</button>
-      </form>
+        <div class="booking-form-group">
+          <label>Select Date</label>
+          <div class="booking-calendar" id="calendar"></div>
+          <input type="hidden" id="selectedDate">
+        </div>
+        <div class="booking-form-group">
+          <label>Select Time</label>
+          <div class="booking-time-scroll" id="timeSlots"></div>
+          <input type="hidden" id="selectedTime">
+        </div>
+        <button type="button" class="booking-submit" id="confirmBtn" onclick="confirmBooking()">Confirm Booking</button>
+        <button type="button" class="booking-back" onclick="goToStep1()">← Back</button>
+      </div>
+      
+      <!-- Success -->
       <div class="booking-success" id="bookingSuccess">
         <h3>✓ Booking Confirmed!</h3>
-        <p>We'll see you soon!</p>
+        <p id="bookingDetails"></p>
       </div>
     </div>
   </div>
 
+  <style>
+    .booking-barber-select { width: 100%; padding: 12px; background: #333; border: 1px solid #444; color: #fff; border-radius: 8px; font-size: 16px; }
+    .booking-calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; background: #222; padding: 10px; border-radius: 8px; }
+    .calendar-day { padding: 10px 5px; text-align: center; cursor: pointer; border-radius: 5px; color: #fff; font-size: 14px; }
+    .calendar-day:hover { background: #444; }
+    .calendar-day.selected { background: #C9A84C; color: #000; }
+    .calendar-day.disabled { color: #555; cursor: not-allowed; }
+    .calendar-day.header { color: #888; font-weight: bold; font-size: 12px; }
+    .booking-time-scroll { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-height: 150px; overflow-y: auto; background: #222; padding: 10px; border-radius: 8px; }
+    .time-slot { padding: 10px; text-align: center; cursor: pointer; border-radius: 5px; background: #333; color: #fff; }
+    .time-slot:hover { background: #444; }
+    .time-slot.selected { background: #C9A84C; color: #000; }
+    .booking-back { width: 100%; padding: 12px; background: transparent; color: #888; border: 1px solid #444; border-radius: 8px; margin-top: 10px; cursor: pointer; }
+    .selected-service-display { background: #C9A84C; color: #000; padding: 15px; border-radius: 8px; margin-bottom: 15px; text-align: center; }
+  </style>
   <script>
     const POCKETBASE_URL = "http://170.64.153.193:8090";
     let services = [];
+    let selectedService = null;
     
-    // Fallback services in case API fails
+    // Fallback services
     services = [
       {id: "1", name: "Haircut", price: 35, duration: 30},
       {id: "2", name: "Haircut & Beard", price: 45, duration: 45},
@@ -1339,91 +1362,120 @@
       {id: "4", name: "Full Service", price: 70, duration: 60}
     ];
     
-    function renderServices() {
-      const container = document.getElementById("bookingServices");
-      if (!container) return;
-      container.innerHTML = services.map(s => '<div class="booking-service-option" data-id="' + s.id + '" data-name="' + s.name + '" data-price="' + s.price + '" onclick="selectService(this)"><span>' + s.name + '</span><span>$' + s.price + '</span></div>').join("");
-    }
+    // Click on service opens modal directly
+    document.addEventListener("click", function(e) {
+      // Check if clicked on a service card
+      const serviceCard = e.target.closest('.service-card') || e.target.closest('.service-item') || e.target.closest('.services .col');
+      if (serviceCard) {
+        const name = serviceCard.querySelector('h3, .service-name, h4')?.textContent;
+        const price = serviceCard.querySelector('.price, .service-price, .amount')?.textContent;
+        if (name && (price || serviceCard.querySelector('.service-price'))) {
+          e.preventDefault();
+          openBookingModal(name);
+        }
+      }
+    });
     
-    function selectService(el) {
-      document.querySelectorAll(".booking-service-option").forEach(e => e.classList.remove("selected"));
-      el.classList.add("selected");
-      document.getElementById("selectedService").value = JSON.stringify({id: el.dataset.id, name: el.dataset.name, price: el.dataset.price});
-    }
-    
-    window.openBookingModal = function() { 
-      document.getElementById("bookingModal").classList.add("open"); 
+    function openBookingModal(serviceName) {
+      document.getElementById("bookingModal").classList.add("open");
       document.body.style.overflow = "hidden";
       renderServices();
-      setupDateTime();
-    };
+      goToStep1();
+    }
+    
+    function goToStep1() {
+      document.getElementById("step1").style.display = "block";
+      document.getElementById("step2").style.display = "none";
+      document.getElementById("bookingSuccess").style.display = "none";
+    }
+    
+    function goToStep2() {
+      const selected = document.querySelector(".booking-service-option.selected");
+      if (!selected) { alert("Please select a service"); return; }
+      selectedService = { id: selected.dataset.id, name: selected.dataset.name, price: selected.dataset.price };
+      document.getElementById("step1").style.display = "none";
+      document.getElementById("step2").style.display = "block";
+      renderCalendar();
+      renderTimeSlots();
+    }
+    
+    function renderCalendar() {
+      const container = document.getElementById("calendar");
+      const today = new Date();
+      let html = '<div class="calendar-day header">S</div><div class="calendar-day header">M</div><div class="calendar-day header">T</div><div class="calendar-day header">W</div><div class="calendar-day header">T</div><div class="calendar-day header">F</div><div class="calendar-day header">S</div>';
+      
+      for (let d = 1; d <= 35; d++) {
+        const date = new Date(today);
+        date.setDate(today.getDate() + d - 1);
+        if (date.getDay() === 0 && d > 1) break;
+        
+        const isPast = date < today;
+        const isSunday = date.getDay() === 0;
+        html += '<div class="calendar-day' + (isPast || isSunday ? ' disabled' : '') + '" data-date="' + date.toISOString().split('T')[0] + '" onclick="' + (isPast || isSunday ? '' : "selectDate(this)") + '">' + date.getDate() + '</div>';
+      }
+      container.innerHTML = html;
+    }
+    
+    function selectDate(el) {
+      document.querySelectorAll(".calendar-day").forEach(d => d.classList.remove("selected"));
+      el.classList.add("selected");
+      document.getElementById("selectedDate").value = el.dataset.date;
+    }
+    
+    function renderTimeSlots() {
+      const container = document.getElementById("timeSlots");
+      let html = "";
+      for (let h = 8; h < 18; h++) {
+        html += '<div class="time-slot" onclick="selectTime(this, ' + h + ':00)">' + h + ':00</div>';
+        if (h < 17) html += '<div class="time-slot" onclick="selectTime(this, ' + h + ':30)">' + h + ':30</div>';
+      }
+      container.innerHTML = html;
+    }
+    
+    function selectTime(el, time) {
+      document.querySelectorAll(".time-slot").forEach(t => t.classList.remove("selected"));
+      el.classList.add("selected");
+      document.getElementById("selectedTime").value = time;
+    }
+    
+    async function confirmBooking() {
+      const date = document.getElementById("selectedDate").value;
+      const time = document.getElementById("selectedTime").value;
+      const barber = document.getElementById("barberSelect").value;
+      
+      if (!date || !time) { alert("Please select date and time"); return; }
+      
+      const btn = document.getElementById("confirmBtn");
+      btn.disabled = true; btn.textContent = "Booking...";
+      
+      try {
+        await fetch(POCKETBASE_URL + "/api/collections/bookings/records", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user_id: "guest_" + Date.now(),
+            user_name: selectedService.name,
+            user_email: "guest@booking.com",
+            user_phone: "0000000000",
+            service_id: selectedService.id,
+            service_name: selectedService.name + (barber ? " (" + barber + ")" : ""),
+            date_time: date + "T" + time + ":00Z",
+            status: "pending"
+          })
+        });
+        
+        document.getElementById("step2").style.display = "none";
+        document.getElementById("bookingSuccess").style.display = "block";
+        document.getElementById("bookingDetails").innerHTML = selectedService.name + "<br>" + date + " at " + time + (barber ? "<br>Barber: " + barber : "");
+      } catch(err) { alert("Booking failed. Please try again."); btn.disabled = false; btn.textContent = "Confirm Booking"; }
+    }
     
     window.closeBookingModal = function() { 
       document.getElementById("bookingModal").classList.remove("open");
       document.body.style.overflow = "";
-      // Reset form
-      document.getElementById("bookingForm").style.display = "block";
-      document.getElementById("bookingSuccess").style.display = "none";
+      goToStep1();
     };
-    
-    function setupDateTime() {
-      const dateInput = document.getElementById("bookingDate");
-      if (!dateInput) return;
-      const today = new Date();
-      const maxDate = new Date(); maxDate.setMonth(maxDate.getMonth() + 2);
-      dateInput.min = today.toISOString().split("T")[0];
-      dateInput.max = maxDate.toISOString().split("T")[0];
-      
-      const timeSelect = document.getElementById("bookingTime");
-      let slots = "";
-      for(let h=8; h<18; h++) { slots += "<option value=" + h + ":00>" + h + ":00</option><option value=" + h + ":30>" + h + ":30</option>"; }
-      timeSelect.innerHTML = "<option value="">Select time</option>" + slots;
-    }
-    
-    document.addEventListener("DOMContentLoaded", function() {
-      const form = document.getElementById("bookingForm");
-      if (form) {
-        form.addEventListener("submit", async (e) => {
-          e.preventDefault();
-          const btn = document.getElementById("bookingSubmit");
-          btn.disabled = true; btn.textContent = "Booking...";
-          
-          try {
-            const svc = JSON.parse(document.getElementById("selectedService").value);
-            const date = document.getElementById("bookingDate").value;
-            const time = document.getElementById("bookingTime").value;
-            
-            await fetch(POCKETBASE_URL + "/api/collections/bookings/records", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                user_id: "guest_" + Date.now(),
-                user_name: document.getElementById("customerName").value,
-                user_email: document.getElementById("customerEmail").value,
-                user_phone: document.getElementById("customerPhone").value,
-                service_id: svc.id,
-                service_name: svc.name,
-                date_time: date + "T" + time + ":00Z",
-                status: "pending"
-              })
-            });
-            document.getElementById("bookingForm").style.display = "none";
-            document.getElementById("bookingSuccess").style.display = "block";
-          } catch(err) { alert("Booking failed. Please try again."); btn.disabled = false; btn.textContent = "Book Now"; }
-        });
-      }
-    });
-    
-    // Auto-attach click handlers to BOOK buttons
-    document.addEventListener("click", function(e) {
-      var text = e.target.textContent || "";
-      var href = e.target.getAttribute("href") || "";
-      if (text.indexOf("BOOK") !== -1 || href.indexOf("tel:") !== -1) {
-        e.preventDefault();
-        e.stopPropagation();
-        openBookingModal();
-      }
-    });
+
   </script>
 </body>
 </html>
