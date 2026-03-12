@@ -146,7 +146,7 @@
             const dateInput = document.getElementById('bookingDate');
             const today = new Date();
             const maxDate = new Date();
-            maxDate.setMonth(maxDate.getMonth() + 3);
+            maxDate.setMonth(maxDate.getMonth() + 6);
             
             dateInput.min = today.toISOString().split('T')[0];
             dateInput.max = maxDate.toISOString().split('T')[0];
