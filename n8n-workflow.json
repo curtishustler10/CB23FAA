@@ -1,0 +1,59 @@
+{
+  "name": "Coollooks23 Booking",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "booking",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "collection": "bookings",
+        "user_id": "{{ $json.user_id }}",
+        "user_name": "{{ $json.user_name }}",
+        "user_email": "{{ $json.user_email }}",
+        "user_phone": "{{ $json.user_phone }}",
+        "service_id": "{{ $json.service_id }}",
+        "service_name": "{{ $json.service_name }}",
+        "date_time": "{{ $json.date_time }}",
+        "status": "pending",
+        "options": {}
+      },
+      "id": "create-booking",
+      "name": "Create Booking",
+      "type": "n8n-nodes-base.pocketbase",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "subject": "Booking Confirmed - Coollooks23",
+        "to": "{{ $json.user_email }}",
+        "body": "Hi {{ $json.user_name }}!\n\nYour booking is confirmed.\n\nService: {{ $json.service_name }}\nDate: {{ $json.date_time }}\n\nSee you soon!",
+        "options": {}
+      },
+      "id": "send-email",
+      "name": "Send Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 3,
+      "position": [650, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{"node": "Create Booking", "type": "main", "index": 0}]]
+    },
+    "Create Booking": {
+      "main": [[{"node": "Send Email", "type": "main", "index": 0}]]
+    }
+  }
+}
