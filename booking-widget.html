@@ -15,6 +15,8 @@
         .form-group label { display: block; margin-bottom: 6px; color: #fff; font-weight: 500; font-size: 14px; }
         .form-group input, .form-group select, input[type=date] { width: 100%; padding: 12px; border: 1px solid #333; background: #000; color: #fff; font-size: 14px; border-radius: 0; }
         .form-group input:focus, .form-group select:focus { outline: none; border-color: #D4AF37; }
+        input[type=date] { appearance: none; -webkit-appearance: none; }
+        input[type=date]::-webkit-calendar-picker-indicator { filter: invert(1); opacity: 0.6; cursor: pointer; }
         .service-option { display: flex; justify-content: space-between; align-items: center; padding: 12px; border: 1px solid #333; background: #000; margin-bottom: 8px; cursor: pointer; transition: all 0.3s; border-radius: 0; }
         .service-option:hover { border-color: #D4AF37; }
         .service-option.selected { border-color: #D4AF37; background: #1a1a1a; }
@@ -69,6 +71,12 @@
             </div>
             
             <!-- Date & Time -->
+            <div class="form-group">
+                <label>Month</label>
+                <select id="bookingMonth">
+                    <option value="">Select month</option>
+                </select>
+            </div>
             <div class="date-time-group">
                 <div class="form-group">
                     <label>Date</label>
@@ -144,12 +152,38 @@
         
         function setupDatePicker() {
             const dateInput = document.getElementById('bookingDate');
+            const monthSelect = document.getElementById('bookingMonth');
             const today = new Date();
-            const maxDate = new Date();
-            maxDate.setMonth(maxDate.getMonth() + 6);
-            
-            dateInput.min = today.toISOString().split('T')[0];
-            dateInput.max = maxDate.toISOString().split('T')[0];
+            today.setHours(0, 0, 0, 0);
+
+            // Populate month options: current month + 2 ahead
+            for (let i = 0; i < 3; i++) {
+                const d = new Date(today.getFullYear(), today.getMonth() + i, 1);
+                const label = d.toLocaleString('default', { month: 'long', year: 'numeric' });
+                const value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+                const opt = document.createElement('option');
+                opt.value = value;
+                opt.textContent = label;
+                monthSelect.appendChild(opt);
+            }
+
+            monthSelect.addEventListener('change', () => {
+                const val = monthSelect.value;
+                dateInput.value = '';
+                updateTimeSlots();
+                if (!val) {
+                    dateInput.min = '';
+                    dateInput.max = '';
+                    return;
+                }
+                const [year, month] = val.split('-').map(Number);
+                const firstDay = new Date(year, month - 1, 1);
+                const lastDay = new Date(year, month, 0);
+                const minDate = firstDay < today ? today : firstDay;
+                dateInput.min = minDate.toISOString().split('T')[0];
+                dateInput.max = lastDay.toISOString().split('T')[0];
+            });
+
             dateInput.addEventListener('change', updateTimeSlots);
         }
         
