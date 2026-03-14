@@ -1365,8 +1365,23 @@
     .booking-back { width: 100%; padding: 12px; background: transparent; color: #888; border: 1px solid #444; border-radius: 0; margin-top: 10px; cursor: pointer; }
     .selected-service-display { background: #C9A84C; color: #000; padding: 15px; border-radius: 0; margin-bottom: 15px; text-align: center; }
   </style>
+  <!-- Firebase SDK (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script>
-    const POCKETBASE_URL = "http://170.64.153.193:8090";
+    // Firebase initialization
+    const firebaseConfig = {
+      apiKey: "AIzaSyDRxXMVd2ZJmbbKZ-DsBEY7jd5_g493iOk",
+      authDomain: "coollooks-c76ec.firebaseapp.com",
+      projectId: "coollooks-c76ec",
+      storageBucket: "coollooks-c76ec.firebasestorage.app",
+      messagingSenderId: "749477472175",
+      appId: "1:749477472175:web:6b2591091cd914e30e315a",
+      measurementId: "G-LC5EGKP76X"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
     let services = [];
     let selectedService = null;
     let currentMonthOffset = 0;
@@ -1515,25 +1530,26 @@
       btn.disabled = true; btn.textContent = "Booking...";
       
       try {
-        await fetch(POCKETBASE_URL + "/api/collections/bookings/records", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            user_id: "guest_" + Date.now(),
-            user_name: name,
-            user_email: email,
-            user_phone: phone,
-            service_id: selectedService.id,
-            service_name: selectedService.name + (barber ? " (" + barber + ")" : ""),
-            date_time: date + "T" + time + ":00Z",
-            status: "pending"
-          })
+        await db.collection("bookings").add({
+          user_id: "guest_" + Date.now(),
+          user_name: name,
+          user_email: email,
+          user_phone: phone,
+          service_id: selectedService.id,
+          service_name: selectedService.name + (barber ? " (" + barber + ")" : ""),
+          barber: barber || "",
+          date_time: date + "T" + time + ":00Z",
+          date: date,
+          time: time,
+          price: selectedService.price,
+          status: "pending",
+          created_at: firebase.firestore.FieldValue.serverTimestamp()
         });
-        
+
         document.getElementById("step2").style.display = "none";
         document.getElementById("bookingSuccess").style.display = "block";
         document.getElementById("bookingDetails").innerHTML = selectedService.name + "<br>" + date + " at " + time + (barber ? "<br>Barber: " + barber : "");
-      } catch(err) { alert("Booking failed. Please try again."); btn.disabled = false; btn.textContent = "Confirm Booking"; }
+      } catch(err) { console.error("Booking error:", err); alert("Booking failed. Please try again."); btn.disabled = false; btn.textContent = "Confirm Booking"; }
     }
     
         function renderServices() {
