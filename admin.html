@@ -261,6 +261,20 @@
   .search-bar input { padding-left: 36px; }
   .search-bar svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #aaa; pointer-events: none; }
 </style>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyDRxXMVd2ZJmbbKZ-DsBEY7jd5_g493iOk",
+  authDomain: "coollooks-c76ec.firebaseapp.com",
+  projectId: "coollooks-c76ec",
+  storageBucket: "coollooks-c76ec.firebasestorage.app",
+  messagingSenderId: "749477472175",
+  appId: "1:749477472175:web:6b2591091cd914e30e315a"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+</script>
 </head>
 <body>
 
@@ -473,7 +487,7 @@
 <div id="toast-container"></div>
 
 <script>
-const PB = 'http://170.64.153.193:8090';
+// const PB = 'http://170.64.153.193:8090'; // Using Firebase now
 const PASSWORD = 'coollooks123';
 
 let allCustomers = [];
@@ -538,18 +552,77 @@ function switchTab(tab) {
   if (tab === 'services') loadServices();
 }
 
-// ─── PB FETCH ────────────────────────────────────────────────────────────────
-async function pbFetch(path, opts = {}) {
-  const res = await fetch(PB + path, {
-    headers: { 'Content-Type': 'application/json', ...(opts.headers || {}) },
-    ...opts
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message || 'Request failed');
+// ─── FIRESTORE HELPERS ───────────────────────────────────────────────────
+async function fsFetch(collection, queryFn) {
+  let q = db.collection(collection);
+  if (queryFn) q = queryFn(q);
+  const snap = await q.get();
+  return { items: snap.docs.map(d => ({ id: d.id, ...d.data() })) };
+}
+
+async function fsGet(collection, id) {
+  const doc = await db.collection(collection).doc(id).get();
+  return doc.exists ? { id: doc.id, ...doc.data() } : null;
+}
+
+async function fsCreate(collection, data) {
+  const doc = await db.collection(collection).add(data);
+  return { id: doc.id, ...data };
+}
+
+async function fsUpdate(collection, id, data) {
+  await db.collection(collection).doc(id).update(data);
+  return { id, ...data };
+}
+
+async function fsDelete(collection, id) {
+  await db.collection(collection).doc(id).delete();
+}
+
+function pbFetch(path, opts = {}) {
+  const method = opts.method || 'GET';
+  const body = opts.body ? JSON.parse(opts.body) : null;
+  
+  // Bookings
+  if (path.includes('bookings')) {
+    if (method === 'GET') {
+      return fsFetch('bookings');
+    }
+    const id = path.split('/').pop();
+    if (method === 'PATCH' && id && id.length > 5) {
+      return fsUpdate('bookings', id, body);
+    }
+    if (method === 'POST') {
+      return fsCreate('bookings', body);
+    }
   }
-  if (res.status === 204) return {};
-  return res.json();
+  // Customers
+  if (path.includes('customers')) {
+    if (method === 'GET') {
+      return fsFetch('customers');
+    }
+    const id = path.split('/').pop();
+    if (method === 'PATCH' && id && id.length > 5) {
+      return fsUpdate('customers', id, body);
+    }
+    if (method === 'POST') {
+      return fsCreate('customers', body);
+    }
+  }
+  // Services
+  if (path.includes('services')) {
+    if (method === 'GET') {
+      return fsFetch('services');
+    }
+    const id = path.split('/').pop();
+    if (method === 'PATCH' && id && id.length > 5) {
+      return fsUpdate('services', id, body);
+    }
+    if (method === 'POST') {
+      return fsCreate('services', body);
+    }
+  }
+  return Promise.resolve({ items: [] });
 }
 
 // ─── DASHBOARD ───────────────────────────────────────────────────────────────
@@ -674,10 +747,7 @@ function clearBookingFilters() {
 
 async function updateBookingStatus(id, status) {
   try {
-    await pbFetch(`/api/collections/bookings/records/${id}`, {
-      method: 'PATCH',
-      body: JSON.stringify({ status })
-    });
+    await fsUpdate('bookings', id, { status });
     toast(`Booking ${status}`, 'success');
     loadBookings();
     // refresh dashboard stats if visible
