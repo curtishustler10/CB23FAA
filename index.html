@@ -1385,6 +1385,19 @@
     let services = [];
     let selectedService = null;
     let currentMonthOffset = 0;
+    
+    // Load services from Firebase
+    async function loadServices() {
+      try {
+        const snap = await db.collection('services').get();
+        services = snap.docs.map(d => ({id: d.id, ...d.data()}));
+        console.log('Loaded services:', services.length);
+      } catch(e) {
+        console.log('Using fallback services');
+      }
+    }
+    loadServices();
+    
     function changeMonth(delta) { currentMonthOffset += delta; renderCalendar(); }
     function goToToday() { currentMonthOffset = 0; renderCalendar(); }
     
@@ -1515,6 +1528,20 @@
       document.getElementById("selectedTime").value = time;
     }
     
+    async function getOrCreateUserId(name, email, phone) {
+      if (email) {
+        const existing = await db.collection("users").where("email", "==", email).limit(1).get();
+        if (!existing.empty) return existing.docs[0].id;
+      }
+      const userRef = await db.collection("users").add({
+        name: name,
+        email: email || "",
+        phone: phone || "",
+        created_at: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      return userRef.id;
+    }
+
     async function confirmBooking() {
       const date = document.getElementById("selectedDate").value;
       const time = document.getElementById("selectedTime").value;
@@ -1522,16 +1549,17 @@
       const name = document.getElementById("customerName").value;
       const email = document.getElementById("customerEmail").value;
       const phone = document.getElementById("customerPhone").value;
-      
+
       if (!date || !time) { alert("Please select date and time"); return; }
       if (!name || !email || !phone) { alert("Please enter your name, email and phone"); return; }
-      
+
       const btn = document.getElementById("confirmBtn");
       btn.disabled = true; btn.textContent = "Booking...";
-      
+
       try {
+        const userId = await getOrCreateUserId(name, email, phone);
         await db.collection("bookings").add({
-          user_id: "guest_" + Date.now(),
+          user_id: userId,
           user_name: name,
           user_email: email,
           user_phone: phone,
