@@ -1326,6 +1326,7 @@
         </div>
         <div class="booking-form-group">
           <label>Select Date</label>
+          <div class="calendar-header"><span id="monthYear"></span><div class="calendar-nav"><button class="today-btn" onclick="goToToday()">Today</button><button onclick="changeMonth(-1)">←</button><button onclick="changeMonth(1)">→</button></div></div>
           <div class="booking-calendar" id="calendar"></div>
           <input type="hidden" id="selectedDate">
         </div>
@@ -1354,6 +1355,9 @@
     .calendar-day.selected { background: #C9A84C; color: #000; }
     .calendar-day.disabled { color: #555; cursor: not-allowed; }
     .calendar-day.header { color: #888; font-weight: bold; font-size: 12px; }
+    .calendar-header { display: flex; justify-content: space-between; align-items: center; color: #fff; font-size: 16px; font-weight: 600; margin-bottom: 10px; padding: 0 5px; }
+    .calendar-nav button { background: #333; border: none; color: #fff; width: 30px; height: 30px; cursor: pointer; border-radius: 4px; }
+    .today-btn { background: #C9A84C !important; color: #000 !important; font-weight: 600; }
     .booking-time-scroll { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-height: 150px; overflow-y: auto; background: #222; padding: 10px; border-radius: 0; }
     .time-slot { padding: 10px; text-align: center; cursor: pointer; border-radius: 0; background: #333; color: #fff; }
     .time-slot:hover { background: #444; }
@@ -1365,6 +1369,9 @@
     const POCKETBASE_URL = "http://170.64.153.193:8090";
     let services = [];
     let selectedService = null;
+    let currentMonthOffset = 0;
+    function changeMonth(delta) { currentMonthOffset += delta; renderCalendar(); }
+    function goToToday() { currentMonthOffset = 0; renderCalendar(); }
     
     // Fallback services - must match HTML exactly
     services = [
@@ -1439,13 +1446,16 @@
     function renderCalendar() {
       const container = document.getElementById("calendar");
       const today = new Date();
-      let html = '<div class="calendar-day header">S</div><div class="calendar-day header">M</div><div class="calendar-day header">T</div><div class="calendar-day header">W</div><div class="calendar-day header">T</div><div class="calendar-day header">F</div><div class="calendar-day header">S</div>';
-      
-      for (let d = 1; d <= 35; d++) {
+      today.setHours(0,0,0,0);
+      const monthStart = new Date(today.getFullYear(), today.getMonth() + currentMonthOffset, 1);
+      const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+      document.getElementById("monthYear").textContent = monthNames[monthStart.getMonth()] + " " + monthStart.getFullYear();
+      let html = '<div class="calendar-day header">Sun</div><div class="calendar-day header">Mon</div><div class="calendar-day header">Tue</div><div class="calendar-day header">Wed</div><div class="calendar-day header">Thu</div><div class="calendar-day header">Fri</div><div class="calendar-day header">Sat</div>';
+
+      for (let d = 0; d < 14; d++) {
         const date = new Date(today);
-        date.setDate(today.getDate() + d - 1);
-        if (date.getDay() === 0 && d > 1) break;
-        
+        date.setDate(today.getDate() + d);
+
         const isPast = date < today;
         const isSunday = date.getDay() === 0;
         html += '<div class="calendar-day' + (isPast || isSunday ? ' disabled' : '') + '" data-date="' + date.toISOString().split('T')[0] + '" onclick="' + (isPast || isSunday ? '' : "selectDate(this)") + '">' + date.getDate() + '</div>';
@@ -1464,7 +1474,11 @@
       let html = "";
       const times = ["08:00","08:30","09:00","09:30","10:00","10:30","11:00","11:30","12:00","12:30","13:00","13:30","14:00","14:30","15:00","15:30","16:00","16:30","17:00","17:30"];
       times.forEach(time => {
-        html += '<div class="time-slot" onclick="selectTime(this,\'' + time + '\')">' + time + '</div>';
+        const [h, m] = time.split(":").map(Number);
+        const ampm = h >= 12 ? "PM" : "AM";
+        const h12 = h % 12 || 12;
+        const label = h12 + ":" + (m === 0 ? "00" : m) + " " + ampm;
+        html += '<div class="time-slot" onclick="selectTime(this,\'' + time + '\')">' + label + '</div>';
       });
       container.innerHTML = html;
     }
