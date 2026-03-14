@@ -1458,9 +1458,15 @@
 
         const isPast = date < today;
         const isSunday = date.getDay() === 0;
-        html += '<div class="calendar-day' + (isPast || isSunday ? ' disabled' : '') + '" data-date="' + date.toISOString().split('T')[0] + '" onclick="' + (isPast || isSunday ? '' : "selectDate(this)") + '">' + date.getDate() + '</div>';
+        const disabledClass = isPast || isSunday ? ' disabled' : '';
+        html += '<div class="calendar-day' + disabledClass + '" data-date="' + date.toISOString().split('T')[0] + '">' + date.getDate() + '</div>';
       }
       container.innerHTML = html;
+      
+      // Attach click handlers after rendering
+      container.querySelectorAll('.calendar-day:not(.header):not(.disabled)').forEach(el => {
+        el.onclick = function() { selectDate(this); };
+      });
     }
     
     function selectDate(el) {
@@ -1478,9 +1484,14 @@
         const ampm = h >= 12 ? "PM" : "AM";
         const h12 = h % 12 || 12;
         const label = h12 + ":" + (m === 0 ? "00" : m) + " " + ampm;
-        html += '<div class="time-slot" onclick="selectTime(this,\'' + time + '\')">' + label + '</div>';
+        html += '<div class="time-slot" data-time="' + time + '">' + label + '</div>';
       });
       container.innerHTML = html;
+      
+      // Attach click handlers after rendering
+      container.querySelectorAll('.time-slot').forEach(el => {
+        el.onclick = function() { selectTime(this, this.dataset.time); };
+      });
     }
     
     function selectTime(el, time) {
