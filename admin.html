@@ -612,8 +612,11 @@ async function loadBookings() {
     const filterDate   = document.getElementById('filter-date').value;
     const filterStatus = document.getElementById('filter-status').value;
 
+    console.log('Loading bookings from Firestore...');
     const snap = await db.collection('bookings').orderBy('created_at', 'desc').get();
+    console.log('Bookings loaded:', snap.size);
     allBookings = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    console.log('First booking:', allBookings[0]);
 
     let filtered = allBookings;
     if (filterDate)   filtered = filtered.filter(b => (b.date || '').slice(0, 10) === filterDate);
