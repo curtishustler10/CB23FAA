@@ -613,7 +613,13 @@ async function loadBookings() {
     const filterStatus = document.getElementById('filter-status').value;
 
     console.log('Loading bookings from Firestore...');
-    const snap = await db.collection('bookings').orderBy('created_at', 'desc').get();
+    let snap;
+    try {
+      snap = await db.collection('bookings').orderBy('created_at', 'desc').get();
+    } catch(e) {
+      console.log('OrderBy failed, trying without:', e.message);
+      snap = await db.collection('bookings').get();
+    }
     console.log('Bookings loaded:', snap.size);
     allBookings = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     console.log('First booking:', allBookings[0]);
