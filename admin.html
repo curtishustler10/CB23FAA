@@ -260,21 +260,13 @@
   .search-bar { position: relative; }
   .search-bar input { padding-left: 36px; }
   .search-bar svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #aaa; pointer-events: none; }
+
+  /* CUSTOMER LINK */
+  .customer-link { cursor: pointer; color: var(--gold); text-decoration: underline; font-weight: 700; }
+  .customer-link:hover { color: var(--gold-dark); }
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyDRxXMVd2ZJmbbKZ-DsBEY7jd5_g493iOk",
-  authDomain: "coollooks-c76ec.firebaseapp.com",
-  projectId: "coollooks-c76ec",
-  storageBucket: "coollooks-c76ec.firebasestorage.app",
-  messagingSenderId: "749477472175",
-  appId: "1:749477472175:web:6b2591091cd914e30e315a"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-</script>
 </head>
 <body>
 
@@ -358,7 +350,7 @@ const db = firebase.firestore();
           </div>
           <div class="table-wrap">
             <table id="dash-bookings-table">
-              <thead><tr><th>Customer</th><th>Service</th><th>Date</th><th>Status</th></tr></thead>
+              <thead><tr><th>Name</th><th>Service</th><th>Date</th><th>Status</th></tr></thead>
               <tbody id="dash-bookings-body"><tr><td colspan="4" class="loading">Loading...</td></tr></tbody>
             </table>
           </div>
@@ -385,7 +377,7 @@ const db = firebase.firestore();
         <div class="card">
           <div class="table-wrap">
             <table>
-              <thead><tr><th>Customer</th><th>Service</th><th>Date & Time</th><th>Status</th><th>Actions</th></tr></thead>
+              <thead><tr><th>Name</th><th>Service</th><th>Date & Time</th><th>Status</th><th>Actions</th></tr></thead>
               <tbody id="bookings-body"><tr><td colspan="5" class="loading">Loading...</td></tr></tbody>
             </table>
           </div>
@@ -487,8 +479,20 @@ const db = firebase.firestore();
 <div id="toast-container"></div>
 
 <script>
-// const PB = 'http://170.64.153.193:8090'; // Using Firebase now
 const PASSWORD = 'coollooks123';
+
+// ─── FIREBASE INIT ───────────────────────────────────────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyDRxXMVd2ZJmbbKZ-DsBEY7jd5_g493iOk",
+  authDomain: "coollooks-c76ec.firebaseapp.com",
+  projectId: "coollooks-c76ec",
+  storageBucket: "coollooks-c76ec.firebasestorage.app",
+  messagingSenderId: "749477472175",
+  appId: "1:749477472175:web:6b2591091cd914e30e315a"
+};
+
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
 let allCustomers = [];
 let allBookings = [];
@@ -552,79 +556,6 @@ function switchTab(tab) {
   if (tab === 'services') loadServices();
 }
 
-// ─── FIRESTORE HELPERS ───────────────────────────────────────────────────
-async function fsFetch(collection, queryFn) {
-  let q = db.collection(collection);
-  if (queryFn) q = queryFn(q);
-  const snap = await q.get();
-  return { items: snap.docs.map(d => ({ id: d.id, ...d.data() })) };
-}
-
-async function fsGet(collection, id) {
-  const doc = await db.collection(collection).doc(id).get();
-  return doc.exists ? { id: doc.id, ...doc.data() } : null;
-}
-
-async function fsCreate(collection, data) {
-  const doc = await db.collection(collection).add(data);
-  return { id: doc.id, ...data };
-}
-
-async function fsUpdate(collection, id, data) {
-  await db.collection(collection).doc(id).update(data);
-  return { id, ...data };
-}
-
-async function fsDelete(collection, id) {
-  await db.collection(collection).doc(id).delete();
-}
-
-function pbFetch(path, opts = {}) {
-  const method = opts.method || 'GET';
-  const body = opts.body ? JSON.parse(opts.body) : null;
-  
-  // Bookings
-  if (path.includes('bookings')) {
-    if (method === 'GET') {
-      return fsFetch('bookings');
-    }
-    const id = path.split('/').pop();
-    if (method === 'PATCH' && id && id.length > 5) {
-      return fsUpdate('bookings', id, body);
-    }
-    if (method === 'POST') {
-      return fsCreate('bookings', body);
-    }
-  }
-  // Customers
-  if (path.includes('customers')) {
-    if (method === 'GET') {
-      return fsFetch('customers');
-    }
-    const id = path.split('/').pop();
-    if (method === 'PATCH' && id && id.length > 5) {
-      return fsUpdate('customers', id, body);
-    }
-    if (method === 'POST') {
-      return fsCreate('customers', body);
-    }
-  }
-  // Services
-  if (path.includes('services')) {
-    if (method === 'GET') {
-      return fsFetch('services');
-    }
-    const id = path.split('/').pop();
-    if (method === 'PATCH' && id && id.length > 5) {
-      return fsUpdate('services', id, body);
-    }
-    if (method === 'POST') {
-      return fsCreate('services', body);
-    }
-  }
-  return Promise.resolve({ items: [] });
-}
-
 // ─── DASHBOARD ───────────────────────────────────────────────────────────────
 async function loadDashboard() {
   try {
@@ -632,48 +563,33 @@ async function loadDashboard() {
     const weekStart = getWeekStart();
     const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().slice(0, 10);
 
-    const [bookings, services] = await Promise.all([
-      pbFetch('/api/collections/bookings/records?perPage=500&sort=-date'),
-      pbFetch('/api/collections/services/records?perPage=200')
-    ]);
+    const snap = await db.collection('bookings').orderBy('created_at', 'desc').get();
+    allBookings = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-    allBookings = bookings.items || [];
-    allServices = services.items || [];
-
-    const svcMap = {};
-    allServices.forEach(s => { svcMap[s.id] = s; });
-
-    const todayB = allBookings.filter(b => (b.date || b.booking_date || '').slice(0, 10) === today);
-    const weekB = allBookings.filter(b => (b.date || b.booking_date || '').slice(0, 10) >= weekStart);
-    const monthB = allBookings.filter(b => (b.date || b.booking_date || '').slice(0, 10) >= monthStart);
+    const todayB = allBookings.filter(b => (b.date || '').slice(0, 10) === today);
+    const weekB  = allBookings.filter(b => (b.date || '').slice(0, 10) >= weekStart);
+    const monthB = allBookings.filter(b => (b.date || '').slice(0, 10) >= monthStart);
     const completedMonth = monthB.filter(b => b.status === 'completed');
 
     let revenue = 0;
-    completedMonth.forEach(b => {
-      const svc = svcMap[b.service] || svcMap[b.service_id];
-      if (svc) revenue += Number(svc.price || 0);
-    });
+    completedMonth.forEach(b => { revenue += Number(b.price || 0); });
 
     document.getElementById('stat-today').textContent = todayB.length;
     document.getElementById('stat-week').textContent = weekB.length;
     document.getElementById('stat-month').textContent = monthB.length;
     document.getElementById('stat-revenue').textContent = '$' + revenue.toFixed(2);
 
-    // Recent bookings
     const tbody = document.getElementById('dash-bookings-body');
     const recent = allBookings.slice(0, 10);
     if (!recent.length) {
       tbody.innerHTML = '<tr><td colspan="4" class="empty-state"><p>No bookings yet</p></td></tr>';
     } else {
-      tbody.innerHTML = recent.map(b => {
-        const svc = svcMap[b.service] || svcMap[b.service_id];
-        return `<tr>
-          <td>${esc(b.customer_name || b.name || 'N/A')}</td>
-          <td>${esc(svc ? svc.name : (b.service_name || 'N/A'))}</td>
-          <td>${formatDate(b.date || b.booking_date)}</td>
-          <td>${statusBadge(b.status)}</td>
-        </tr>`;
-      }).join('');
+      tbody.innerHTML = recent.map(b => `<tr>
+        <td>${esc(b.user_name || 'N/A')}</td>
+        <td>${esc(b.service_name || 'N/A')}</td>
+        <td>${formatDate(b.date_time || b.date)}</td>
+        <td>${statusBadge(b.status)}</td>
+      </tr>`).join('');
     }
   } catch (e) {
     console.error(e);
@@ -693,42 +609,34 @@ async function loadBookings() {
   const tbody = document.getElementById('bookings-body');
   tbody.innerHTML = '<tr><td colspan="5" class="loading">Loading...</td></tr>';
   try {
-    const filterDate = document.getElementById('filter-date').value;
+    const filterDate   = document.getElementById('filter-date').value;
     const filterStatus = document.getElementById('filter-status').value;
 
-    let filters = [];
-    if (filterDate) filters.push(`(date>='${filterDate} 00:00:00'&&date<='${filterDate} 23:59:59')`);
-    if (filterStatus) filters.push(`status='${filterStatus}'`);
-    const q = filters.length ? '&filter=' + encodeURIComponent(filters.join('&&')) : '';
+    const snap = await db.collection('bookings').orderBy('created_at', 'desc').get();
+    allBookings = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-    const [bookings, services] = await Promise.all([
-      pbFetch(`/api/collections/bookings/records?perPage=500&sort=-date${q}`),
-      pbFetch('/api/collections/services/records?perPage=200')
-    ]);
+    let filtered = allBookings;
+    if (filterDate)   filtered = filtered.filter(b => (b.date || '').slice(0, 10) === filterDate);
+    if (filterStatus) filtered = filtered.filter(b => b.status === filterStatus);
 
-    allBookings = bookings.items || [];
-    const svcMap = {};
-    (services.items || []).forEach(s => { svcMap[s.id] = s; });
-
-    if (!allBookings.length) {
+    if (!filtered.length) {
       tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><p>No bookings found</p></td></tr>';
       return;
     }
 
-    tbody.innerHTML = allBookings.map(b => {
-      const svc = svcMap[b.service] || svcMap[b.service_id];
+    tbody.innerHTML = filtered.map(b => {
       const canConfirm = b.status === 'pending';
       const canComplete = b.status === 'confirmed';
       const canCancel = b.status !== 'cancelled' && b.status !== 'completed';
       return `<tr>
-        <td><strong>${esc(b.customer_name || b.name || 'N/A')}</strong><br><small style="color:#888">${esc(b.customer_email || b.email || '')}</small></td>
-        <td>${esc(svc ? svc.name : (b.service_name || b.service || 'N/A'))}</td>
-        <td>${formatDate(b.date || b.booking_date)}</td>
+        <td><span class="customer-link" onclick="viewCustomerFile('${esc(b.user_name || '')}','${esc(b.user_email || '')}')">${esc(b.user_name || 'N/A')}</span></td>
+        <td>${esc(b.service_name || 'N/A')}</td>
+        <td>${formatDate(b.date_time || b.date)}</td>
         <td>${statusBadge(b.status)}</td>
         <td><div class="actions">
-          ${canConfirm ? `<button class="btn btn-sm btn-confirm" onclick="updateBookingStatus('${b.id}','confirmed')">Confirm</button>` : ''}
+          ${canConfirm  ? `<button class="btn btn-sm btn-confirm"  onclick="updateBookingStatus('${b.id}','confirmed')">Confirm</button>`  : ''}
           ${canComplete ? `<button class="btn btn-sm btn-complete" onclick="updateBookingStatus('${b.id}','completed')">Complete</button>` : ''}
-          ${canCancel ? `<button class="btn btn-sm btn-cancel" onclick="updateBookingStatus('${b.id}','cancelled')">Cancel</button>` : ''}
+          ${canCancel   ? `<button class="btn btn-sm btn-cancel"   onclick="updateBookingStatus('${b.id}','cancelled')">Cancel</button>`   : ''}
         </div></td>
       </tr>`;
     }).join('');
@@ -747,10 +655,9 @@ function clearBookingFilters() {
 
 async function updateBookingStatus(id, status) {
   try {
-    await fsUpdate('bookings', id, { status });
+    await db.collection('bookings').doc(id).update({ status });
     toast(`Booking ${status}`, 'success');
     loadBookings();
-    // refresh dashboard stats if visible
     if (document.getElementById('tab-dashboard').classList.contains('active')) loadDashboard();
   } catch (e) {
     toast('Failed to update: ' + e.message, 'error');
@@ -762,32 +669,27 @@ async function loadCustomers() {
   const grid = document.getElementById('customers-grid');
   grid.innerHTML = '<div class="loading">Loading...</div>';
   try {
-    const [custRes, bookRes] = await Promise.all([
-      pbFetch('/api/collections/customers/records?perPage=500&sort=name'),
-      pbFetch('/api/collections/bookings/records?perPage=1000&sort=-date')
-    ]);
-    allCustomers = custRes.items || [];
-    const bookings = bookRes.items || [];
-    const svcRes = await pbFetch('/api/collections/services/records?perPage=200');
-    const svcMap = {};
-    (svcRes.items || []).forEach(s => { svcMap[s.id] = s; });
+    // Derive customers from bookings (keyed by email or phone)
+    const snap = await db.collection('bookings').get();
+    const bookings = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-    // Build per-customer stats
-    const custStats = {};
+    const customerMap = {};
     bookings.forEach(b => {
-      const cid = b.customer || b.customer_id || b.customer_name;
-      if (!cid) return;
-      if (!custStats[cid]) custStats[cid] = { visits: 0, spent: 0, last: null };
-      custStats[cid].visits++;
+      const key = b.user_email || b.user_phone || b.user_name;
+      if (!key) return;
+      if (!customerMap[key]) {
+        customerMap[key] = { id: key, name: b.user_name || 'Unknown', email: b.user_email || '', phone: b.user_phone || '', visits: 0, spent: 0, last: null };
+      }
+      customerMap[key].visits++;
       if (b.status === 'completed') {
-        const svc = svcMap[b.service] || svcMap[b.service_id];
-        if (svc) custStats[cid].spent += Number(svc.price || 0);
-        const d = b.date || b.booking_date;
-        if (d && (!custStats[cid].last || d > custStats[cid].last)) custStats[cid].last = d;
+        customerMap[key].spent += Number(b.price || 0);
+        const d = b.date || '';
+        if (d && (!customerMap[key].last || d > customerMap[key].last)) customerMap[key].last = d;
       }
     });
 
-    renderCustomers(allCustomers, custStats);
+    allCustomers = Object.values(customerMap).sort((a, b) => a.name.localeCompare(b.name));
+    renderCustomers(allCustomers);
   } catch (e) {
     console.error(e);
     grid.innerHTML = '<div class="empty-state"><p>Error loading customers</p></div>';
@@ -795,28 +697,23 @@ async function loadCustomers() {
   }
 }
 
-function renderCustomers(customers, statsMap) {
+function renderCustomers(customers) {
   const grid = document.getElementById('customers-grid');
   if (!customers.length) {
-    grid.innerHTML = '<div class="empty-state"><p>No customers yet. Add your first one!</p></div>';
+    grid.innerHTML = '<div class="empty-state"><p>No customers yet.</p></div>';
     return;
   }
   grid.innerHTML = customers.map(c => {
-    const initials = (c.name || 'U').split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
-    const stats = statsMap ? (statsMap[c.id] || statsMap[c.name] || { visits: 0, spent: 0, last: null }) : { visits: 0, spent: 0, last: null };
+    const initials = (c.name || 'U').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
     return `<div class="customer-card">
       <div class="customer-avatar">${initials}</div>
       <div class="customer-name">${esc(c.name || 'Unknown')}</div>
       <div class="customer-email">${esc(c.email || '')}</div>
       <div class="customer-phone">${esc(c.phone || '')}</div>
-      <div class="customer-notes">${esc(c.notes || 'No notes')}</div>
       <div class="customer-stats">
-        <div class="cstat"><div class="cstat-val">${stats.visits}</div><div class="cstat-lbl">Visits</div></div>
-        <div class="cstat"><div class="cstat-val">$${stats.spent.toFixed(0)}</div><div class="cstat-lbl">Spent</div></div>
-        <div class="cstat"><div class="cstat-val">${stats.last ? formatDateShort(stats.last) : '—'}</div><div class="cstat-lbl">Last Visit</div></div>
-      </div>
-      <div class="customer-actions">
-        <button class="btn btn-sm btn-edit" onclick="openCustomerModal('${c.id}')">Edit</button>
+        <div class="cstat"><div class="cstat-val">${c.visits}</div><div class="cstat-lbl">Visits</div></div>
+        <div class="cstat"><div class="cstat-val">$${(c.spent || 0).toFixed(0)}</div><div class="cstat-lbl">Spent</div></div>
+        <div class="cstat"><div class="cstat-val">${c.last ? formatDateShort(c.last) : '—'}</div><div class="cstat-lbl">Last Visit</div></div>
       </div>
     </div>`;
   }).join('');
@@ -829,7 +726,7 @@ function filterCustomers() {
     (c.email || '').toLowerCase().includes(q) ||
     (c.phone || '').includes(q)
   );
-  renderCustomers(filtered, null);
+  renderCustomers(filtered);
 }
 
 function openCustomerModal(id) {
@@ -869,10 +766,10 @@ async function saveCustomer() {
   };
   try {
     if (id) {
-      await pbFetch(`/api/collections/customers/records/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
+      await db.collection('customers').doc(id).update(data);
       toast('Customer updated', 'success');
     } else {
-      await pbFetch('/api/collections/customers/records', { method: 'POST', body: JSON.stringify(data) });
+      await db.collection('customers').add(data);
       toast('Customer added', 'success');
     }
     closeCustomerModal();
@@ -887,8 +784,8 @@ async function loadServices() {
   const list = document.getElementById('services-list');
   list.innerHTML = '<div class="loading">Loading...</div>';
   try {
-    const res = await pbFetch('/api/collections/services/records?perPage=200&sort=category,name');
-    allServices = res.items || [];
+    const snap = await db.collection('services').orderBy('name').get();
+    allServices = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     if (!allServices.length) {
       list.innerHTML = '<div class="empty-state"><p>No services yet. Add your first one!</p></div>';
       return;
@@ -947,8 +844,8 @@ async function saveService() {
   const name = document.getElementById('s-name').value.trim();
   const price = document.getElementById('s-price').value;
   const duration = document.getElementById('s-duration').value;
-  if (!name) { toast('Service name is required', 'warning'); return; }
-  if (!price) { toast('Price is required', 'warning'); return; }
+  if (!name)     { toast('Service name is required', 'warning'); return; }
+  if (!price)    { toast('Price is required', 'warning'); return; }
   if (!duration) { toast('Duration is required', 'warning'); return; }
   const data = {
     name,
@@ -959,10 +856,10 @@ async function saveService() {
   };
   try {
     if (id) {
-      await pbFetch(`/api/collections/services/records/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
+      await db.collection('services').doc(id).update(data);
       toast('Service updated', 'success');
     } else {
-      await pbFetch('/api/collections/services/records', { method: 'POST', body: JSON.stringify(data) });
+      await db.collection('services').add(data);
       toast('Service added', 'success');
     }
     closeServiceModal();
@@ -974,7 +871,7 @@ async function saveService() {
 
 async function toggleService(id, active) {
   try {
-    await pbFetch(`/api/collections/services/records/${id}`, { method: 'PATCH', body: JSON.stringify({ active }) });
+    await db.collection('services').doc(id).update({ active });
     toast(`Service ${active ? 'activated' : 'deactivated'}`, 'success');
     const svc = allServices.find(s => s.id === id);
     if (svc) svc.active = active;
@@ -1019,6 +916,25 @@ function toast(msg, type = 'info') {
     el.style.animation = 'slideOut 0.3s ease forwards';
     setTimeout(() => el.remove(), 300);
   }, 3500);
+}
+
+// ─── VIEW CUSTOMER FILE ──────────────────────────────────────────────────────
+function viewCustomerFile(name, email) {
+  switchTab('customers');
+  const query = email || name;
+  setTimeout(() => {
+    const searchInput = document.getElementById('customer-search');
+    searchInput.value = query;
+    filterCustomers();
+    setTimeout(() => {
+      const firstCard = document.querySelector('.customer-card');
+      if (firstCard) {
+        firstCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        firstCard.style.boxShadow = '0 0 0 3px var(--gold)';
+        setTimeout(() => { firstCard.style.boxShadow = ''; }, 3000);
+      }
+    }, 100);
+  }, 300);
 }
 
 // Close modals on overlay click
