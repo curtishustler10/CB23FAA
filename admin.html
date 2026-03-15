@@ -393,6 +393,11 @@
     color: var(--text-muted);
   }
 
+  /* TOPBAR LEFT */
+  .topbar-left { display: flex; align-items: center; gap: 8px; }
+  .topbar-logo-img { display: none; height: 32px; width: auto; }
+  .topbar-brand-text { display: none; font-size: 15px; font-weight: 700; color: var(--text); }
+
   /* MOBILE SIDEBAR */
   .hamburger {
     display: none;
@@ -443,6 +448,10 @@
 
     #app.visible { display: block; }
     .main { width: 100%; }
+    .topbar-logo-img { display: block; }
+    .topbar-brand-text { display: block; }
+    .topbar-title { display: none; }
+    .profile-name { display: none; }
   }
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -503,9 +512,13 @@
   <!-- MAIN CONTENT -->
   <div class="main">
     <div class="topbar">
-      <button class="hamburger" id="hamburger-btn" onclick="toggleSidebar()" aria-label="Toggle menu">
-        <span></span><span></span><span></span>
-      </button>
+      <div class="topbar-left">
+        <button class="hamburger" id="hamburger-btn" onclick="toggleSidebar()" aria-label="Toggle menu">
+          <span></span><span></span><span></span>
+        </button>
+        <img src="https://res.cloudinary.com/ecom-hustler/image/upload/v1773556292/logo_off1_miizyk.png" alt="CoolLooks" class="topbar-logo-img">
+        <span class="topbar-brand-text">Admin Dashboard</span>
+      </div>
       <div class="topbar-title" id="page-title">Dashboard</div>
       <div style="display:flex;align-items:center;gap:16px;position:relative">
         <div class="topbar-date" id="topbar-date"></div>
@@ -777,7 +790,17 @@ function doLogout() {
 // ─── INIT ────────────────────────────────────────────────────────────────────
 function initApp() {
   const now = new Date();
-  document.getElementById('topbar-date').textContent = now.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+  const isMobile = window.innerWidth <= 768;
+  let dateStr;
+  if (isMobile) {
+    const dd = String(now.getDate()).padStart(2, '0');
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const yy = String(now.getFullYear()).slice(-2);
+    dateStr = `${dd}/${mm}/${yy}`;
+  } else {
+    dateStr = now.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+  }
+  document.getElementById('topbar-date').textContent = dateStr;
   
   // Set admin name from login
   const adminName = localStorage.getItem('cl_admin_name') || 'Admin';
