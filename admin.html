@@ -287,6 +287,71 @@
     height: 80px;
     background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
   }
+
+  /* PROFILE MENU */
+  .topbar-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 8px;
+    transition: background 0.2s;
+  }
+  .topbar-profile:hover {
+    background: rgba(0,0,0,0.05);
+  }
+  .profile-avatar {
+    width: 36px;
+    height: 36px;
+    background: var(--gold);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .profile-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .profile-menu {
+    position: absolute;
+    top: 100%;
+    right: 28px;
+    background: var(--card);
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    min-width: 180px;
+    padding: 8px 0;
+    display: none;
+    z-index: 100;
+  }
+  .profile-menu.show {
+    display: block;
+  }
+  .profile-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    font-size: 14px;
+    color: var(--text);
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .profile-menu-item:hover {
+    background: #f5f5f5;
+  }
+  .profile-menu-item.logout {
+    color: var(--danger);
+  }
+  .profile-menu-item.logout:hover {
+    background: #fef2f2;
+  }
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -338,7 +403,23 @@
   <div class="main">
     <div class="topbar">
       <div class="topbar-title" id="page-title">Dashboard</div>
-      <div class="topbar-date" id="topbar-date"></div>
+      <div style="display:flex;align-items:center;gap:16px;position:relative">
+        <div class="topbar-date" id="topbar-date"></div>
+        <div class="topbar-profile" onclick="toggleProfileMenu()">
+          <div class="profile-avatar">CL</div>
+          <span class="profile-name">Admin</span>
+        </div>
+        <div class="profile-menu" id="profile-menu">
+          <div class="profile-menu-item" onclick="openSettings()">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            Settings
+          </div>
+          <div class="profile-menu-item logout" onclick="doLogout()">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Logout
+          </div>
+        </div>
+      </div>
     </div>
     
     <!-- HERO IMAGE -->
@@ -956,6 +1037,25 @@ function toast(msg, type = 'info') {
     setTimeout(() => el.remove(), 300);
   }, 3500);
 }
+
+// PROFILE MENU
+function toggleProfileMenu() {
+  document.getElementById('profile-menu').classList.toggle('show');
+}
+
+function openSettings() {
+  document.getElementById('profile-menu').classList.remove('show');
+  toast('Settings coming soon', 'info');
+}
+
+// Close profile menu when clicking outside
+document.addEventListener('click', function(e) {
+  const profile = document.querySelector('.topbar-profile');
+  const menu = document.getElementById('profile-menu');
+  if (profile && !profile.contains(e.target) && menu && !menu.contains(e.target)) {
+    menu.classList.remove('show');
+  }
+});
 
 // ─── VIEW CUSTOMER FILE ──────────────────────────────────────────────────────
 function viewCustomerFile(name, email) {
