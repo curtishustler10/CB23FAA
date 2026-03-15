@@ -620,8 +620,8 @@
           </div>
           <div class="table-wrap">
             <table id="dash-bookings-table">
-              <thead><tr><th>Name</th><th>Service</th><th>Date</th><th>Status</th></tr></thead>
-              <tbody id="dash-bookings-body"><tr><td colspan="4" class="loading">Loading...</td></tr></tbody>
+              <thead><tr><th>Name</th><th>Service</th><th>Status</th></tr></thead>
+              <tbody id="dash-bookings-body"><tr><td colspan="3" class="loading">Loading...</td></tr></tbody>
             </table>
           </div>
         </div>
@@ -925,12 +925,11 @@ async function loadDashboard() {
     const tbody = document.getElementById('dash-bookings-body');
     const recent = allBookings.slice(0, 10);
     if (!recent.length) {
-      tbody.innerHTML = '<tr><td colspan="4" class="empty-state"><p>No bookings yet</p></td></tr>';
+      tbody.innerHTML = '<tr><td colspan="3" class="empty-state"><p>No bookings yet</p></td></tr>';
     } else {
       tbody.innerHTML = recent.map(b => `<tr>
         <td>${esc(b.user_name || 'N/A')}</td>
         <td>${esc(b.service_name || 'N/A')}</td>
-        <td>${formatDate(b.date_time || b.date)}</td>
         <td>${statusBadge(b.status)}</td>
       </tr>`).join('');
     }
