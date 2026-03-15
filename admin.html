@@ -35,6 +35,7 @@
     box-shadow: 0 20px 60px rgba(0,0,0,0.4);
   }
   .login-logo { font-size: 32px; font-weight: 800; color: var(--gold); margin-bottom: 4px; }
+  .login-logo img { height: 60px; width: auto; }
   .login-sub { color: var(--text-muted); font-size: 14px; margin-bottom: 32px; }
   .login-box input {
     width: 100%; padding: 14px 16px; border: 2px solid var(--border);
@@ -63,6 +64,12 @@
   }
   .sidebar-brand {
     padding: 24px 20px; border-bottom: 1px solid #2d2d2d;
+    text-align: center;
+  }
+  .sidebar-brand .logo-img {
+    height: 40px;
+    width: auto;
+    margin-bottom: 8px;
   }
   .sidebar-brand .name { font-size: 18px; font-weight: 800; color: var(--gold); }
   .sidebar-brand .sub { font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: 1px; }
@@ -362,7 +369,9 @@
 <!-- LOGIN SCREEN -->
 <div id="login-screen">
   <div class="login-box">
-    <div class="login-logo">CoolLooks</div>
+    <div class="login-logo">
+      <img src="https://res.cloudinary.com/ecom-hustler/image/upload/v1773556292/logo_off1_miizyk.png" alt="CoolLooks">
+    </div>
     <div class="login-sub">Barberz Admin Portal</div>
     <input type="text" id="login-pin" placeholder="Enter 4-digit PIN" maxlength="4" inputmode="numeric" autocomplete="off">
     <div class="login-error" id="login-error"></div>
@@ -378,6 +387,7 @@
   <!-- SIDEBAR -->
   <div class="sidebar">
     <div class="sidebar-brand">
+      <img src="https://res.cloudinary.com/ecom-hustler/image/upload/v1773556292/logo_off1_miizyk.png" alt="CoolLooks" class="logo-img">
       <div class="name">CoolLooks</div>
       <div class="sub">Barberz Admin</div>
     </div>
