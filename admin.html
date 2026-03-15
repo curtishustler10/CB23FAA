@@ -435,7 +435,7 @@
   .sidebar-overlay.active { display: block; }
 
   /* STATUS LEGEND */
-  .status-legend { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+  .status-legend { display: none; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
   .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); font-weight: 500; }
   .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 
@@ -493,7 +493,7 @@
     .toggle-slider:before { width: 20px; height: 20px; }
     .toggle input:checked + .toggle-slider:before { transform: translateX(22px); }
 
-    .status-legend { display: none; }
+    .status-legend { display: flex; gap: 12px; padding: 12px; }
     th.actions-col, td.actions-col { display: none; }
   }
 </style>
@@ -648,18 +648,18 @@
             Refresh
           </button>
         </div>
-        <div class="status-legend">
-          <div class="legend-item"><div class="legend-dot" style="background:var(--warning)"></div>Pending</div>
-          <div class="legend-item"><div class="legend-dot" style="background:var(--success)"></div>Confirmed</div>
-          <div class="legend-item"><div class="legend-dot" style="background:var(--info)"></div>Completed</div>
-          <div class="legend-item"><div class="legend-dot" style="background:var(--danger)"></div>Cancelled</div>
-        </div>
         <div class="card">
           <div class="table-wrap">
             <table>
               <thead><tr><th>Name</th><th>Service</th><th>Status</th><th class="actions-col">Actions</th></tr></thead>
               <tbody id="bookings-body"><tr><td colspan="4" class="loading">Loading...</td></tr></tbody>
             </table>
+          </div>
+          <div class="status-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:var(--warning)"></div>Pending</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--success)"></div>Confirmed</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--info)"></div>Completed</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--danger)"></div>Cancelled</div>
           </div>
           <div class="pagination" id="bookings-pagination">
             <button class="pagination-btn" id="prev-page" onclick="changePage(-1)" disabled>Previous</button>
