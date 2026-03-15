@@ -593,7 +593,7 @@
       <!-- DASHBOARD TAB -->
       <div class="tab-panel active" id="tab-dashboard">
         <div class="stats-grid">
-          <div class="stat-card stat-card-link" onclick="goToTodayBookings()" title="View today's bookings">
+          <div class="stat-card stat-card-link" onclick="switchTab('bookings'); document.getElementById('filter-date').value = new Date().toISOString().slice(0,10); loadBookings();" title="View today's bookings">
             <div class="stat-label">Today's Bookings</div>
             <div class="stat-value" id="stat-today">—</div>
             <div class="stat-sub">tap to view →</div>
