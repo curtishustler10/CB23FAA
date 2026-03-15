@@ -953,7 +953,7 @@ let totalBookingsPages = 1;
 
 async function loadBookings() {
   const tbody = document.getElementById('bookings-body');
-  tbody.innerHTML = '<tr><td colspan="5" class="loading">Loading...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="4" class="loading">Loading...</td></tr>';
   try {
     const filterDate   = document.getElementById('filter-date').value;
     const filterStatus = document.getElementById('filter-status').value;
@@ -1002,7 +1002,7 @@ async function loadBookings() {
     document.getElementById('page-info').textContent = `Page ${bookingsPage} of ${totalBookingsPages}`;
   } catch (e) {
     console.error(e);
-    tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><p>Error loading bookings</p></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="4" class="empty-state"><p>Error loading bookings</p></td></tr>';
     toast('Failed to load bookings: ' + e.message, 'error');
   }
 }
