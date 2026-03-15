@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create Account - CoolLooks Admin</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --gold: #C9A84C;
+    --gold-light: #e4c170;
+    --gold-dark: #a8883a;
+    --bg: #f4f4f0;
+    --card: #ffffff;
+    --text: #1a1a1a;
+    --text-muted: #6b6b6b;
+    --border: #e0e0e0;
+    --danger: #e53e3e;
+    --success: #38a169;
+  }
+  body { 
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+    background: #1a1a1a; 
+    min-height: 100vh; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    padding: 20px;
+  }
+  .container {
+    background: var(--card);
+    padding: 40px;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+  }
+  .logo { font-size: 28px; font-weight: 800; color: var(--gold); margin-bottom: 4px; }
+  .sub { color: var(--text-muted); font-size: 14px; margin-bottom: 32px; }
+  .form-group { margin-bottom: 18px; text-align: left; }
+  .form-label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .form-input {
+    width: 100%; padding: 14px 16px; border: 2px solid var(--border);
+    border-radius: 8px; font-size: 16px; outline: none; transition: border-color 0.2s;
+    font-family: inherit; text-align: center; letter-spacing: 8px; font-weight: 700;
+  }
+  .form-input:focus { border-color: var(--gold); }
+  .form-input::placeholder { letter-spacing: normal; font-weight: 400; }
+  .error { color: var(--danger); font-size: 13px; margin-bottom: 12px; min-height: 20px; }
+  .btn {
+    width: 100%; padding: 14px; background: var(--gold); color: #fff;
+    border: none; border-radius: 8px; font-size: 16px; font-weight: 700;
+    cursor: pointer; transition: background 0.2s;
+  }
+  .btn:hover { background: var(--gold-dark); }
+  .back-link { display: block; margin-top: 20px; color: var(--text-muted); font-size: 14px; text-decoration: none; }
+  .back-link:hover { color: var(--gold); }
+  .success-msg { color: var(--success); margin-bottom: 16px; }
+  .info { font-size: 12px; color: var(--text-muted); margin-top: 12px; line-height: 1.5; }
+</style>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+<div class="container">
+  <div class="logo">CoolLooks</div>
+  <div class="sub">Create Your Account</div>
+  
+  <div id="error" class="error"></div>
+  
+  <div id="form-content">
+    <div class="form-group">
+      <label class="form-label">4-Digit PIN</label>
+      <input type="text" id="pin" class="form-input" placeholder="••••" maxlength="4" inputmode="numeric" autocomplete="off">
+    </div>
+    
+    <div class="form-group">
+      <label class="form-label">Your Name</label>
+      <input type="text" id="name" class="form-input" placeholder="John Smith" style="text-align:left;letter-spacing:normal;font-weight:400">
+    </div>
+    
+    <div class="form-group">
+      <label class="form-label">Create Password</label>
+      <input type="password" id="password" class="form-input" placeholder="Min 6 characters" style="text-align:left;letter-spacing:normal;font-weight:400">
+    </div>
+    
+    <button class="btn" onclick="createAccount()">Create Account</button>
+  </div>
+  
+  <div id="success-content" style="display:none">
+    <div class="success-msg">✓ Account created successfully!</div>
+    <p style="margin-bottom:16px">Your account is now active. You can log in with your 4-digit PIN.</p>
+    <a href="admin.html" class="btn" style="display:block;text-decoration:none">Go to Login</a>
+  </div>
+  
+  <a href="admin.html" class="back-link">← Back to Login</a>
+  
+  <p class="info">This link is for barbershop staff only.<br>Contact the administrator for access.</p>
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyDRxXMVd2ZJmbbKZ-DsBEY7jd5_g493iOk",
+  authDomain: "coollooks-c76ec.firebaseapp.com",
+  projectId: "coollooks-c76ec",
+  storageBucket: "coollooks-c76ec.firebasestorage.app",
+  messagingSenderId: "749477472175",
+  appId: "1:749477472175:web:6b2591091cd914e30e315a"
+};
+
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+const urlParams = new URLSearchParams(window.location.search);
+const inviteCode = urlParams.get('code') || '';
+
+async function createAccount() {
+  const pin = document.getElementById('pin').value.trim();
+  const name = document.getElementById('name').value.trim();
+  const password = document.getElementById('password').value;
+  const errorEl = document.getElementById('error');
+  
+  errorEl.textContent = '';
+  
+  if (!pin || pin.length !== 4 || !/^\d{4}$/.test(pin)) {
+    errorEl.textContent = 'Please enter a valid 4-digit PIN';
+    return;
+  }
+  if (!name) {
+    errorEl.textContent = 'Please enter your name';
+    return;
+  }
+  if (!password || password.length < 6) {
+    errorEl.textContent = 'Password must be at least 6 characters';
+    return;
+  }
+  
+  try {
+    // Check if PIN already exists
+    const existing = await db.collection('admins').doc(pin).get();
+    if (existing.exists) {
+      errorEl.textContent = 'This PIN is already registered';
+      return;
+    }
+    
+    // Create the admin account
+    await db.collection('admins').doc(pin).set({
+      name: name,
+      password: password, // In production, hash this!
+      role: 'barber',
+      created_at: new Date().toISOString(),
+      pin: pin
+    });
+    
+    document.getElementById('form-content').style.display = 'none';
+    document.getElementById('success-content').style.display = 'block';
+    
+  } catch (e) {
+    errorEl.textContent = 'Error: ' + e.message;
+  }
+}
+
+// Auto-format PIN input
+document.getElementById('pin').addEventListener('input', function(e) {
+  this.value = this.value.replace(/\D/g, '').slice(0, 4);
+});
+</script>
+
+</body>
+</html>

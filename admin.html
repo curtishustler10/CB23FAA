@@ -38,9 +38,10 @@
   .login-sub { color: var(--text-muted); font-size: 14px; margin-bottom: 32px; }
   .login-box input {
     width: 100%; padding: 14px 16px; border: 2px solid var(--border);
-    border-radius: 0; font-size: 16px; margin-bottom: 16px; outline: none;
-    transition: border-color 0.2s;
+    border-radius: 8px; font-size: 16px; margin-bottom: 16px; outline: none;
+    transition: border-color 0.2s; text-align: center; letter-spacing: 8px; font-weight: 700;
   }
+  .login-box input::placeholder { letter-spacing: normal; font-weight: 400; }
   .login-box input:focus { border-color: var(--gold); }
   .login-error { color: var(--danger); font-size: 13px; margin-bottom: 12px; min-height: 20px; }
   .btn-login {
@@ -363,9 +364,12 @@
   <div class="login-box">
     <div class="login-logo">CoolLooks</div>
     <div class="login-sub">Barberz Admin Portal</div>
-    <input type="password" id="login-pw" placeholder="Enter password" autocomplete="current-password">
+    <input type="text" id="login-pin" placeholder="Enter 4-digit PIN" maxlength="4" inputmode="numeric" autocomplete="off">
     <div class="login-error" id="login-error"></div>
     <button class="btn-login" onclick="doLogin()">Sign In</button>
+    <div style="margin-top:20px;font-size:12px;color:#999">
+      <a href="invite.html" style="color:var(--gold);text-decoration:none">Create Account</a>
+    </div>
   </div>
 </div>
 
@@ -605,6 +609,8 @@ const firebaseConfig = {
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
+let currentAdmin = null;
+
 let allCustomers = [];
 let allBookings = [];
 let allServices = [];
@@ -614,26 +620,53 @@ function checkAuth() {
   return localStorage.getItem('cl_admin_auth') === '1';
 }
 
-function doLogin() {
-  const pw = document.getElementById('login-pw').value;
-  if (pw === PASSWORD) {
-    localStorage.setItem('cl_admin_auth', '1');
-    document.getElementById('login-screen').classList.add('hidden');
-    document.getElementById('app').classList.add('visible');
-    initApp();
-  } else {
-    document.getElementById('login-error').textContent = 'Incorrect password. Try again.';
-    document.getElementById('login-pw').value = '';
-    document.getElementById('login-pw').focus();
+async function doLogin() {
+  const pin = document.getElementById('login-pin').value.trim();
+  const errorEl = document.getElementById('login-error');
+  errorEl.textContent = '';
+  
+  if (!pin || pin.length !== 4 || !/^\d{4}$/.test(pin)) {
+    errorEl.textContent = 'Please enter a valid 4-digit PIN';
+    return;
+  }
+  
+  try {
+    // Check PIN against admins collection
+    const doc = await db.collection('admins').doc(pin).get();
+    
+    if (doc.exists) {
+      const adminData = doc.data();
+      localStorage.setItem('cl_admin_auth', '1');
+      localStorage.setItem('cl_admin_name', adminData.name || 'Admin');
+      localStorage.setItem('cl_admin_pin', pin);
+      document.getElementById('login-screen').classList.add('hidden');
+      document.getElementById('app').classList.add('visible');
+      initApp();
+    } else {
+      errorEl.textContent = 'Invalid PIN. Contact administrator.';
+      document.getElementById('login-pin').value = '';
+    }
+  } catch (e) {
+    errorEl.textContent = 'Login error: ' + e.message;
   }
 }
 
-document.getElementById('login-pw').addEventListener('keydown', e => {
+document.getElementById('login-pin').addEventListener('keydown', e => {
   if (e.key === 'Enter') doLogin();
+  // Only allow digits
+  if (!/\d/.test(e.key) && !['Backspace','Delete','ArrowLeft','ArrowRight','Tab'].includes(e.key)) {
+    e.preventDefault();
+  }
+});
+
+document.getElementById('login-pin').addEventListener('input', function(e) {
+  this.value = this.value.replace(/\D/g, '').slice(0, 4);
 });
 
 function doLogout() {
   localStorage.removeItem('cl_admin_auth');
+  localStorage.removeItem('cl_admin_name');
+  localStorage.removeItem('cl_admin_pin');
   location.reload();
 }
 
@@ -641,6 +674,13 @@ function doLogout() {
 function initApp() {
   const now = new Date();
   document.getElementById('topbar-date').textContent = now.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+  
+  // Set admin name from login
+  const adminName = localStorage.getItem('cl_admin_name') || 'Admin';
+  const initials = adminName.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+  document.querySelector('.profile-avatar').textContent = initials;
+  document.querySelector('.profile-name').textContent = adminName;
+  
   loadDashboard();
 }
 
