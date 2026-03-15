@@ -547,7 +547,10 @@
                 
                 <div class="toolbar">
                     <input type="text" class="search-input" id="searchBookings" placeholder="Search customer..." oninput="renderBookings()">
-                    <input type="date" class="date-input" id="filterDate" onchange="renderBookings()">
+                    <div style="position:relative;display:inline-flex;align-items:center;">
+                        <svg style="position:absolute;left:10px;pointer-events:none;opacity:0.5;" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        <input type="date" class="date-input" id="filterDate" onchange="renderBookings()" style="padding-left:32px;">
+                    </div>
                     <select class="filter-select" id="filterStatus" onchange="renderBookings()">
                         <option value="">All Status</option>
                         <option value="pending">Pending</option>
@@ -555,6 +558,7 @@
                         <option value="completed">Completed</option>
                         <option value="cancelled">Cancelled</option>
                     </select>
+                    <button onclick="document.getElementById('filterDate').value=new Date().toISOString().slice(0,10);loadBookings();">Today</button>
                 </div>
                 
                 <div class="table-container">
