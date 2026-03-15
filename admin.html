@@ -264,6 +264,29 @@
   /* CUSTOMER LINK */
   .customer-link { cursor: pointer; color: var(--gold); text-decoration: underline; font-weight: 700; }
   .customer-link:hover { color: var(--gold-dark); }
+
+  /* HERO IMAGE */
+  .hero-container {
+    width: 100%;
+    height: 280px;
+    overflow: hidden;
+    position: relative;
+    border-radius: 20px 20px 0 0;
+  }
+  .hero-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+  .hero-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 80px;
+    background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
+  }
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -317,7 +340,14 @@
       <div class="topbar-title" id="page-title">Dashboard</div>
       <div class="topbar-date" id="topbar-date"></div>
     </div>
-    <div class="page-content">
+    
+    <!-- HERO IMAGE -->
+    <div class="hero-container">
+      <img src="https://res.cloudinary.com/ecom-hustler/image/upload/v1773554998/hf_20260315_060122_618b5ca0-5b79-4fc7-86b9-19aa4d9f950c_xxtlsy.jpg" alt="CoolLooks Barberz">
+      <div class="hero-overlay"></div>
+    </div>
+    
+    <div class="page-content" style="margin-top: -20px; position: relative; z-index: 10;">
 
       <!-- DASHBOARD TAB -->
       <div class="tab-panel active" id="tab-dashboard">
