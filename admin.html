@@ -927,7 +927,7 @@ async function loadDashboard() {
     if (!recent.length) {
       tbody.innerHTML = '<tr><td colspan="3" class="empty-state"><p>No bookings yet</p></td></tr>';
     } else {
-      tbody.innerHTML = recent.map(b => `<tr>
+      tbody.innerHTML = recent.map(b => `<tr class="booking-row-clickable" onclick="openBookingById('${b.id}')">
         <td>${esc(b.user_name || 'N/A')}</td>
         <td>${esc(b.service_name || 'N/A')}</td>
         <td>${statusBadge(b.status)}</td>
@@ -1247,6 +1247,64 @@ async function toggleService(id, active) {
   }
 }
 
+// ─── BOOKING MODAL ───────────────────────────────────────────────────────────
+async function openBookingById(id) {
+  let b = allBookings.find(x => x.id === id);
+  if (!b) {
+    try {
+      const doc = await db.collection('bookings').doc(id).get();
+      if (doc.exists) b = { id: doc.id, ...doc.data() };
+    } catch(e) { toast('Failed to load booking', 'error'); return; }
+  }
+  if (!b) { toast('Booking not found', 'warning'); return; }
+
+  const canConfirm  = b.status === 'pending';
+  const canComplete = b.status === 'confirmed';
+  const canCancel   = b.status !== 'cancelled' && b.status !== 'completed';
+
+  document.getElementById('booking-modal-content').innerHTML = `
+    <div class="form-group">
+      <div class="form-label">Customer</div>
+      <div style="font-size:16px;font-weight:600">${esc(b.user_name || 'N/A')}</div>
+      ${b.user_email ? `<div style="font-size:13px;color:var(--text-muted)">${esc(b.user_email)}</div>` : ''}
+      ${b.user_phone ? `<div style="font-size:13px;color:var(--text-muted)">${esc(b.user_phone)}</div>` : ''}
+    </div>
+    <div class="form-group">
+      <div class="form-label">Service</div>
+      <div style="font-size:15px">${esc(b.service_name || 'N/A')}</div>
+    </div>
+    <div class="form-group" style="display:flex;gap:24px;flex-wrap:wrap">
+      <div>
+        <div class="form-label">Date &amp; Time</div>
+        <div style="font-size:15px">${esc(b.date ? formatDate(b.date) : '—')}</div>
+      </div>
+      <div>
+        <div class="form-label">Price</div>
+        <div style="font-size:15px;font-weight:700;color:var(--gold)">${b.price != null ? '$' + Number(b.price).toFixed(2) : '—'}</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="form-label">Status</div>
+      ${statusBadge(b.status)}
+    </div>
+    ${b.notes ? `<div class="form-group"><div class="form-label">Notes</div><div style="font-size:14px;color:var(--text-muted)">${esc(b.notes)}</div></div>` : ''}
+    ${b.created_at ? `<div style="font-size:12px;color:#aaa;margin-top:8px">Booked: ${esc(formatDate(b.created_at))}</div>` : ''}
+  `;
+
+  document.getElementById('booking-modal-footer').innerHTML = `
+    <button class="btn btn-secondary" onclick="closeBookingModal()">Close</button>
+    ${canConfirm  ? `<button class="btn btn-confirm"  onclick="updateBookingStatus('${b.id}','confirmed');closeBookingModal()">Confirm</button>`  : ''}
+    ${canComplete ? `<button class="btn btn-complete" onclick="updateBookingStatus('${b.id}','completed');closeBookingModal()">Complete</button>` : ''}
+    ${canCancel   ? `<button class="btn btn-cancel"   onclick="updateBookingStatus('${b.id}','cancelled');closeBookingModal()">Cancel</button>`   : ''}
+  `;
+
+  document.getElementById('booking-modal-overlay').classList.remove('hidden');
+}
+
+function closeBookingModal() {
+  document.getElementById('booking-modal-overlay').classList.add('hidden');
+}
+
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 function esc(str) {
   return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -1338,6 +1396,9 @@ document.getElementById('customer-modal-overlay').addEventListener('click', func
 });
 document.getElementById('service-modal-overlay').addEventListener('click', function(e) {
   if (e.target === this) closeServiceModal();
+});
+document.getElementById('booking-modal-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeBookingModal();
 });
 </script>
 </body>
