@@ -360,6 +360,38 @@
   .profile-menu-item.logout:hover {
     background: #fef2f2;
   }
+
+  /* PAGINATION */
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+  .pagination-btn {
+    padding: 8px 14px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    cursor: pointer;
+    font-size: 13px;
+    border-radius: 6px;
+    transition: all 0.2s;
+  }
+  .pagination-btn:hover:not(:disabled) {
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+  .pagination-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .pagination-info {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -471,7 +503,6 @@
         <div class="card">
           <div class="card-header">
             <div class="card-title">Recent Bookings</div>
-            <button class="btn btn-outline btn-sm" onclick="switchTab('bookings')">View All</button>
           </div>
           <div class="table-wrap">
             <table id="dash-bookings-table">
@@ -505,6 +536,11 @@
               <thead><tr><th>Name</th><th>Service</th><th>Date & Time</th><th>Status</th><th>Actions</th></tr></thead>
               <tbody id="bookings-body"><tr><td colspan="5" class="loading">Loading...</td></tr></tbody>
             </table>
+          </div>
+          <div class="pagination" id="bookings-pagination">
+            <button class="pagination-btn" id="prev-page" onclick="changePage(-1)" disabled>Previous</button>
+            <span class="pagination-info" id="page-info">Page 1</span>
+            <button class="pagination-btn" id="next-page" onclick="changePage(1)">Next</button>
           </div>
         </div>
       </div>
@@ -766,6 +802,10 @@ function getWeekStart() {
 }
 
 // ─── BOOKINGS ────────────────────────────────────────────────────────────────
+const ITEMS_PER_PAGE = 10;
+let bookingsPage = 1;
+let totalBookingsPages = 1;
+
 async function loadBookings() {
   const tbody = document.getElementById('bookings-body');
   tbody.innerHTML = '<tr><td colspan="5" class="loading">Loading...</td></tr>';
@@ -773,43 +813,49 @@ async function loadBookings() {
     const filterDate   = document.getElementById('filter-date').value;
     const filterStatus = document.getElementById('filter-status').value;
 
-    console.log('Loading bookings from Firestore...');
     let snap;
     try {
       snap = await db.collection('bookings').orderBy('created_at', 'desc').get();
     } catch(e) {
-      console.log('OrderBy failed, trying without:', e.message);
       snap = await db.collection('bookings').get();
     }
-    console.log('Bookings loaded:', snap.size);
     allBookings = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    console.log('First booking:', allBookings[0]);
 
     let filtered = allBookings;
     if (filterDate)   filtered = filtered.filter(b => (b.date || '').slice(0, 10) === filterDate);
     if (filterStatus) filtered = filtered.filter(b => b.status === filterStatus);
 
-    if (!filtered.length) {
+    // Calculate pagination
+    totalBookingsPages = Math.ceil(filtered.length / ITEMS_PER_PAGE) || 1;
+    if (bookingsPage > totalBookingsPages) bookingsPage = 1;
+    const startIdx = (bookingsPage - 1) * ITEMS_PER_PAGE;
+    const paginated = filtered.slice(startIdx, startIdx + ITEMS_PER_PAGE);
+
+    if (!paginated.length) {
       tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><p>No bookings found</p></td></tr>';
-      return;
+    } else {
+      tbody.innerHTML = paginated.map(b => {
+        const canConfirm = b.status === 'pending';
+        const canComplete = b.status === 'confirmed';
+        const canCancel = b.status !== 'cancelled' && b.status !== 'completed';
+        return `<tr>
+          <td><span class="customer-link" onclick="viewCustomerFile('${esc(b.user_name || '')}','${esc(b.user_email || '')}')">${esc(b.user_name || 'N/A')}</span></td>
+          <td>${esc(b.service_name || 'N/A')}</td>
+          <td>${formatDate(b.date_time || b.date)}</td>
+          <td>${statusBadge(b.status)}</td>
+          <td><div class="actions">
+            ${canConfirm  ? `<button class="btn btn-sm btn-confirm"  onclick="updateBookingStatus('${b.id}','confirmed')">Confirm</button>`  : ''}
+            ${canComplete ? `<button class="btn btn-sm btn-complete" onclick="updateBookingStatus('${b.id}','completed')">Complete</button>` : ''}
+            ${canCancel   ? `<button class="btn btn-sm btn-cancel"   onclick="updateBookingStatus('${b.id}','cancelled')">Cancel</button>`   : ''}
+          </div></td>
+        </tr>`;
+      }).join('');
     }
 
-    tbody.innerHTML = filtered.map(b => {
-      const canConfirm = b.status === 'pending';
-      const canComplete = b.status === 'confirmed';
-      const canCancel = b.status !== 'cancelled' && b.status !== 'completed';
-      return `<tr>
-        <td><span class="customer-link" onclick="viewCustomerFile('${esc(b.user_name || '')}','${esc(b.user_email || '')}')">${esc(b.user_name || 'N/A')}</span></td>
-        <td>${esc(b.service_name || 'N/A')}</td>
-        <td>${formatDate(b.date_time || b.date)}</td>
-        <td>${statusBadge(b.status)}</td>
-        <td><div class="actions">
-          ${canConfirm  ? `<button class="btn btn-sm btn-confirm"  onclick="updateBookingStatus('${b.id}','confirmed')">Confirm</button>`  : ''}
-          ${canComplete ? `<button class="btn btn-sm btn-complete" onclick="updateBookingStatus('${b.id}','completed')">Complete</button>` : ''}
-          ${canCancel   ? `<button class="btn btn-sm btn-cancel"   onclick="updateBookingStatus('${b.id}','cancelled')">Cancel</button>`   : ''}
-        </div></td>
-      </tr>`;
-    }).join('');
+    // Update pagination controls
+    document.getElementById('prev-page').disabled = bookingsPage <= 1;
+    document.getElementById('next-page').disabled = bookingsPage >= totalBookingsPages;
+    document.getElementById('page-info').textContent = `Page ${bookingsPage} of ${totalBookingsPages}`;
   } catch (e) {
     console.error(e);
     tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><p>Error loading bookings</p></td></tr>';
@@ -817,9 +863,15 @@ async function loadBookings() {
   }
 }
 
+function changePage(delta) {
+  bookingsPage += delta;
+  loadBookings();
+}
+
 function clearBookingFilters() {
   document.getElementById('filter-date').value = '';
   document.getElementById('filter-status').value = '';
+  bookingsPage = 1;
   loadBookings();
 }
 
