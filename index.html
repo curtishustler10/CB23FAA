@@ -1374,8 +1374,8 @@
 
     let services = [];
     let selectedService = null;
-    let currentMonthOffset = 0;
-    
+    let currentPeriodOffset = 0;
+
     // Load services from Firebase
     async function loadServices() {
       try {
@@ -1388,8 +1388,8 @@
     }
     loadServices();
     
-    function changeMonth(delta) { currentMonthOffset += delta; renderCalendar(); }
-    function goToToday() { currentMonthOffset = 0; renderCalendar(); }
+    function changeMonth(delta) { currentPeriodOffset += delta; renderCalendar(); }
+    function goToToday() { currentPeriodOffset = 0; renderCalendar(); }
     
     // Fallback services - must match HTML exactly
     services = [
@@ -1465,14 +1465,18 @@
       const container = document.getElementById("calendar");
       const today = new Date();
       today.setHours(0,0,0,0);
-      const monthStart = new Date(today.getFullYear(), today.getMonth() + currentMonthOffset, 1);
-      const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-      document.getElementById("monthYear").textContent = monthNames[monthStart.getMonth()] + " " + monthStart.getFullYear();
+      const periodStart = new Date(today);
+      periodStart.setDate(today.getDate() + currentPeriodOffset * 14);
+      const periodEnd = new Date(periodStart);
+      periodEnd.setDate(periodStart.getDate() + 13);
+      const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+      const fmt = d => monthNames[d.getMonth()] + " " + d.getDate();
+      document.getElementById("monthYear").textContent = fmt(periodStart) + " – " + fmt(periodEnd) + " " + periodEnd.getFullYear();
       let html = '<div class="calendar-day header">Sun</div><div class="calendar-day header">Mon</div><div class="calendar-day header">Tue</div><div class="calendar-day header">Wed</div><div class="calendar-day header">Thu</div><div class="calendar-day header">Fri</div><div class="calendar-day header">Sat</div>';
 
       for (let d = 0; d < 14; d++) {
-        const date = new Date(today);
-        date.setDate(today.getDate() + d);
+        const date = new Date(periodStart);
+        date.setDate(periodStart.getDate() + d);
 
         const isPast = date < today;
         const isSunday = date.getDay() === 0;
