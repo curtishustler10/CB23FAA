@@ -1195,8 +1195,8 @@
   });
 
   // Mobile menu
-  function openMenu() { document.getElementById('mobileMenu').classList.add('open'); }
-  function closeMenu() { document.getElementById('mobileMenu').classList.remove('open'); }
+  window.openMenu = function openMenu() { document.getElementById('mobileMenu').classList.add('open'); }
+  window.closeMenu = function closeMenu() { document.getElementById('mobileMenu').classList.remove('open'); }
 
   // Fade-in on scroll
   const observer = new IntersectionObserver((entries) => {
@@ -1269,25 +1269,32 @@
     const db = firebase.firestore();
 
     // ─── PUBLIC SERVICES (services section) ──────────────────────────────────
-    async function loadPublicServices() {
+    window.loadPublicServices = async function loadPublicServices() {
+      console.log('[loadPublicServices] Starting...');
       const list = document.getElementById('public-services-list');
       try {
+        console.log('[loadPublicServices] Fetching services from Firestore...');
         const snap = await db.collection('services').orderBy('name').get();
+        console.log('[loadPublicServices] Snapshot received, docs count:', snap.docs.length);
         const active = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })).filter(s => s.active === true);
+        console.log('[loadPublicServices] Active services:', active.length, active);
         if (!active.length) {
+          console.log('[loadPublicServices] No active services found.');
           list.innerHTML = '<div style="color:var(--gray);font-size:0.85rem;padding:1rem 0;">No services available.</div>';
           return;
         }
         const cats = {};
         active.forEach(s => { const c = s.category || 'Other'; if (!cats[c]) cats[c] = []; cats[c].push(s); });
+        console.log('[loadPublicServices] Categories:', Object.keys(cats));
         list.innerHTML = Object.entries(cats).map(([cat, svcs]) =>
           '<div class="service-category"><p class="cat-title">' + cat + '</p>' +
           svcs.map(s =>
             '<div class="service-row"><div class="service-info"><div class="service-name">' + s.name + '</div><div class="service-duration">' + (s.duration || 0) + ' min</div></div><div class="service-dots"></div><div class="service-price">$' + (s.price || 0) + '</div></div>'
           ).join('') + '</div>'
         ).join('');
+        console.log('[loadPublicServices] Done rendering.');
       } catch(e) {
-        console.error('Error loading public services:', e);
+        console.error('[loadPublicServices] Error loading public services:', e);
         list.innerHTML = '<div style="color:var(--gray);font-size:0.85rem;padding:1rem 0;">Unable to load services.</div>';
       }
     }
@@ -1296,7 +1303,7 @@
     // ─── BOOKING MODAL SERVICES ───────────────────────────────────────────────
     let services = [];
 
-    async function loadServices() {
+    window.loadServices = async function loadServices() {
       try {
         const snap = await db.collection('services').get();
         services = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })).filter(s => s.active === true);
@@ -1304,21 +1311,21 @@
       } catch(e) { console.error(e); }
     }
 
-    function renderServices() {
+    window.renderServices = function renderServices() {
       const container = document.getElementById("bookingServices");
       container.innerHTML = services.map(s => '<div class="booking-service-option" data-id="' + s.id + '" data-name="' + s.name + '" data-price="' + s.price + '" onclick="selectService(this)"><span>' + s.name + '</span><span>$' + s.price + '</span></div>').join("");
     }
-    
-    function selectService(el) {
+
+    window.selectService = function selectService(el) {
       document.querySelectorAll(".booking-service-option").forEach(e => e.classList.remove("selected"));
       el.classList.add("selected");
       document.getElementById("selectedService").value = JSON.stringify({id: el.dataset.id, name: el.dataset.name, price: el.dataset.price});
     }
-    
-    function openBookingModal() { document.getElementById("bookingModal").classList.add("open"); loadServices(); setupDateTime(); }
-    function closeBookingModal() { document.getElementById("bookingModal").classList.remove("open"); }
-    
-    function setupDateTime() {
+
+    window.openBookingModal = function openBookingModal() { document.getElementById("bookingModal").classList.add("open"); loadServices(); setupDateTime(); }
+    window.closeBookingModal = function closeBookingModal() { document.getElementById("bookingModal").classList.remove("open"); }
+
+    window.setupDateTime = function setupDateTime() {
       const dateInput = document.getElementById("bookingDate");
       const today = new Date();
       const maxDate = new Date(); maxDate.setMonth(maxDate.getMonth() + 2);
