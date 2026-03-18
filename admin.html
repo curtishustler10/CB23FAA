@@ -91,12 +91,12 @@
   /* MAIN */
   .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
   .topbar {
-    background: var(--card); border-bottom: 1px solid var(--border);
+    background: transparent;
     padding: 16px 28px; display: flex; align-items: center; justify-content: space-between;
-    position: sticky; top: 0; z-index: 50;
+    position: fixed; top: 0; left: 0; width: 100%; z-index: 9999;
   }
-  .topbar-title { font-size: 22px; font-weight: 700; }
-  .topbar-date { color: var(--text-muted); font-size: 14px; }
+  .topbar-title { font-size: 22px; font-weight: 700; color: #fff; }
+  .topbar-date { color: #999; font-size: 12px; margin-top: 4px; }
   .page-content { padding: 28px; flex: 1; }
 
   /* TABS */
@@ -315,7 +315,7 @@
     transition: background 0.2s;
   }
   .topbar-profile:hover {
-    background: rgba(0,0,0,0.05);
+    background: rgba(255,255,255,0.1);
   }
   .profile-avatar {
     width: 36px;
@@ -332,7 +332,7 @@
   .profile-name {
     font-size: 14px;
     font-weight: 600;
-    color: var(--text);
+    color: #fff;
   }
   .profile-menu {
     position: absolute;
@@ -476,7 +476,7 @@
 
     #app.visible { display: block; }
     .main { width: 100%; }
-    .topbar { background: #1a1a1a; border-bottom-color: #2d2d2d; padding: 12px 16px; }
+    .topbar { background: #1a1a1a; border-bottom-color: #2d2d2d; padding: 12px 16px; left: 0; }
     .topbar-logo-img { display: block; }
     .topbar-brand-text { display: block; color: #fff; }
     .topbar-title { display: none; }
@@ -535,6 +535,7 @@
       <img src="https://res.cloudinary.com/ecom-hustler/image/upload/v1773556292/logo_off1_miizyk.png" alt="CoolLooks" class="logo-img">
       <div class="name">CoolLooks</div>
       <div class="sub">Barberz Admin</div>
+      <div class="topbar-date" id="topbar-date"></div>
     </div>
     <div class="nav-item active" onclick="switchTab('dashboard')" id="nav-dashboard">
       <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
@@ -568,9 +569,7 @@
         <img src="https://res.cloudinary.com/ecom-hustler/image/upload/v1773556292/logo_off1_miizyk.png" alt="CoolLooks" class="topbar-logo-img">
         <span class="topbar-brand-text">Admin Dashboard</span>
       </div>
-      <div class="topbar-title" id="page-title">Dashboard</div>
       <div style="display:flex;align-items:center;gap:16px;position:relative">
-        <div class="topbar-date" id="topbar-date"></div>
         <div class="topbar-profile" onclick="toggleProfileMenu()">
           <div class="profile-avatar">CL</div>
           <span class="profile-name">Admin</span>
