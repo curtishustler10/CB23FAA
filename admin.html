@@ -1041,26 +1041,45 @@ async function loadCustomers() {
   const grid = document.getElementById('customers-grid');
   grid.innerHTML = '<div class="loading">Loading...</div>';
   try {
-    // Derive customers from bookings (keyed by email or phone)
-    const snap = await db.collection('bookings').get();
-    const bookings = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    // Load explicit customer records from Firestore customers collection
+    const custSnap = await db.collection('customers').get();
+    const explicitCustomers = {};
+    custSnap.docs.forEach(doc => {
+      const d = doc.data();
+      const key = d.email || d.phone || d.name;
+      if (key) explicitCustomers[key] = { firestoreId: doc.id, name: d.name || '', email: d.email || '', phone: d.phone || '', notes: d.notes || '', visits: 0, spent: 0, last: null };
+    });
 
-    const customerMap = {};
+    // Derive visit stats from bookings
+    const bookSnap = await db.collection('bookings').get();
+    const bookings = bookSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const bookingMap = {};
     bookings.forEach(b => {
       const key = b.user_email || b.user_phone || b.user_name;
       if (!key) return;
-      if (!customerMap[key]) {
-        customerMap[key] = { id: key, name: b.user_name || 'Unknown', email: b.user_email || '', phone: b.user_phone || '', visits: 0, spent: 0, last: null };
+      if (!bookingMap[key]) {
+        bookingMap[key] = { name: b.user_name || 'Unknown', email: b.user_email || '', phone: b.user_phone || '', visits: 0, spent: 0, last: null };
       }
-      customerMap[key].visits++;
+      bookingMap[key].visits++;
       if (b.status === 'completed') {
-        customerMap[key].spent += Number(b.price || 0);
+        bookingMap[key].spent += Number(b.price || 0);
         const d = b.date || '';
-        if (d && (!customerMap[key].last || d > customerMap[key].last)) customerMap[key].last = d;
+        if (d && (!bookingMap[key].last || d > bookingMap[key].last)) bookingMap[key].last = d;
       }
     });
 
-    allCustomers = Object.values(customerMap).sort((a, b) => a.name.localeCompare(b.name));
+    // Merge: explicit customers take priority, augmented with booking stats
+    const merged = {};
+    Object.entries(explicitCustomers).forEach(([key, c]) => {
+      const stats = bookingMap[key] || { visits: 0, spent: 0, last: null };
+      merged[key] = { ...c, visits: stats.visits, spent: stats.spent, last: stats.last };
+    });
+    // Add booking-derived customers not yet in the customers collection
+    Object.entries(bookingMap).forEach(([key, c]) => {
+      if (!merged[key]) merged[key] = { firestoreId: null, notes: '', ...c };
+    });
+
+    allCustomers = Object.values(merged).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
     renderCustomers(allCustomers);
   } catch (e) {
     console.error(e);
@@ -1082,10 +1101,14 @@ function renderCustomers(customers) {
       <div class="customer-name">${esc(c.name || 'Unknown')}</div>
       <div class="customer-email">${esc(c.email || '')}</div>
       <div class="customer-phone">${esc(c.phone || '')}</div>
+      ${c.notes ? `<div class="customer-notes">${esc(c.notes)}</div>` : ''}
       <div class="customer-stats">
-        <div class="cstat"><div class="cstat-val">${c.visits}</div><div class="cstat-lbl">Visits</div></div>
+        <div class="cstat"><div class="cstat-val">${c.visits || 0}</div><div class="cstat-lbl">Visits</div></div>
         <div class="cstat"><div class="cstat-val">$${(c.spent || 0).toFixed(0)}</div><div class="cstat-lbl">Spent</div></div>
         <div class="cstat"><div class="cstat-val">${c.last ? formatDateShort(c.last) : '—'}</div><div class="cstat-lbl">Last Visit</div></div>
+      </div>
+      <div class="customer-actions">
+        <button class="btn btn-sm btn-edit" onclick="openCustomerModal('${esc(c.firestoreId || '')}')">Edit</button>
       </div>
     </div>`;
   }).join('');
@@ -1109,7 +1132,7 @@ function openCustomerModal(id) {
   document.getElementById('c-notes').value = '';
   if (id) {
     document.getElementById('customer-modal-title').textContent = 'Edit Customer';
-    const c = allCustomers.find(x => x.id === id);
+    const c = allCustomers.find(x => x.firestoreId === id);
     if (c) {
       document.getElementById('c-name').value = c.name || '';
       document.getElementById('c-email').value = c.email || '';
@@ -1141,7 +1164,7 @@ async function saveCustomer() {
       await db.collection('customers').doc(id).update(data);
       toast('Customer updated', 'success');
     } else {
-      await db.collection('customers').add(data);
+      await db.collection('customers').add({ ...data, created_at: new Date().toISOString() });
       toast('Customer added', 'success');
     }
     closeCustomerModal();

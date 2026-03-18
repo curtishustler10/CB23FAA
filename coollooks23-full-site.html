@@ -318,9 +318,10 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
-    margin-bottom: 3rem;
+    margin: 0 auto 3rem;
     flex-wrap: wrap;
     gap: 1rem;
+    max-width: 1400px;
   }
 
   .services-intro {
@@ -335,10 +336,14 @@
     grid-template-columns: 1fr 1fr;
     gap: 3rem;
     align-items: start;
+    max-width: 1400px;
+    width: 100%;
+    margin: 0 auto;
   }
 
   /* Menu container */
   .services-menu {
+    min-width: 0;
     max-height: 80vh;
     overflow-y: auto;
     padding-right: 1.5rem;
@@ -446,6 +451,7 @@
   /* Gallery container */
   .services-gallery {
     position: relative;
+    min-width: 0;
     max-height: 80vh;
     overflow: hidden;
     border-radius: 2px;
@@ -830,7 +836,7 @@
   }
 
   /* ─── RESPONSIVE ─── */
-  @media (max-width: 768px) {
+  @media (max-width: 900px) {
     nav { padding: 0.2rem 2rem; }
     .nav-links { display: none; }
     .hamburger { display: flex; }
@@ -852,7 +858,7 @@
 
     section { padding: 3rem 2rem; }
     section.hero { padding: 0 !important; }
-    .services-layout { grid-template-columns: 1fr; }
+    .services-layout { grid-template-columns: 1fr; max-width: none; }
     .services-gallery { max-height: 50vh; }
     .gallery-scroll-track { gap: 0.4rem; }
     .services-header { flex-direction: column; align-items: flex-start; }
@@ -899,6 +905,8 @@
   .booking-success { display: none; text-align: center; padding: 40px 20px; }
   .booking-success h3 { color: #4CAF50; margin-bottom: 10px; }
 </style>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -994,94 +1002,11 @@
 
   <div class="services-layout fade-in">
     <!-- Menu Container -->
-      <div class="service-category">
-        <p class="cat-title">Mens</p>
-        <div class="service-row">
-          <div class="service-info">
-            <div class="service-name">Haircut</div>
-            <div class="service-duration">35 min</div>
-          </div>
-          <div class="service-dots"></div>
-          <div class="service-price">$40</div>
-        </div>
-        <div class="service-row">
-          <div class="service-info">
-            <div class="service-name">Haircut & Beard</div>
-            <div class="service-duration">40 min</div>
-          </div>
-          <div class="service-dots"></div>
-          <div class="service-price">$50</div>
-        </div>
+    <div class="services-menu">
+      <p class="services-menu-label">Menu</p>
+      <div id="public-services-list">
+        <div style="color:var(--gray);font-size:0.85rem;padding:1rem 0;">Loading services…</div>
       </div>
-
-      <div class="service-category">
-        <p class="cat-title">Kids</p>
-        <div class="service-row">
-          <div class="service-info">
-            <div class="service-name">High School Cuts</div>
-            <div class="service-duration">30 min</div>
-          </div>
-          <div class="service-dots"></div>
-          <div class="service-price">$30</div>
-        </div>
-      </div>
-
-      <div class="service-category">
-        <p class="cat-title">Styling</p>
-        <div class="service-row">
-          <div class="service-info">
-            <div class="service-name">Hair Dye (Black)</div>
-            <div class="service-duration">15 min</div>
-          </div>
-          <div class="service-dots"></div>
-          <div class="service-price">$30</div>
-        </div>
-        <div class="service-row">
-          <div class="service-info">
-            <div class="service-name">Hair Dye / Bleach</div>
-            <div class="service-duration">40 min</div>
-          </div>
-          <div class="service-dots"></div>
-          <div class="service-price">$70</div>
-        </div>
-      </div>
-
-      <div class="service-category">
-        <p class="cat-title">Cut</p>
-        <div class="service-row">
-          <div class="service-info">
-            <div class="service-name">Pensioners Haircut</div>
-            <div class="service-duration">30 min</div>
-          </div>
-          <div class="service-dots"></div>
-          <div class="service-price">$30</div>
-        </div>
-      </div>
-
-      <div class="service-category">
-        <p class="cat-title">Face</p>
-        <div class="service-row">
-          <div class="service-info">
-            <div class="service-name">Facials</div>
-            <div class="service-duration">60 min</div>
-          </div>
-          <div class="service-dots"></div>
-          <div class="service-price">$100</div>
-        </div>
-      </div>
-
-      <div class="service-category">
-        <p class="cat-title">Extra</p>
-        <div class="service-row">
-          <div class="service-info">
-            <div class="service-name">Braiding</div>
-            <div class="service-duration">120 min</div>
-          </div>
-          <div class="service-dots"></div>
-          <div class="service-price">$200</div>
-        </div>
-      </div>
-
       <div class="services-cta">
         <a href="#" onclick="openBookingModal(); return false;" class="btn-primary">BOOK NOW</a>
       </div>
@@ -1331,18 +1256,54 @@
   </div>
 
   <script>
-    const POCKETBASE_URL = "http://170.64.153.193:8090";
+    // ─── FIREBASE INIT ───────────────────────────────────────────────────────
+    const firebaseConfig = {
+      apiKey: "AIzaSyDRxXMVd2ZJmbbKZ-DsBEY7jd5_g493iOk",
+      authDomain: "coollooks-c76ec.firebaseapp.com",
+      projectId: "coollooks-c76ec",
+      storageBucket: "coollooks-c76ec.firebasestorage.app",
+      messagingSenderId: "749477472175",
+      appId: "1:749477472175:web:6b2591091cd914e30e315a"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // ─── PUBLIC SERVICES (services section) ──────────────────────────────────
+    async function loadPublicServices() {
+      const list = document.getElementById('public-services-list');
+      try {
+        const snap = await db.collection('services').orderBy('name').get();
+        const active = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })).filter(s => s.active === true);
+        if (!active.length) {
+          list.innerHTML = '<div style="color:var(--gray);font-size:0.85rem;padding:1rem 0;">No services available.</div>';
+          return;
+        }
+        const cats = {};
+        active.forEach(s => { const c = s.category || 'Other'; if (!cats[c]) cats[c] = []; cats[c].push(s); });
+        list.innerHTML = Object.entries(cats).map(([cat, svcs]) =>
+          '<div class="service-category"><p class="cat-title">' + cat + '</p>' +
+          svcs.map(s =>
+            '<div class="service-row"><div class="service-info"><div class="service-name">' + s.name + '</div><div class="service-duration">' + (s.duration || 0) + ' min</div></div><div class="service-dots"></div><div class="service-price">$' + (s.price || 0) + '</div></div>'
+          ).join('') + '</div>'
+        ).join('');
+      } catch(e) {
+        console.error('Error loading public services:', e);
+        list.innerHTML = '<div style="color:var(--gray);font-size:0.85rem;padding:1rem 0;">Unable to load services.</div>';
+      }
+    }
+    loadPublicServices();
+
+    // ─── BOOKING MODAL SERVICES ───────────────────────────────────────────────
     let services = [];
-    
+
     async function loadServices() {
       try {
-        const res = await fetch(POCKETBASE_URL + "/api/collections/services/records");
-        const data = await res.json();
-        services = data.items;
+        const snap = await db.collection('services').get();
+        services = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })).filter(s => s.active === true);
         renderServices();
       } catch(e) { console.error(e); }
     }
-    
+
     function renderServices() {
       const container = document.getElementById("bookingServices");
       container.innerHTML = services.map(s => '<div class="booking-service-option" data-id="' + s.id + '" data-name="' + s.name + '" data-price="' + s.price + '" onclick="selectService(this)"><span>' + s.name + '</span><span>$' + s.price + '</span></div>').join("");
