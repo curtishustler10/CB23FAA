@@ -1335,7 +1335,7 @@
       const timeSelect = document.getElementById("bookingTime");
       let slots = "";
       for(let h=8; h<18; h++) { slots += "<option value=" + h + ":00>" + h + ":00</option><option value=" + h + ":30>" + h + ":30</option>"; }
-      timeSelect.innerHTML = "<option value="">Select time</option>" + slots;
+      timeSelect.innerHTML = '<option value="">Select time</option>' + slots;
     }
     
     document.getElementById("bookingForm").addEventListener("submit", async (e) => {
