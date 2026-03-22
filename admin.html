@@ -722,15 +722,22 @@
             <span id="notif-status-badge"></span>
           </div>
 
-          <!-- Webhook -->
+          <!-- Gmail Sender -->
           <div class="notif-section">
-            <div class="notif-section-title">n8n Webhook</div>
-            <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px">
-              Paste your n8n webhook URL. Every new booking will POST the booking data here so n8n can send emails and run automations.
+            <div class="notif-section-title">Gmail Sender</div>
+            <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">
+              All emails are sent via Firebase Cloud Functions using a Gmail account.
+              Use a dedicated Gmail address and generate an <strong>App Password</strong> at
+              <a href="https://myaccount.google.com/apppasswords" target="_blank" style="color:var(--gold)">myaccount.google.com/apppasswords</a>
+              (requires 2FA enabled on the Gmail account).
             </p>
-            <div class="notif-url-row">
-              <input type="url" class="form-input" id="notif-webhook-url" placeholder="https://your-n8n.com/webhook/booking">
-              <button class="btn btn-outline btn-sm" onclick="testWebhook()">Test</button>
+            <div class="form-group">
+              <label class="form-label">Sender Gmail Address</label>
+              <input type="email" class="form-input" id="notif-sender-email" placeholder="bookings@gmail.com">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Gmail App Password</label>
+              <input type="password" class="form-input" id="notif-sender-password" placeholder="xxxx xxxx xxxx xxxx">
             </div>
           </div>
 
@@ -740,7 +747,7 @@
             <div class="notif-row">
               <div>
                 <div class="notif-label">Customer confirmation email</div>
-                <div class="notif-desc">Send booking confirmation to the customer via n8n</div>
+                <div class="notif-desc">Sends booking confirmation to the customer on every new booking</div>
               </div>
               <label class="toggle">
                 <input type="checkbox" id="notif-email-customer">
@@ -750,7 +757,7 @@
             <div class="notif-row">
               <div>
                 <div class="notif-label">Notify barber on new booking</div>
-                <div class="notif-desc">Send an alert to the barber email below</div>
+                <div class="notif-desc">Sends booking details to the barber email below</div>
               </div>
               <label class="toggle">
                 <input type="checkbox" id="notif-notify-barber">
@@ -760,7 +767,7 @@
             <div class="notif-row">
               <div>
                 <div class="notif-label">24-hour reminder</div>
-                <div class="notif-desc">n8n sends customer a reminder the day before</div>
+                <div class="notif-desc">Cloud Function runs at 8am daily and reminds customers with tomorrow's bookings</div>
               </div>
               <label class="toggle">
                 <input type="checkbox" id="notif-reminder-24h">
@@ -1486,18 +1493,19 @@ async function loadNotificationSettings() {
   try {
     const doc = await db.collection('settings').doc('notifications').get();
     const s = doc.exists ? doc.data() : {};
-    document.getElementById('notif-webhook-url').value = s.webhookUrl || '';
+    document.getElementById('notif-sender-email').value = s.senderEmail || '';
+    document.getElementById('notif-sender-password').value = s.senderPassword || '';
     document.getElementById('notif-email-customer').checked = s.emailCustomer !== false;
     document.getElementById('notif-notify-barber').checked = !!s.notifyBarber;
     document.getElementById('notif-reminder-24h').checked = !!s.reminder24h;
     document.getElementById('notif-barber-email').value = s.barberEmail || '';
     const badge = document.getElementById('notif-status-badge');
-    if (s.webhookUrl) {
+    if (s.senderEmail) {
       badge.className = 'notif-status ok';
-      badge.textContent = '● Webhook configured';
+      badge.textContent = '● Ready';
     } else {
       badge.className = 'notif-status warn';
-      badge.textContent = '○ No webhook set';
+      badge.textContent = '○ Sender not configured';
     }
   } catch (e) {
     toast('Failed to load notification settings: ' + e.message, 'error');
@@ -1505,8 +1513,13 @@ async function loadNotificationSettings() {
 }
 
 async function saveNotificationSettings() {
+  const senderEmail = document.getElementById('notif-sender-email').value.trim();
+  const senderPassword = document.getElementById('notif-sender-password').value.trim();
+  if (!senderEmail) { toast('Sender email is required', 'warning'); return; }
+  if (!senderPassword) { toast('Gmail App Password is required', 'warning'); return; }
   const data = {
-    webhookUrl: document.getElementById('notif-webhook-url').value.trim(),
+    senderEmail,
+    senderPassword,
     emailCustomer: document.getElementById('notif-email-customer').checked,
     notifyBarber: document.getElementById('notif-notify-barber').checked,
     reminder24h: document.getElementById('notif-reminder-24h').checked,
@@ -1521,28 +1534,6 @@ async function saveNotificationSettings() {
     toast('Notification settings saved', 'success');
   } catch (e) {
     toast('Error saving settings: ' + e.message, 'error');
-  }
-}
-
-async function testWebhook() {
-  const url = document.getElementById('notif-webhook-url').value.trim();
-  if (!url) { toast('Enter a webhook URL first', 'warning'); return; }
-  try {
-    await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        test: true,
-        customer: { name: 'Test Customer', email: 'test@coollooks23.com.au', phone: '0400000000' },
-        service: { name: 'Test Haircut', price: 45 },
-        date: new Date().toISOString().slice(0, 10),
-        time: '10:00',
-        status: 'pending'
-      })
-    });
-    toast('Test sent — check your n8n execution log', 'success');
-  } catch (e) {
-    toast('Webhook failed: ' + e.message, 'error');
   }
 }
 
