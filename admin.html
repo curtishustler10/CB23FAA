@@ -1108,6 +1108,7 @@ function renderCustomers(customers) {
       </div>
       <div class="customer-actions">
         <button class="btn btn-sm btn-edit" onclick="openCustomerModal('${esc(c.firestoreId || '')}')">Edit</button>
+        ${c.firestoreId ? `<button class="btn btn-sm btn-danger" onclick="deleteCustomer('${esc(c.firestoreId)}', '${esc(c.name || 'this customer')}')">Delete</button>` : ''}
       </div>
     </div>`;
   }).join('');
@@ -1170,6 +1171,17 @@ async function saveCustomer() {
     loadCustomers();
   } catch (e) {
     toast('Error saving customer: ' + e.message, 'error');
+  }
+}
+
+async function deleteCustomer(id, name) {
+  if (!confirm(`Delete ${name}? This cannot be undone.`)) return;
+  try {
+    await db.collection('customers').doc(id).delete();
+    toast('Customer deleted', 'success');
+    loadCustomers();
+  } catch (e) {
+    toast('Error deleting customer: ' + e.message, 'error');
   }
 }
 
