@@ -502,6 +502,18 @@
     .status-legend { display: flex; gap: 12px; padding: 12px; }
     th.actions-col, td.actions-col { display: none; }
   }
+  /* NOTIFICATIONS */
+  .notif-section { margin-bottom: 28px; }
+  .notif-section-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 14px; padding-bottom: 8px; border-bottom: 2px solid var(--border); }
+  .notif-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--border); }
+  .notif-row:last-child { border-bottom: none; }
+  .notif-label { font-size: 15px; font-weight: 600; margin-bottom: 3px; }
+  .notif-desc { font-size: 13px; color: var(--text-muted); }
+  .notif-status { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; padding: 4px 10px; }
+  .notif-status.ok { color: var(--success); background: #e6f4ea; }
+  .notif-status.warn { color: var(--warning); background: #fff8e1; }
+  .notif-url-row { display: flex; gap: 10px; align-items: center; margin-top: 8px; }
+  .notif-url-row .form-input { flex: 1; font-size: 13px; padding: 9px 12px; }
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -552,6 +564,10 @@
     <div class="nav-item" onclick="switchTab('services')" id="nav-services">
       <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
       Services
+    </div>
+    <div class="nav-item" onclick="switchTab('notifications')" id="nav-notifications">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      Notifications
     </div>
     <div class="sidebar-logout" onclick="doLogout()">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
@@ -695,6 +711,77 @@
         </div>
         <div class="services-list" id="services-list">
           <div class="loading">Loading services...</div>
+        </div>
+      </div>
+
+      <!-- NOTIFICATIONS TAB -->
+      <div class="tab-panel" id="tab-notifications">
+        <div class="card" style="max-width:680px">
+          <div class="card-header">
+            <div class="card-title">Notification Settings</div>
+            <span id="notif-status-badge"></span>
+          </div>
+
+          <!-- Webhook -->
+          <div class="notif-section">
+            <div class="notif-section-title">n8n Webhook</div>
+            <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px">
+              Paste your n8n webhook URL. Every new booking will POST the booking data here so n8n can send emails and run automations.
+            </p>
+            <div class="notif-url-row">
+              <input type="url" class="form-input" id="notif-webhook-url" placeholder="https://your-n8n.com/webhook/booking">
+              <button class="btn btn-outline btn-sm" onclick="testWebhook()">Test</button>
+            </div>
+          </div>
+
+          <!-- Toggles -->
+          <div class="notif-section">
+            <div class="notif-section-title">Triggers</div>
+            <div class="notif-row">
+              <div>
+                <div class="notif-label">Customer confirmation email</div>
+                <div class="notif-desc">Send booking confirmation to the customer via n8n</div>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" id="notif-email-customer">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="notif-row">
+              <div>
+                <div class="notif-label">Notify barber on new booking</div>
+                <div class="notif-desc">Send an alert to the barber email below</div>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" id="notif-notify-barber">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="notif-row">
+              <div>
+                <div class="notif-label">24-hour reminder</div>
+                <div class="notif-desc">n8n sends customer a reminder the day before</div>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" id="notif-reminder-24h">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Barber email -->
+          <div class="notif-section">
+            <div class="notif-section-title">Barber Contact</div>
+            <div class="form-group">
+              <label class="form-label">Barber Email</label>
+              <input type="email" class="form-input" id="notif-barber-email" placeholder="barber@coollooks23.com.au">
+            </div>
+          </div>
+
+          <div style="display:flex;gap:10px;align-items:center">
+            <button class="btn btn-gold" onclick="saveNotificationSettings()">Save Settings</button>
+            <span id="notif-save-status" style="font-size:13px;color:var(--success)"></span>
+          </div>
         </div>
       </div>
 
@@ -889,7 +976,7 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // ─── TABS ────────────────────────────────────────────────────────────────────
-const tabTitles = { dashboard: 'Dashboard', bookings: 'Bookings', customers: 'Customers', services: 'Services' };
+const tabTitles = { dashboard: 'Dashboard', bookings: 'Bookings', customers: 'Customers', services: 'Services', notifications: 'Notifications' };
 
 function switchTab(tab) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
@@ -901,6 +988,7 @@ function switchTab(tab) {
   if (tab === 'bookings') loadBookings();
   if (tab === 'customers') loadCustomers();
   if (tab === 'services') loadServices();
+  if (tab === 'notifications') loadNotificationSettings();
   closeSidebar();
 }
 
@@ -1393,13 +1481,78 @@ function closeSidebar() {
   document.getElementById('sidebar-overlay').classList.remove('active');
 }
 
+// ─── NOTIFICATIONS ───────────────────────────────────────────────────────────
+async function loadNotificationSettings() {
+  try {
+    const doc = await db.collection('settings').doc('notifications').get();
+    const s = doc.exists ? doc.data() : {};
+    document.getElementById('notif-webhook-url').value = s.webhookUrl || '';
+    document.getElementById('notif-email-customer').checked = s.emailCustomer !== false;
+    document.getElementById('notif-notify-barber').checked = !!s.notifyBarber;
+    document.getElementById('notif-reminder-24h').checked = !!s.reminder24h;
+    document.getElementById('notif-barber-email').value = s.barberEmail || '';
+    const badge = document.getElementById('notif-status-badge');
+    if (s.webhookUrl) {
+      badge.className = 'notif-status ok';
+      badge.textContent = '● Webhook configured';
+    } else {
+      badge.className = 'notif-status warn';
+      badge.textContent = '○ No webhook set';
+    }
+  } catch (e) {
+    toast('Failed to load notification settings: ' + e.message, 'error');
+  }
+}
+
+async function saveNotificationSettings() {
+  const data = {
+    webhookUrl: document.getElementById('notif-webhook-url').value.trim(),
+    emailCustomer: document.getElementById('notif-email-customer').checked,
+    notifyBarber: document.getElementById('notif-notify-barber').checked,
+    reminder24h: document.getElementById('notif-reminder-24h').checked,
+    barberEmail: document.getElementById('notif-barber-email').value.trim()
+  };
+  try {
+    await db.collection('settings').doc('notifications').set(data, { merge: true });
+    const status = document.getElementById('notif-save-status');
+    status.textContent = '✓ Saved';
+    setTimeout(() => { status.textContent = ''; }, 3000);
+    loadNotificationSettings();
+    toast('Notification settings saved', 'success');
+  } catch (e) {
+    toast('Error saving settings: ' + e.message, 'error');
+  }
+}
+
+async function testWebhook() {
+  const url = document.getElementById('notif-webhook-url').value.trim();
+  if (!url) { toast('Enter a webhook URL first', 'warning'); return; }
+  try {
+    await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        test: true,
+        customer: { name: 'Test Customer', email: 'test@coollooks23.com.au', phone: '0400000000' },
+        service: { name: 'Test Haircut', price: 45 },
+        date: new Date().toISOString().slice(0, 10),
+        time: '10:00',
+        status: 'pending'
+      })
+    });
+    toast('Test sent — check your n8n execution log', 'success');
+  } catch (e) {
+    toast('Webhook failed: ' + e.message, 'error');
+  }
+}
+
 function toggleProfileMenu() {
   document.getElementById('profile-menu').classList.toggle('show');
 }
 
 function openSettings() {
   document.getElementById('profile-menu').classList.remove('show');
-  toast('Settings coming soon', 'info');
+  switchTab('notifications');
 }
 
 // Close profile menu when clicking outside

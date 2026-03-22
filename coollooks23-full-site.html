@@ -997,7 +997,7 @@
       <div class="section-label">What We Offer</div>
       <h2 class="section-title">OUR SERVICES</h2>
     </div>
-    <p class="services-intro">Every service is tailored to you — precise, professional, and personal.</p>
+    <p class="services-intro">Every service is tailored to you. Precise, professional, and personal.</p>
   </div>
 
   <div class="services-layout fade-in">
@@ -1047,7 +1047,7 @@
 <!-- HAIR STYLISTS -->
 <section id="masters">
   <div class="section-label fade-in">Our Team</div>
-  <h2 class="section-title fade-in">HAIR STYLISTS</h2>
+  <h2 class="section-title fade-in">Barbers</h2>
   <div class="masters-grid">
     <div class="master-card fade-in">
       <img class="master-card-img" src="https://res.cloudinary.com/ecom-hustler/image/upload/v1773556798/Obama_founder_main_barber_z6nj6y.jpg" alt="Obama">
@@ -1347,7 +1347,7 @@
       const time = document.getElementById("bookingTime").value;
       
       try {
-        await db.collection('bookings').add({
+        const bookingPayload = {
           customer: {
             name: document.getElementById("customerName").value,
             email: document.getElementById("customerEmail").value,
@@ -1359,7 +1359,33 @@
           barber: "Any",
           status: "pending",
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
+        };
+        await db.collection('bookings').add(bookingPayload);
+
+        // Fire n8n webhook if configured
+        try {
+          const notifDoc = await db.collection('settings').doc('notifications').get();
+          if (notifDoc.exists) {
+            const notif = notifDoc.data();
+            if (notif.webhookUrl) {
+              fetch(notif.webhookUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  customer: bookingPayload.customer,
+                  service: bookingPayload.service,
+                  date: date,
+                  time: time,
+                  barberEmail: notif.barberEmail || '',
+                  emailCustomer: notif.emailCustomer !== false,
+                  notifyBarber: !!notif.notifyBarber,
+                  reminder24h: !!notif.reminder24h
+                })
+              }).catch(() => {}); // fire-and-forget, don't block confirmation
+            }
+          }
+        } catch(_) {}
+
         document.getElementById("bookingForm").style.display = "none";
         document.getElementById("bookingSuccess").style.display = "block";
       } catch(err) { alert("Booking failed. Please try again."); btn.disabled = false; btn.textContent = "Book Now"; }
