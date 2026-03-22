@@ -26,14 +26,28 @@
         <div id="servicesList">Loading...</div>
         <a href="coollooks23-full-site.html" class="book-btn">Book Appointment</a>
     </div>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
     <script>
-        fetch('http://170.64.153.193:8090/api/collections/services/records')
-            .then(r => r.json())
-            .then(data => {
-                document.getElementById('servicesList').innerHTML = data.items.map(s => 
-                    '<div class="service-row"><div><div class="service-name">' + s.name + '</div><div class="service-duration">' + s.duration + ' min</div></div><div class="service-price">$' + s.price + '</div></div>'
-                ).join('');
-            });
+        const firebaseConfig = {
+            apiKey: "AIzaSyDRxXMVd2ZJmbbKZ-DsBEY7jd5_g493iOk",
+            authDomain: "coollooks-c76ec.firebaseapp.com",
+            projectId: "coollooks-c76ec",
+            storageBucket: "coollooks-c76ec.firebasestorage.app",
+            messagingSenderId: "749477472175",
+            appId: "1:749477472175:web:6b2591091cd914e30e315a"
+        };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        db.collection('services').orderBy('name').get().then(snap => {
+            const services = snap.docs.map(doc => doc.data()).filter(s => s.active !== false);
+            document.getElementById('servicesList').innerHTML = services.map(s =>
+                '<div class="service-row"><div><div class="service-name">' + s.name + '</div><div class="service-duration">' + s.duration + ' min</div></div><div class="service-price">$' + s.price + '</div></div>'
+            ).join('') || '<p style="color:#666">No services available.</p>';
+        }).catch(() => {
+            document.getElementById('servicesList').innerHTML = '<p style="color:#666">Unable to load services.</p>';
+        });
     </script>
 </body>
 </html>

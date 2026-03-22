@@ -1276,7 +1276,7 @@
         console.log('[loadPublicServices] Fetching services from Firestore...');
         const snap = await db.collection('services').orderBy('name').get();
         console.log('[loadPublicServices] Snapshot received, docs count:', snap.docs.length);
-        const active = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })).filter(s => s.active === true);
+        const active = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })).filter(s => s.active !== false);
         console.log('[loadPublicServices] Active services:', active.length, active);
         if (!active.length) {
           console.log('[loadPublicServices] No active services found.');
@@ -1306,7 +1306,7 @@
     window.loadServices = async function loadServices() {
       try {
         const snap = await db.collection('services').get();
-        services = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })).filter(s => s.active === true);
+        services = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })).filter(s => s.active !== false);
         renderServices();
       } catch(e) { console.error(e); }
     }
@@ -1348,19 +1348,18 @@
       const time = document.getElementById("bookingTime").value;
       
       try {
-        await fetch(POCKETBASE_URL + "/api/collections/bookings/records", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            user_id: "guest_" + Date.now(),
-            user_name: document.getElementById("customerName").value,
-            user_email: document.getElementById("customerEmail").value,
-            user_phone: document.getElementById("customerPhone").value,
-            service_id: svc.id,
-            service_name: svc.name,
-            date_time: date + "T" + time + ":00Z",
-            status: "pending"
-          })
+        await db.collection('bookings').add({
+          customer: {
+            name: document.getElementById("customerName").value,
+            email: document.getElementById("customerEmail").value,
+            phone: document.getElementById("customerPhone").value
+          },
+          service: { id: svc.id, name: svc.name, price: svc.price },
+          date: date,
+          time: time,
+          barber: "Any",
+          status: "pending",
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         document.getElementById("bookingForm").style.display = "none";
         document.getElementById("bookingSuccess").style.display = "block";

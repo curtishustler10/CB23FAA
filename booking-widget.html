@@ -45,6 +45,8 @@
         .subscription-note { background: #1a1a1a; padding: 12px; border-left: 3px solid #D4AF37; margin-bottom: 16px; font-size: 13px; color: #888; }
         .close-btn { position: absolute; top: 10px; right: 15px; color: #fff; font-size: 24px; cursor: pointer; }
     </style>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
     <div class="booking-widget" id="bookingWidget">
@@ -115,8 +117,16 @@
     </div>
 
     <script>
-        // CONFIG: Change this to your PocketBase URL
-        const POCKETBASE_URL = 'http://170.64.153.193:8090';
+        const firebaseConfig = {
+            apiKey: "AIzaSyDRxXMVd2ZJmbbKZ-DsBEY7jd5_g493iOk",
+            authDomain: "coollooks-c76ec.firebaseapp.com",
+            projectId: "coollooks-c76ec",
+            storageBucket: "coollooks-c76ec.firebasestorage.app",
+            messagingSenderId: "749477472175",
+            appId: "1:749477472175:web:6b2591091cd914e30e315a"
+        };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
         let SERVICES = [];
         
         // Initialize
@@ -129,14 +139,10 @@
         
         async function loadServices() {
             try {
-                const res = await fetch(`${POCKETBASE_URL}/api/collections/services/records`);
-                const data = await res.json();
-                SERVICES = data.items.map(s => ({
-                    id: s.id,
-                    name: s.name,
-                    duration: s.duration,
-                    price: s.price
-                }));
+                const snap = await db.collection('services').orderBy('name').get();
+                SERVICES = snap.docs
+                    .map(doc => ({ id: doc.id, ...doc.data() }))
+                    .filter(s => s.active !== false);
             } catch (e) {
                 console.error('Failed to load services:', e);
             }
@@ -265,26 +271,23 @@
         }
         
         async function submitBooking(bookingData) {
-            // Guest booking - create booking directly with customer info (no account required)
-            const bookingResponse = await fetch(`${POCKETBASE_URL}/api/collections/bookings/records`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    user_id: 'guest_' + Date.now(),
-                    user_name: bookingData.name,
-                    user_email: bookingData.email,
-                    user_phone: bookingData.phone,
-                    service_id: bookingData.service_id,
-                    service_name: bookingData.service_name,
-                    date_time: bookingData.date_time,
-                    status: 'pending'
-                })
+            await db.collection('bookings').add({
+                customer: {
+                    name: bookingData.name,
+                    email: bookingData.email,
+                    phone: bookingData.phone
+                },
+                service: {
+                    id: bookingData.service_id,
+                    name: bookingData.service_name,
+                    price: bookingData.service_price
+                },
+                date: bookingData.date_time.split('T')[0],
+                time: bookingData.date_time.split('T')[1].slice(0, 5),
+                barber: 'Any',
+                status: 'pending',
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
-            
-            if (!bookingResponse.ok) throw new Error('Failed to create booking');
-            
-            const booking = await bookingResponse.json();
-            return booking;
         }
         
         function setupForm() {
@@ -303,7 +306,7 @@
                     return;
                 }
                 
-                const service = SERVICES.find(s => s.id === parseInt(serviceId));
+                const service = SERVICES.find(s => s.id === serviceId);
                 const date = document.getElementById('bookingDate').value;
                 if (!date) {
                     document.getElementById('dateError').textContent = 'Please select a date';
