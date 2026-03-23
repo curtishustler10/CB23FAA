@@ -893,6 +893,25 @@ let currentAdmin = null;
 
 let allCustomers = [];
 let allBookings = [];
+
+// Normalise booking docs — handles both nested format (front-end saves customer.name etc.)
+// and legacy flat format (user_name etc.)
+function normalizeBooking(data, id) {
+  const d = { id, ...data };
+  if (d.customer) {
+    if (!d.user_name)  d.user_name  = d.customer.name  || '';
+    if (!d.user_email) d.user_email = d.customer.email || '';
+    if (!d.user_phone) d.user_phone = d.customer.phone || '';
+  }
+  if (d.service) {
+    if (!d.service_name) d.service_name = d.service.name || '';
+    if (d.price == null) d.price = d.service.price || 0;
+  }
+  if (d.createdAt && !d.created_at) {
+    d.created_at = d.createdAt.toDate ? d.createdAt.toDate().toISOString() : String(d.createdAt);
+  }
+  return d;
+}
 let allServices = [];
 
 // ─── AUTH ───────────────────────────────────────────────────────────────────
@@ -1006,8 +1025,8 @@ async function loadDashboard() {
     const weekStart = getWeekStart();
     const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().slice(0, 10);
 
-    const snap = await db.collection('bookings').orderBy('created_at', 'desc').get();
-    allBookings = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const snap = await db.collection('bookings').orderBy('createdAt', 'desc').get();
+    allBookings = snap.docs.map(doc => normalizeBooking(doc.data(), doc.id));
 
     const todayB = allBookings.filter(b => (b.date || '').slice(0, 10) === today);
     const weekB  = allBookings.filter(b => (b.date || '').slice(0, 10) >= weekStart);
@@ -1060,11 +1079,11 @@ async function loadBookings() {
 
     let snap;
     try {
-      snap = await db.collection('bookings').orderBy('created_at', 'desc').get();
+      snap = await db.collection('bookings').orderBy('createdAt', 'desc').get();
     } catch(e) {
       snap = await db.collection('bookings').get();
     }
-    allBookings = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    allBookings = snap.docs.map(doc => normalizeBooking(doc.data(), doc.id));
 
     let filtered = allBookings;
     if (filterDate)   filtered = filtered.filter(b => (b.date || '').slice(0, 10) === filterDate);
@@ -1146,7 +1165,7 @@ async function loadCustomers() {
 
     // Derive visit stats from bookings
     const bookSnap = await db.collection('bookings').get();
-    const bookings = bookSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const bookings = bookSnap.docs.map(doc => normalizeBooking(doc.data(), doc.id));
     const bookingMap = {};
     bookings.forEach(b => {
       const key = b.user_email || b.user_phone || b.user_name;
@@ -1388,7 +1407,7 @@ async function openBookingById(id) {
   if (!b) {
     try {
       const doc = await db.collection('bookings').doc(id).get();
-      if (doc.exists) b = { id: doc.id, ...doc.data() };
+      if (doc.exists) b = normalizeBooking(doc.data(), doc.id);
     } catch(e) { toast('Failed to load booking', 'error'); return; }
   }
   if (!b) { toast('Booking not found', 'warning'); return; }
