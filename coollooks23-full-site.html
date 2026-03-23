@@ -1125,7 +1125,7 @@
       </div>
       <div class="contact-item">
         <p class="contact-label">Phone</p>
-        <p class="contact-value"><a href="#" onclick="openBookingModal(); return false;">+61 470 224 498</a></p>
+        <p class="contact-value"><a href="tel:+61470224498">+61 470 224 498</a></p>
       </div>
       <div class="contact-item">
         <p class="contact-label">Book</p>
@@ -1288,7 +1288,7 @@
         list.innerHTML = Object.entries(cats).map(([cat, svcs]) =>
           '<div class="service-category"><p class="cat-title">' + cat + '</p>' +
           svcs.map(s =>
-            '<div class="service-row" onclick="openBookingModal()" style="cursor:pointer"><div class="service-info"><div class="service-name">' + s.name + '</div><div class="service-duration">' + (s.duration || 0) + ' min</div></div><div class="service-dots"></div><div class="service-price">$' + (s.price || 0) + '</div></div>'
+            '<div class="service-row" data-name="' + s.name + '" onclick="openBookingModal(this.dataset.name)" style="cursor:pointer"><div class="service-info"><div class="service-name">' + s.name + '</div><div class="service-duration">' + (s.duration || 0) + ' min</div></div><div class="service-dots"></div><div class="service-price">$' + (s.price || 0) + '</div></div>'
           ).join('') + '</div>'
         ).join('');
         console.log('[loadPublicServices] Done rendering.');
@@ -1302,11 +1302,16 @@
     // ─── BOOKING MODAL SERVICES ───────────────────────────────────────────────
     let services = [];
 
-    window.loadServices = async function loadServices() {
+    window.loadServices = async function loadServices(preSelectName) {
       try {
         const snap = await db.collection('services').get();
         services = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })).filter(s => s.active !== false);
         renderServices();
+        if (preSelectName) {
+          document.querySelectorAll('.booking-service-option').forEach(el => {
+            if (el.dataset.name === preSelectName) selectService(el);
+          });
+        }
       } catch(e) { console.error(e); }
     }
 
@@ -1321,8 +1326,15 @@
       document.getElementById("selectedService").value = JSON.stringify({id: el.dataset.id, name: el.dataset.name, price: el.dataset.price});
     }
 
-    window.openBookingModal = function openBookingModal() { document.getElementById("bookingModal").classList.add("open"); loadServices(); setupDateTime(); }
-    window.closeBookingModal = function closeBookingModal() { document.getElementById("bookingModal").classList.remove("open"); }
+    window.openBookingModal = function openBookingModal(preSelectName) { document.getElementById("bookingModal").classList.add("open"); loadServices(preSelectName); setupDateTime(); }
+    window.closeBookingModal = function closeBookingModal() {
+      document.getElementById("bookingModal").classList.remove("open");
+      document.getElementById("bookingForm").style.display = "";
+      document.getElementById("bookingSuccess").style.display = "none";
+      document.getElementById("bookingForm").reset();
+      document.getElementById("bookingSubmit").disabled = false;
+      document.getElementById("bookingSubmit").textContent = "Book Now";
+    }
 
     window.setupDateTime = function setupDateTime() {
       const dateInput = document.getElementById("bookingDate");
