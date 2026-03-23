@@ -889,24 +889,83 @@
   .booking-success { display: none; text-align: center; padding: 40px 20px; }
   .booking-success h3 { color: #4CAF50; margin-bottom: 10px; }
 
-  /* BOOKING MODAL */
-  .booking-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; overflow-y: auto; padding: 20px; }
-  .booking-modal.open { display: block; }
-  .booking-modal-content { max-width: 500px; margin: 40px auto; background: #1a1a1a; border-radius: 0; padding: 30px; position: relative; }
-  .booking-modal-close { position: absolute; top: 15px; right: 20px; font-size: 30px; color: #fff; cursor: pointer; background: none; border: none; }
-  .booking-modal h2 { color: #C9A84C; margin-bottom: 20px; }
-  .booking-form-group { margin-bottom: 15px; }
-  .booking-form-group label { display: block; color: #fff; margin-bottom: 5px; font-size: 14px; }
-  .booking-form-group input, .booking-form-group select { width: 100%; padding: 12px; background: #333; border: 1px solid #444; color: #fff; border-radius: 0; }
-  .booking-service-option { display: flex; justify-content: space-between; padding: 12px; background: #333; border: 1px solid #444; border-radius: 0; margin-bottom: 8px; cursor: pointer; }
-  .booking-service-option:hover, .booking-service-option.selected { border-color: #C9A84C; }
-  .booking-submit { width: 100%; padding: 14px; background: #C9A84C; color: #000; border: none; border-radius: 0; font-weight: 600; cursor: pointer; }
-  .booking-submit:hover { background: #b8973f; }
-  .booking-success { display: none; text-align: center; padding: 40px 20px; }
-  .booking-success h3 { color: #4CAF50; margin-bottom: 10px; }
+  /* ─── CUSTOM DATE PICKER ──────────────────────────────────────────────── */
+  .date-picker-wrap { position: relative; }
+  .date-picker-field {
+    display: flex; align-items: center;
+    background: #333; border: 1px solid #444;
+    transition: border-color 0.2s;
+  }
+  .date-picker-field:focus-within { border-color: #C9A84C; }
+  .date-picker-text {
+    flex: 1; padding: 12px; background: transparent; border: none;
+    color: #fff; cursor: pointer; font-family: 'Barlow', sans-serif;
+    font-size: 14px; outline: none; caret-color: transparent;
+  }
+  .date-picker-text::placeholder { color: #666; }
+  .date-picker-icon-btn {
+    background: none; border: none; cursor: pointer;
+    padding: 0 14px; display: flex; align-items: center; height: 100%;
+  }
+  .date-picker-icon-btn svg {
+    width: 24px; height: 24px; fill: #C9A84C; display: block;
+    transition: transform 0.2s ease;
+  }
+  .date-picker-icon-btn:hover svg { transform: scale(1.18); }
+  .custom-cal {
+    position: fixed; z-index: 9999;
+    background: #0d0d0d; border: 1px solid #C9A84C;
+    padding: 18px; box-shadow: 0 12px 40px rgba(0,0,0,0.75);
+    opacity: 0; transform: translateY(-6px) scale(0.97);
+    pointer-events: none;
+    transition: opacity 0.22s ease, transform 0.22s ease;
+  }
+  .custom-cal.open {
+    opacity: 1; transform: translateY(0) scale(1);
+    pointer-events: auto;
+  }
+  .cal-head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .cal-my {
+    font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem;
+    letter-spacing: 0.2em; color: #C9A84C; user-select: none;
+  }
+  .cal-arrow {
+    background: none; border: 1px solid rgba(201,168,76,0.35);
+    color: #C9A84C; width: 28px; height: 28px; cursor: pointer;
+    font-size: 13px; display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .cal-arrow:hover { background: rgba(201,168,76,0.15); border-color: #C9A84C; }
+  .cal-wdays {
+    display: grid; grid-template-columns: repeat(7, 1fr);
+    margin-bottom: 8px; padding-bottom: 8px;
+    border-bottom: 1px solid rgba(201,168,76,0.15);
+  }
+  .cal-wdays span {
+    text-align: center; font-size: 0.58rem; letter-spacing: 0.12em;
+    color: #8a8880; font-weight: 500; font-family: 'Barlow', sans-serif;
+  }
+  .cal-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+  .cal-d {
+    text-align: center; padding: 7px 2px; font-size: 0.8rem;
+    cursor: pointer; color: #c8c5bf; font-family: 'Barlow', sans-serif;
+    border: 1px solid transparent; user-select: none;
+    transition: background 0.12s, color 0.12s, border-color 0.12s;
+  }
+  .cal-d:hover:not(.cal-dis):not(.cal-sel):not(.cal-empty) {
+    background: rgba(201,168,76,0.12); border-color: rgba(201,168,76,0.45);
+  }
+  .cal-d.cal-today { color: #C9A84C; font-weight: 600; }
+  .cal-d.cal-sel { background: #C9A84C; color: #000; font-weight: 700; border-color: #C9A84C; }
+  .cal-d.cal-dis { color: #2a2a2a; cursor: default; }
+  .cal-d.cal-empty { cursor: default; }
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 </head>
 <body>
 
@@ -1237,7 +1296,28 @@
         </div>
         <div class="booking-form-group">
           <label>Date</label>
-          <input type="date" id="bookingDate" required>
+          <div class="date-picker-wrap">
+            <div class="date-picker-field">
+              <input type="text" id="bookingDateDisplay" class="date-picker-text" placeholder="Select a date" readonly onclick="toggleCal()">
+              <button type="button" class="date-picker-icon-btn" onclick="toggleCal()">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M19 4h-1V2h-2v2H8V2H6v2H5C3.9 4 3 4.9 3 6v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11zM5 7V6h14v1H5zm2 4h10v2H7zm0 4h7v2H7z"/>
+                </svg>
+              </button>
+            </div>
+            <input type="hidden" id="bookingDate">
+            <div class="custom-cal" id="customCal">
+              <div class="cal-head">
+                <button type="button" class="cal-arrow" onclick="calNav(-1)">&#8592;</button>
+                <span class="cal-my" id="calMY"></span>
+                <button type="button" class="cal-arrow" onclick="calNav(1)">&#8594;</button>
+              </div>
+              <div class="cal-wdays">
+                <span>SU</span><span>MO</span><span>TU</span><span>WE</span><span>TH</span><span>FR</span><span>SA</span>
+              </div>
+              <div class="cal-days" id="calDays"></div>
+            </div>
+          </div>
         </div>
         <div class="booking-form-group">
           <label>Time</label>
@@ -1266,6 +1346,75 @@
     };
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
+
+    // ─── EMAIL CONFIG (emailjs.com) ───────────────────────────────────────────
+    // 1. Sign up free at emailjs.com  2. Connect Gmail  3. Create two templates:
+    //    New booking template vars: {{to_email}} {{customer_name}} {{service_name}} {{booking_date}} {{booking_time}} {{price}}
+    //    Confirm template vars:     same as above
+    // 4. Paste your keys below.
+    const EMAILJS_PK      = 'YOUR_PUBLIC_KEY';       // Account → API Keys
+    const EMAILJS_SVC     = 'YOUR_SERVICE_ID';        // Email Services tab
+    const EMAILJS_TPL_NEW = 'YOUR_NEW_BOOKING_TEMPLATE_ID';
+    if (EMAILJS_PK !== 'YOUR_PUBLIC_KEY') emailjs.init(EMAILJS_PK);
+
+    // ─── CUSTOM CALENDAR ─────────────────────────────────────────────────────
+    let _calView = new Date();
+    let _calMin = null, _calMax = null, _calSel = null;
+    const _MON = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+    window.toggleCal = function() {
+      const cal = document.getElementById('customCal');
+      if (cal.classList.contains('open')) { cal.classList.remove('open'); return; }
+      const field = document.querySelector('.date-picker-field');
+      const rect = field.getBoundingClientRect();
+      cal.style.left  = rect.left + 'px';
+      cal.style.top   = (rect.bottom + 6) + 'px';
+      cal.style.width = rect.width + 'px';
+      renderCal();
+      cal.classList.add('open');
+    };
+
+    window.calNav = function(dir) {
+      _calView = new Date(_calView.getFullYear(), _calView.getMonth() + dir, 1);
+      renderCal();
+    };
+
+    window.calPickDay = function(ds) {
+      _calSel = ds;
+      document.getElementById('bookingDate').value = ds;
+      const dt = new Date(ds + 'T00:00:00');
+      document.getElementById('bookingDateDisplay').value =
+        dt.toLocaleDateString('en-AU', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
+      document.getElementById('customCal').classList.remove('open');
+    };
+
+    function renderCal() {
+      const y = _calView.getFullYear(), m = _calView.getMonth();
+      document.getElementById('calMY').textContent = _MON[m] + ' ' + y;
+      const firstDay = new Date(y, m, 1).getDay();
+      const days = new Date(y, m + 1, 0).getDate();
+      const today = new Date(); today.setHours(0,0,0,0);
+      let html = '';
+      for (let i = 0; i < firstDay; i++) html += '<span class="cal-d cal-empty"></span>';
+      for (let d = 1; d <= days; d++) {
+        const nd = new Date(y, m, d); nd.setHours(0,0,0,0);
+        const ds = nd.toISOString().slice(0,10);
+        const dis = (_calMin && nd < _calMin) || (_calMax && nd > _calMax);
+        let cls = 'cal-d' + (dis ? ' cal-dis' : '') +
+                  (nd.getTime() === today.getTime() ? ' cal-today' : '') +
+                  (_calSel === ds ? ' cal-sel' : '');
+        html += `<span class="${cls}"${!dis ? ` onclick="calPickDay('${ds}')"` : ''}>${d}</span>`;
+      }
+      document.getElementById('calDays').innerHTML = html;
+    }
+
+    document.addEventListener('click', function(e) {
+      const wrap = document.querySelector('.date-picker-wrap');
+      const cal  = document.getElementById('customCal');
+      if (cal && cal.classList.contains('open') && !cal.contains(e.target) && wrap && !wrap.contains(e.target)) {
+        cal.classList.remove('open');
+      }
+    });
 
     // ─── PUBLIC SERVICES (services section) ──────────────────────────────────
     window.loadPublicServices = async function loadPublicServices() {
@@ -1334,18 +1483,19 @@
       document.getElementById("bookingForm").reset();
       document.getElementById("bookingSubmit").disabled = false;
       document.getElementById("bookingSubmit").textContent = "Book Now";
+      _calSel = null;
+      document.getElementById('customCal').classList.remove('open');
     }
 
     window.setupDateTime = function setupDateTime() {
-      const dateInput = document.getElementById("bookingDate");
-      const today = new Date();
-      const maxDate = new Date(); maxDate.setMonth(maxDate.getMonth() + 2);
-      dateInput.min = today.toISOString().split("T")[0];
-      dateInput.max = maxDate.toISOString().split("T")[0];
-      
+      const today = new Date(); today.setHours(0,0,0,0);
+      const maxDate = new Date(); maxDate.setMonth(maxDate.getMonth() + 2); maxDate.setHours(23,59,59,999);
+      _calMin = today;
+      _calMax = maxDate;
+      _calView = new Date(today);
       const timeSelect = document.getElementById("bookingTime");
       let slots = "";
-      for(let h=8; h<18; h++) { slots += "<option value=" + h + ":00>" + h + ":00</option><option value=" + h + ":30>" + h + ":30</option>"; }
+      for(let h=8; h<18; h++) { slots += '<option value="' + h + ':00">' + h + ':00</option><option value="' + h + ':30">' + h + ':30</option>'; }
       timeSelect.innerHTML = '<option value="">Select time</option>' + slots;
     }
     
@@ -1375,6 +1525,18 @@
 
         document.getElementById("bookingForm").style.display = "none";
         document.getElementById("bookingSuccess").style.display = "block";
+
+        // Send booking request email to customer
+        if (EMAILJS_PK !== 'YOUR_PUBLIC_KEY') {
+          emailjs.send(EMAILJS_SVC, EMAILJS_TPL_NEW, {
+            to_email: document.getElementById("customerEmail").value,
+            customer_name: document.getElementById("customerName").value,
+            service_name: svc.name,
+            booking_date: document.getElementById("bookingDateDisplay").value || date,
+            booking_time: time,
+            price: '$' + svc.price
+          }).catch(err => console.warn('Email send failed:', err));
+        }
       } catch(err) { alert("Booking failed. Please try again."); btn.disabled = false; btn.textContent = "Book Now"; }
     });
   </script>
