@@ -517,6 +517,7 @@
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 </head>
 <body>
 
@@ -889,6 +890,12 @@ const firebaseConfig = {
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
+// ─── EMAIL CONFIG — must match keys in coollooks23-full-site.html ─────────────
+const EMAILJS_PK      = 'YOUR_PUBLIC_KEY';
+const EMAILJS_SVC     = 'YOUR_SERVICE_ID';
+const EMAILJS_TPL_CNF = 'YOUR_CONFIRM_TEMPLATE_ID'; // sent to customer when admin confirms booking
+if (EMAILJS_PK !== 'YOUR_PUBLIC_KEY') emailjs.init(EMAILJS_PK);
+
 let currentAdmin = null;
 
 let allCustomers = [];
@@ -1142,6 +1149,22 @@ async function updateBookingStatus(id, status) {
   try {
     await db.collection('bookings').doc(id).update({ status });
     toast(`Booking ${status}`, 'success');
+
+    // Email customer when booking is confirmed
+    if (status === 'confirmed' && EMAILJS_PK !== 'YOUR_PUBLIC_KEY') {
+      const b = allBookings.find(x => x.id === id);
+      if (b && b.user_email) {
+        emailjs.send(EMAILJS_SVC, EMAILJS_TPL_CNF, {
+          to_email:      b.user_email,
+          customer_name: b.user_name  || 'Valued Customer',
+          service_name:  b.service_name || '',
+          booking_date:  b.date || '',
+          booking_time:  b.time || '',
+          price:         b.price != null ? '$' + Number(b.price).toFixed(2) : ''
+        }).catch(err => console.warn('Confirmation email failed:', err));
+      }
+    }
+
     loadBookings();
     if (document.getElementById('tab-dashboard').classList.contains('active')) loadDashboard();
   } catch (e) {
