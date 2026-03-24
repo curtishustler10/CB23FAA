@@ -97,11 +97,15 @@
   }
   .topbar-title { font-size: 22px; font-weight: 700; color: #fff; }
   .topbar-date { color: #999; font-size: 12px; margin-top: 4px; }
-  .page-content { padding: 28px; flex: 1; overflow-y: auto; }
+  .page-content { padding: 28px; flex: 1; overflow: hidden; display: flex; flex-direction: column; }
 
   /* TABS */
   .tab-panel { display: none; }
-  .tab-panel.active { display: block; }
+  .tab-panel.active { display: block; flex: 1; min-height: 0; overflow-y: auto; }
+  #tab-dashboard.active { overflow: hidden; display: flex; flex-direction: column; }
+  #tab-dashboard .stats-grid { flex-shrink: 0; }
+  #tab-dashboard .card { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+  #tab-dashboard .table-wrap { flex: 1; min-height: 0; overflow-y: auto; }
 
   /* STAT CARDS */
   .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 32px; }
@@ -637,11 +641,16 @@
         <div class="card">
           <div class="card-header">
             <div class="card-title">Recent Bookings</div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <button class="pagination-btn" id="dash-prev-page" onclick="dashChangePage(-1)" disabled>&#8592;</button>
+              <span class="pagination-info" id="dash-page-info">Page 1</span>
+              <button class="pagination-btn" id="dash-next-page" onclick="dashChangePage(1)">&#8594;</button>
+            </div>
           </div>
           <div class="table-wrap">
             <table id="dash-bookings-table">
-              <thead><tr><th>Name</th><th>Service</th><th>Status</th></tr></thead>
-              <tbody id="dash-bookings-body"><tr><td colspan="3" class="loading">Loading...</td></tr></tbody>
+              <thead><tr><th>Name</th><th>Service</th><th>Date</th><th>Status</th></tr></thead>
+              <tbody id="dash-bookings-body"><tr><td colspan="4" class="loading">Loading...</td></tr></tbody>
             </table>
           </div>
         </div>
@@ -1046,21 +1055,41 @@ async function loadDashboard() {
     document.getElementById('stat-month').textContent = monthB.length;
     document.getElementById('stat-revenue').textContent = '$' + revenue.toFixed(2);
 
-    const tbody = document.getElementById('dash-bookings-body');
-    const recent = allBookings.slice(0, 10);
-    if (!recent.length) {
-      tbody.innerHTML = '<tr><td colspan="3" class="empty-state"><p>No bookings yet</p></td></tr>';
-    } else {
-      tbody.innerHTML = recent.map(b => `<tr class="booking-row-clickable" onclick="openBookingById('${b.id}')">
-        <td>${esc(b.user_name || 'N/A')}</td>
-        <td>${esc(b.service_name || 'N/A')}</td>
-        <td>${statusBadge(b.status)}</td>
-      </tr>`).join('');
-    }
+    renderDashBookings();
   } catch (e) {
     console.error(e);
     toast('Failed to load dashboard: ' + e.message, 'error');
   }
+}
+
+const DASH_PER_PAGE = 25;
+let dashPage = 1;
+
+function renderDashBookings() {
+  const tbody = document.getElementById('dash-bookings-body');
+  const totalPages = Math.max(1, Math.ceil(allBookings.length / DASH_PER_PAGE));
+  dashPage = Math.min(dashPage, totalPages);
+  const slice = allBookings.slice((dashPage - 1) * DASH_PER_PAGE, dashPage * DASH_PER_PAGE);
+
+  if (!slice.length) {
+    tbody.innerHTML = '<tr><td colspan="4" class="empty-state"><p>No bookings yet</p></td></tr>';
+  } else {
+    tbody.innerHTML = slice.map(b => `<tr class="booking-row-clickable" onclick="openBookingById('${b.id}')">
+      <td>${esc(b.user_name || 'N/A')}</td>
+      <td>${esc(b.service_name || 'N/A')}</td>
+      <td>${esc((b.date || '').slice(0,10) || 'N/A')}</td>
+      <td>${statusBadge(b.status)}</td>
+    </tr>`).join('');
+  }
+
+  document.getElementById('dash-page-info').textContent = 'Page ' + dashPage + ' / ' + totalPages;
+  document.getElementById('dash-prev-page').disabled = dashPage <= 1;
+  document.getElementById('dash-next-page').disabled = dashPage >= totalPages;
+}
+
+function dashChangePage(dir) {
+  dashPage += dir;
+  renderDashBookings();
 }
 
 function getWeekStart() {
