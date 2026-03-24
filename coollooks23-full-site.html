@@ -178,6 +178,17 @@
     justify-content: flex-end;
     padding: 4rem 5rem;
     position: relative;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .hero-left.hero-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .hero-left.hero-scrolled-out {
+    opacity: 0;
+    transform: translateY(-12px);
   }
 
   .hero-eyebrow {
@@ -1296,8 +1307,16 @@
 <script>
   // Sticky nav
   const navbar = document.getElementById('navbar');
+  // hero-left: fade in 500ms after load, fade out on deep scroll
+  const heroLeft = document.querySelector('.hero-left');
+  const HERO_SCROLL_OUT = Math.round(window.innerHeight * 0.4);
+  setTimeout(() => heroLeft.classList.add('hero-visible'), 500);
+
   window.addEventListener('scroll', () => {
     navbar.classList.toggle('scrolled', window.scrollY > 50);
+    if (heroLeft.classList.contains('hero-visible')) {
+      heroLeft.classList.toggle('hero-scrolled-out', window.scrollY > HERO_SCROLL_OUT);
+    }
   });
 
   // Mobile menu
