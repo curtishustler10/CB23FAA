@@ -864,15 +864,16 @@
     .nav-links { display: none; }
     .hamburger { display: flex; }
 
-    #hero { grid-template-columns: 1fr; position: relative; max-height: 80vh; }
+    #hero { grid-template-columns: 1fr; position: relative; height: 72svh; height: 72vh; max-height: 72svh; max-height: 72vh; }
     .hero-right { position: absolute; inset: 0; min-height: unset; }
     .hero-left {
       position: relative;
       z-index: 2;
       padding: 1rem 4rem;
-      min-height: 84vh;
+      min-height: unset;
+      height: 100%;
       justify-content: flex-start;
-      bottom: -50px;
+      bottom: 0;
       background: linear-gradient(to bottom, rgba(5,5,5,0.3) 0%, rgba(5,5,5,0.75) 60%, rgba(5,5,5,0.95) 100%);
     }
 .hero-headline {
