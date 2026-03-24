@@ -887,9 +887,15 @@
   .booking-form-group input:focus, .booking-form-group select:focus { outline: none; border-color: var(--accent); }
   .booking-form-group input::placeholder { color: #555; }
   .booking-form-group select option { background: #1a1a1a; }
-  .booking-service-option { display: flex; justify-content: space-between; align-items: baseline; padding: 12px 0; border-bottom: 1px solid var(--line); cursor: pointer; transition: padding-left 0.2s; gap: 1rem; }
-  .booking-service-option:hover, .booking-service-option.selected { padding-left: 6px; border-bottom-color: var(--accent); }
+  .booking-service-option { display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--line); cursor: pointer; transition: background 0.15s; gap: 1rem; }
+  .booking-service-option:hover { background: rgba(201,168,76,0.04); padding-left: 4px; }
+  .booking-service-option.selected { padding-left: 4px; }
   .booking-service-option.selected .bso-name { color: var(--accent); }
+  .booking-service-option.selected .bso-price { color: var(--accent); }
+  .booking-service-option.selected .bso-check { opacity: 1; }
+  .bso-left { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
+  .bso-check { width: 14px; height: 14px; flex-shrink: 0; opacity: 0; transition: opacity 0.15s; color: var(--accent); }
+  .bso-check svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.5; }
   .bso-name { font-size: 0.85rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--white); }
   .bso-price { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; font-weight: 300; color: var(--white); white-space: nowrap; }
   .booking-submit { width: 100%; padding: 14px; background: var(--accent); color: #000; border: none; font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 0.25em; cursor: pointer; transition: background 0.2s; margin-top: 8px; }
@@ -897,6 +903,24 @@
   .booking-success { display: none; text-align: center; padding: 40px 20px; }
   .booking-success h3 { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; letter-spacing: 0.2em; color: #4CAF50; margin-bottom: 10px; }
   .booking-success p { font-size: 0.85rem; color: var(--gray); letter-spacing: 0.05em; }
+
+  /* ─── HEADS COUNTER ─── */
+  .heads-counter { display: flex; align-items: center; gap: 14px; }
+  .heads-adj { background: none; border: 1px solid rgba(255,255,255,0.15); color: var(--white); width: 30px; height: 30px; cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; transition: border-color 0.2s, color 0.2s; flex-shrink: 0; }
+  .heads-adj:hover { border-color: var(--accent); color: var(--accent); }
+  .heads-display { display: flex; align-items: center; gap: 6px; font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; color: var(--white); min-width: 32px; }
+  .heads-display svg { width: 15px; height: 15px; fill: none; stroke: var(--accent); stroke-width: 1.5; flex-shrink: 0; }
+
+  /* ─── BOOKING TOTAL ─── */
+  .booking-total { display: none; justify-content: space-between; align-items: baseline; padding: 12px 0 0; border-top: 1px solid var(--line); margin-top: 4px; }
+  .booking-total-label { font-size: 0.6rem; letter-spacing: 0.35em; text-transform: uppercase; color: var(--gray); }
+  .booking-total-amount { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; font-weight: 300; color: var(--accent); }
+
+  /* ─── SERVICES LIST SCROLLABLE ─── */
+  #bookingServices { max-height: 180px; overflow-y: auto; padding-right: 4px; }
+  #bookingServices::-webkit-scrollbar { width: 3px; }
+  #bookingServices::-webkit-scrollbar-track { background: transparent; }
+  #bookingServices::-webkit-scrollbar-thumb { background: var(--accent); }
 
   /* ─── CUSTOM DATE PICKER ──────────────────────────────────────────────── */
   .date-picker-wrap { position: relative; }
@@ -1288,9 +1312,24 @@
       <p class="booking-modal-subtitle">Coollooks Barberz — Slacks Creek</p>
       <form id="bookingForm">
         <div class="booking-form-group">
-          <label>Select Service</label>
+          <label>Number of Heads</label>
+          <div class="heads-counter">
+            <button type="button" class="heads-adj" id="headsDecBtn" onclick="adjustHeads(-1)" style="visibility:hidden">−</button>
+            <div class="heads-display">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+              <span id="headsCountDisplay">1</span>
+            </div>
+            <button type="button" class="heads-adj" onclick="adjustHeads(1)">+</button>
+          </div>
+          <input type="hidden" id="headCount" value="1">
+        </div>
+        <div class="booking-form-group">
+          <label>Select Services</label>
           <div id="bookingServices"></div>
-          <input type="hidden" id="selectedService" required>
+          <div class="booking-total" id="bookingTotal">
+            <span class="booking-total-label">Total</span>
+            <span class="booking-total-amount" id="bookingTotalAmount">$0</span>
+          </div>
         </div>
         <div class="booking-form-group">
           <label>Your Name</label>
@@ -1378,6 +1417,28 @@
     let _calView = new Date();
     let _calMin = null, _calMax = null, _calSel = null;
     const _MON = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+    // ─── HEADS COUNTER ───────────────────────────────────────────────────────
+    let _headCount = 1;
+
+    window.adjustHeads = function(delta) {
+      _headCount = Math.max(1, Math.min(6, _headCount + delta));
+      document.getElementById('headCount').value = _headCount;
+      document.getElementById('headsCountDisplay').textContent = _headCount;
+      document.getElementById('headsDecBtn').style.visibility = _headCount === 1 ? 'hidden' : 'visible';
+      updateTotal();
+    };
+
+    // ─── MULTI-SERVICE SELECT ─────────────────────────────────────────────────
+    let _selectedServices = {};
+
+    function updateTotal() {
+      const sum = Object.values(_selectedServices).reduce((t, s) => t + parseFloat(s.price), 0);
+      const total = sum * _headCount;
+      const el = document.getElementById('bookingTotal');
+      el.style.display = Object.keys(_selectedServices).length ? 'flex' : 'none';
+      document.getElementById('bookingTotalAmount').textContent = '$' + total.toFixed(2).replace(/\.00$/, '');
+    }
 
     window.toggleCal = function() {
       const cal = document.getElementById('customCal');
@@ -1504,21 +1565,33 @@
         renderServices();
         if (preSelectName) {
           document.querySelectorAll('.booking-service-option').forEach(el => {
-            if (el.dataset.name === preSelectName) selectService(el);
+            if (el.dataset.name === preSelectName && !_selectedServices[el.dataset.id]) selectService(el);
           });
         }
       } catch(e) { console.error(e); }
     }
 
+    const CHECK_SVG = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
+
     window.renderServices = function renderServices() {
       const container = document.getElementById("bookingServices");
-      container.innerHTML = services.map(s => '<div class="booking-service-option" data-id="' + s.id + '" data-name="' + s.name + '" data-price="' + s.price + '" onclick="selectService(this)"><span class="bso-name">' + s.name + '</span><span class="bso-price">$' + s.price + '</span></div>').join("");
+      container.innerHTML = services.map(s =>
+        '<div class="booking-service-option" data-id="' + s.id + '" data-name="' + s.name + '" data-price="' + s.price + '" onclick="selectService(this)">' +
+        '<div class="bso-left"><span class="bso-check">' + CHECK_SVG + '</span><span class="bso-name">' + s.name + '</span></div>' +
+        '<span class="bso-price">$' + s.price + '</span></div>'
+      ).join("");
     }
 
     window.selectService = function selectService(el) {
-      document.querySelectorAll(".booking-service-option").forEach(e => e.classList.remove("selected"));
-      el.classList.add("selected");
-      document.getElementById("selectedService").value = JSON.stringify({id: el.dataset.id, name: el.dataset.name, price: el.dataset.price});
+      const id = el.dataset.id;
+      if (_selectedServices[id]) {
+        delete _selectedServices[id];
+        el.classList.remove("selected");
+      } else {
+        _selectedServices[id] = { id, name: el.dataset.name, price: parseFloat(el.dataset.price) };
+        el.classList.add("selected");
+      }
+      updateTotal();
     }
 
     window.openBookingModal = function openBookingModal(preSelectName) { document.getElementById("bookingModal").classList.add("open"); loadServices(preSelectName); setupDateTime(); }
@@ -1530,6 +1603,11 @@
       document.getElementById("bookingSubmit").disabled = false;
       document.getElementById("bookingSubmit").textContent = "Book Now";
       _calSel = null;
+      _selectedServices = {};
+      _headCount = 1;
+      document.getElementById('headsCountDisplay').textContent = '1';
+      document.getElementById('headsDecBtn').style.visibility = 'hidden';
+      document.getElementById('bookingTotal').style.display = 'none';
       document.getElementById('customCal').classList.remove('open');
     }
 
@@ -1548,13 +1626,18 @@
     
     document.getElementById("bookingForm").addEventListener("submit", async (e) => {
       e.preventDefault();
+      const selectedList = Object.values(_selectedServices);
+      if (!selectedList.length) { alert("Please select at least one service."); return; }
+
       const btn = document.getElementById("bookingSubmit");
       btn.disabled = true; btn.textContent = "Booking...";
-      
-      const svc = JSON.parse(document.getElementById("selectedService").value);
+
       const date = document.getElementById("bookingDate").value;
       const time = document.getElementById("bookingTime").value;
-      
+      const heads = _headCount;
+      const servicesTotal = selectedList.reduce((t, s) => t + s.price, 0);
+      const totalPrice = servicesTotal * heads;
+
       try {
         await db.collection('bookings').add({
           customer: {
@@ -1562,7 +1645,9 @@
             email: document.getElementById("customerEmail").value,
             phone: document.getElementById("customerPhone").value
           },
-          service: { id: svc.id, name: svc.name, price: svc.price },
+          services: selectedList,
+          heads: heads,
+          total_price: totalPrice,
           date: date,
           time: time,
           barber: document.getElementById("selectedBarber").value,
@@ -1573,14 +1658,13 @@
         document.getElementById("bookingForm").style.display = "none";
         document.getElementById("bookingSuccess").style.display = "block";
 
-        // Send booking request email to customer
         emailjs.send(EMAILJS_SVC, EMAILJS_TPL_NEW, {
           to_email: document.getElementById("customerEmail").value,
           customer_name: document.getElementById("customerName").value,
-          service_name: svc.name,
+          service_name: selectedList.map(s => s.name).join(', '),
           booking_date: document.getElementById("bookingDateDisplay").value || date,
           booking_time: time,
-          price: '$' + svc.price
+          price: '$' + totalPrice + (heads > 1 ? ' (' + heads + ' heads)' : '')
         }, EMAILJS_PK).catch(err => console.warn('Email send failed:', err.status, err.text, err));
       } catch(err) { alert("Booking failed. Please try again."); btn.disabled = false; btn.textContent = "Book Now"; }
     });
