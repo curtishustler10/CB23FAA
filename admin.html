@@ -93,7 +93,7 @@
   .topbar {
     background: transparent;
     padding: 16px 28px; display: flex; align-items: center; justify-content: space-between;
-    position: fixed; top: 0; left: 0; width: 100%; z-index: 9999;
+    position: absolute; top: 0; left: 0; right: 0; width: 100%; z-index: 10;
   }
   .topbar-title { font-size: 22px; font-weight: 700; color: #fff; }
   .topbar-date { color: #999; font-size: 12px; margin-top: 4px; }
@@ -283,10 +283,15 @@
   .hero-container {
     width: 100%;
     height: 240px;
-    overflow: hidden;
     position: sticky;
     top: 0;
     z-index: 5;
+    border-radius: 20px 20px 0 0;
+  }
+  .hero-img-wrap {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
     border-radius: 20px 20px 0 0;
   }
   .hero-container img {
@@ -476,7 +481,7 @@
 
     #app.visible { display: block; }
     .main { width: 100%; }
-    .topbar { background: #1a1a1a; border-bottom-color: #2d2d2d; padding: 12px 16px; left: 0; }
+    .topbar { background: rgba(0,0,0,0.65); backdrop-filter: blur(6px); padding: 12px 16px; }
     .topbar-logo-img { display: block; }
     .topbar-brand-text { display: block; color: #fff; }
     .topbar-title { display: none; }
@@ -490,6 +495,7 @@
     .stats-grid { gap: 10px; margin-bottom: 20px; }
 
     .hero-container { height: 180px; border-radius: 0; }
+    .hero-img-wrap { border-radius: 0; }
 
     .service-row { flex-wrap: wrap; padding: 14px 16px; gap: 10px; }
     .service-price { min-width: auto; font-size: 18px; }
@@ -578,36 +584,37 @@
 
   <!-- MAIN CONTENT -->
   <div class="main">
-    <div class="topbar">
-      <div class="topbar-left">
-        <button class="hamburger" id="hamburger-btn" onclick="toggleSidebar()" aria-label="Toggle menu">
-          <span></span><span></span><span></span>
-        </button>
-        <img src="https://res.cloudinary.com/ecom-hustler/image/upload/v1773556292/logo_off1_miizyk.png" alt="CoolLooks" class="topbar-logo-img">
-        <span class="topbar-brand-text" id="page-title">Admin Dashboard</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:16px;position:relative">
-        <div class="topbar-profile" onclick="toggleProfileMenu()">
-          <div class="profile-avatar">CL</div>
-          <span class="profile-name">Admin</span>
-        </div>
-        <div class="profile-menu" id="profile-menu">
-          <div class="profile-menu-item" onclick="openSettings()">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-            Settings
-          </div>
-          <div class="profile-menu-item logout" onclick="doLogout()">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-            Logout
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <!-- HERO IMAGE -->
+    <!-- HERO + TOPBAR (one sticky unit) -->
     <div class="hero-container">
-      <img src="https://res.cloudinary.com/ecom-hustler/image/upload/v1773554998/hf_20260315_060122_618b5ca0-5b79-4fc7-86b9-19aa4d9f950c_xxtlsy.jpg" alt="CoolLooks Barberz">
-      <div class="hero-overlay"></div>
+      <div class="hero-img-wrap">
+        <img src="https://res.cloudinary.com/ecom-hustler/image/upload/v1773554998/hf_20260315_060122_618b5ca0-5b79-4fc7-86b9-19aa4d9f950c_xxtlsy.jpg" alt="CoolLooks Barberz">
+        <div class="hero-overlay"></div>
+      </div>
+      <div class="topbar">
+        <div class="topbar-left">
+          <button class="hamburger" id="hamburger-btn" onclick="toggleSidebar()" aria-label="Toggle menu">
+            <span></span><span></span><span></span>
+          </button>
+          <img src="https://res.cloudinary.com/ecom-hustler/image/upload/v1773556292/logo_off1_miizyk.png" alt="CoolLooks" class="topbar-logo-img">
+          <span class="topbar-brand-text" id="page-title">Admin Dashboard</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:16px;position:relative">
+          <div class="topbar-profile" onclick="toggleProfileMenu()">
+            <div class="profile-avatar">CL</div>
+            <span class="profile-name">Admin</span>
+          </div>
+          <div class="profile-menu" id="profile-menu">
+            <div class="profile-menu-item" onclick="openSettings()">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              Settings
+            </div>
+            <div class="profile-menu-item logout" onclick="doLogout()">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Logout
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
     
     <div class="page-content">
