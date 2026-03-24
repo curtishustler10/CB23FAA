@@ -876,18 +876,27 @@
   /* BOOKING MODAL */
   .booking-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; overflow-y: auto; overflow-x: hidden; padding: 20px; -webkit-overflow-scrolling: touch; }
   .booking-modal.open { display: flex; flex-direction: column; }
-  .booking-modal-content { max-width: 500px; width: 100%; margin: 40px auto; background: #1a1a1a; border-radius: 0; padding: 30px; position: relative; flex-shrink: 0; }
-  .booking-modal-close { position: absolute; top: 15px; right: 20px; font-size: 30px; color: #fff; cursor: pointer; background: none; border: none; }
-  .booking-modal h2 { color: #C9A84C; margin-bottom: 20px; }
-  .booking-form-group { margin-bottom: 15px; }
-  .booking-form-group label { display: block; color: #fff; margin-bottom: 5px; font-size: 14px; }
-  .booking-form-group input, .booking-form-group select { width: 100%; padding: 12px; background: #333; border: 1px solid #444; color: #fff; border-radius: 0; }
-  .booking-service-option { display: flex; justify-content: space-between; padding: 12px; background: #333; border: 1px solid #444; border-radius: 0; margin-bottom: 8px; cursor: pointer; }
-  .booking-service-option:hover, .booking-service-option.selected { border-color: #C9A84C; }
-  .booking-submit { width: 100%; padding: 14px; background: #C9A84C; color: #000; border: none; border-radius: 0; font-weight: 600; cursor: pointer; }
+  .booking-modal-content { max-width: 500px; width: 100%; margin: 40px auto; background: #1a1a1a; border: 1px solid rgba(201,168,76,0.15); padding: 30px; position: relative; flex-shrink: 0; }
+  .booking-modal-close { position: absolute; top: 15px; right: 20px; font-size: 28px; color: var(--gray); cursor: pointer; background: none; border: none; transition: color 0.2s; }
+  .booking-modal-close:hover { color: var(--white); }
+  .booking-modal h2 { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; letter-spacing: 0.2em; color: var(--accent); margin-bottom: 6px; }
+  .booking-modal-subtitle { font-size: 0.7rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gray); margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+  .booking-form-group { margin-bottom: 16px; }
+  .booking-form-group label { display: block; font-size: 0.6rem; letter-spacing: 0.35em; text-transform: uppercase; color: var(--gray); margin-bottom: 6px; }
+  .booking-form-group input, .booking-form-group select { width: 100%; padding: 12px; background: #111; border: 1px solid rgba(255,255,255,0.08); color: var(--white); border-radius: 0; font-family: 'Barlow', sans-serif; font-size: 0.9rem; font-weight: 300; transition: border-color 0.2s; }
+  .booking-form-group input:focus, .booking-form-group select:focus { outline: none; border-color: var(--accent); }
+  .booking-form-group input::placeholder { color: #555; }
+  .booking-form-group select option { background: #1a1a1a; }
+  .booking-service-option { display: flex; justify-content: space-between; align-items: baseline; padding: 12px 0; border-bottom: 1px solid var(--line); cursor: pointer; transition: padding-left 0.2s; gap: 1rem; }
+  .booking-service-option:hover, .booking-service-option.selected { padding-left: 6px; border-bottom-color: var(--accent); }
+  .booking-service-option.selected .bso-name { color: var(--accent); }
+  .bso-name { font-size: 0.85rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--white); }
+  .bso-price { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; font-weight: 300; color: var(--white); white-space: nowrap; }
+  .booking-submit { width: 100%; padding: 14px; background: var(--accent); color: #000; border: none; font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 0.25em; cursor: pointer; transition: background 0.2s; margin-top: 8px; }
   .booking-submit:hover { background: #b8973f; }
   .booking-success { display: none; text-align: center; padding: 40px 20px; }
-  .booking-success h3 { color: #4CAF50; margin-bottom: 10px; }
+  .booking-success h3 { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; letter-spacing: 0.2em; color: #4CAF50; margin-bottom: 10px; }
+  .booking-success p { font-size: 0.85rem; color: var(--gray); letter-spacing: 0.05em; }
 
   /* ─── CUSTOM DATE PICKER ──────────────────────────────────────────────── */
   .date-picker-wrap { position: relative; }
@@ -1276,6 +1285,7 @@
     <div class="booking-modal-content">
       <button class="booking-modal-close" onclick="closeBookingModal()">×</button>
       <h2>Book Your Appointment</h2>
+      <p class="booking-modal-subtitle">Coollooks Barberz — Slacks Creek</p>
       <form id="bookingForm">
         <div class="booking-form-group">
           <label>Select Service</label>
@@ -1502,7 +1512,7 @@
 
     window.renderServices = function renderServices() {
       const container = document.getElementById("bookingServices");
-      container.innerHTML = services.map(s => '<div class="booking-service-option" data-id="' + s.id + '" data-name="' + s.name + '" data-price="' + s.price + '" onclick="selectService(this)"><span>' + s.name + '</span><span>$' + s.price + '</span></div>').join("");
+      container.innerHTML = services.map(s => '<div class="booking-service-option" data-id="' + s.id + '" data-name="' + s.name + '" data-price="' + s.price + '" onclick="selectService(this)"><span class="bso-name">' + s.name + '</span><span class="bso-price">$' + s.price + '</span></div>').join("");
     }
 
     window.selectService = function selectService(el) {
