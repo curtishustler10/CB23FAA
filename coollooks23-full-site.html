@@ -1527,16 +1527,14 @@
         document.getElementById("bookingSuccess").style.display = "block";
 
         // Send booking request email to customer
-        if (EMAILJS_PK !== 'YOUR_PUBLIC_KEY') {
-          emailjs.send(EMAILJS_SVC, EMAILJS_TPL_NEW, {
-            to_email: document.getElementById("customerEmail").value,
-            customer_name: document.getElementById("customerName").value,
-            service_name: svc.name,
-            booking_date: document.getElementById("bookingDateDisplay").value || date,
-            booking_time: time,
-            price: '$' + svc.price
-          }).catch(err => console.warn('Email send failed:', err));
-        }
+        emailjs.send(EMAILJS_SVC, EMAILJS_TPL_NEW, {
+          to_email: document.getElementById("customerEmail").value,
+          customer_name: document.getElementById("customerName").value,
+          service_name: svc.name,
+          booking_date: document.getElementById("bookingDateDisplay").value || date,
+          booking_time: time,
+          price: '$' + svc.price
+        }, EMAILJS_PK).catch(err => console.warn('Email send failed:', err.status, err.text, err));
       } catch(err) { alert("Booking failed. Please try again."); btn.disabled = false; btn.textContent = "Book Now"; }
     });
   </script>
