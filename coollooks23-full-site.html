@@ -121,7 +121,7 @@
 
   /* mobile menu */
   .mobile-menu {
-    display: none;
+    display: flex;
     position: fixed;
     inset: 0;
     background: var(--black);
@@ -129,39 +129,52 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 2.5rem;
+    gap: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease;
   }
-  .mobile-menu.open { display: flex; }
+  .mobile-menu.open { opacity: 1; pointer-events: auto; }
   .mobile-menu a {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 3rem;
-    letter-spacing: 0.1em;
-    color: var(--white);
+    font-size: 2.6rem;
+    letter-spacing: 0.12em;
+    color: var(--light-gray);
     text-decoration: none;
-    transition: color 0.3s;
+    transition: color 0.2s;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--line);
+    width: 60%;
+    text-align: center;
   }
-  .mobile-menu a:hover { color: var(--accent); }
+  .mobile-menu a:last-of-type { border-bottom: none; }
+  .mobile-menu a:hover { color: var(--white); }
   .mobile-menu .btn-mobile {
-    margin-top: 1rem;
-    padding: 1rem 3rem;
-    background: var(--white);
+    margin-top: 2rem;
+    padding: 0.9rem 3rem;
+    background: var(--accent);
     color: var(--black);
-    font-family: 'Barlow', sans-serif;
-    font-size: 0.8rem;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem;
     letter-spacing: 0.3em;
     text-transform: uppercase;
-    font-weight: 500;
+    border: none;
+    transition: background 0.2s;
   }
+  .mobile-menu .btn-mobile:hover { background: #b8973f; color: var(--black); }
   .close-btn {
     position: absolute;
-    top: 2rem; right: 3rem;
-    font-size: 2rem;
-    color: var(--white);
+    top: 1.5rem; right: 1.5rem;
+    font-size: 1.5rem;
+    color: var(--gray);
     cursor: pointer;
     background: none;
     border: none;
     line-height: 1;
+    transition: color 0.2s;
+    padding: 0.5rem;
   }
+  .close-btn:hover { color: var(--white); }
 
   /* ─── HERO ─── */
   #hero {
@@ -1040,12 +1053,12 @@
 
 <!-- Mobile Menu -->
 <div class="mobile-menu" id="mobileMenu">
-  <button class="close-btn" onclick="closeMenu()" aria-label="Close menu">×</button>
+  <button class="close-btn" onclick="closeMenu()" aria-label="Close menu">✕</button>
   <a href="#services" onclick="closeMenu()">Services</a>
-  <a href="#masters" onclick="closeMenu()">Hair Stylists</a>
+  <a href="#masters" onclick="closeMenu()">Our Team</a>
   <a href="#blog" onclick="closeMenu()">Blog</a>
   <a href="#contact" onclick="closeMenu()">Contact</a>
-  <a href="#" onclick="openBookingModal(); return false;" class="btn-mobile">BOOK NOW</a>
+  <a href="#" onclick="openBookingModal(); return false;" class="btn-mobile">Book Now</a>
 </div>
 
 <!-- NAV -->
