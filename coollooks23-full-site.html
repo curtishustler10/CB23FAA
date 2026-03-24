@@ -642,6 +642,18 @@
     background: linear-gradient(transparent, rgba(0,0,0,0.9));
     z-index: 2;
   }
+  .master-card-book {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(0,0,0,0.45);
+    opacity: 0; transition: opacity 0.2s;
+    z-index: 3;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.9rem; letter-spacing: 0.3em;
+    color: var(--accent);
+  }
+  .master-card:hover .master-card-book { opacity: 1; }
   .master-name {
     font-family: 'Bebas Neue', sans-serif;
     font-size: 1.8rem;
@@ -1141,22 +1153,25 @@
   <div class="section-label fade-in">Our Team</div>
   <h2 class="section-title fade-in">Barbers</h2>
   <div class="masters-grid">
-    <div class="master-card fade-in">
+    <div class="master-card fade-in" onclick="openBookingModal(null, 'Obama')">
       <img class="master-card-img" src="https://res.cloudinary.com/ecom-hustler/image/upload/v1773556798/Obama_founder_main_barber_z6nj6y.jpg" alt="Obama">
+      <div class="master-card-book">BOOK</div>
       <div class="master-overlay">
         <span class="master-name">OBAMA</span>
         <p class="master-role">Founder & Main Barber</p>
       </div>
     </div>
-    <div class="master-card fade-in">
+    <div class="master-card fade-in" onclick="openBookingModal(null, 'Maurice')">
       <img class="master-card-img" src="https://res.cloudinary.com/ecom-hustler/image/upload/v1773556798/Maurice_barber_evn589.jpg" alt="Maurice">
+      <div class="master-card-book">BOOK</div>
       <div class="master-overlay">
         <span class="master-name">MAURICE</span>
         <p class="master-role">Barber</p>
       </div>
     </div>
-    <div class="master-card fade-in">
+    <div class="master-card fade-in" onclick="openBookingModal(null, 'Scorpion')">
       <img class="master-card-img" src="https://res.cloudinary.com/ecom-hustler/image/upload/v1773556798/Scorpion_barber_ft5bsu.jpg" alt="Scorpion">
+      <div class="master-card-book">BOOK</div>
       <div class="master-overlay">
         <span class="master-name">SCORPION</span>
         <p class="master-role">Barber</p>
@@ -1345,9 +1360,11 @@
         </div>
         <div class="booking-form-group">
           <label>Select Barber</label>
-          <select id="selectedBarber" required>
-            <option value="Any">Any Available Barber</option>
-            <!-- Add barber names here e.g. <option value="Jordan">Jordan</option> -->
+          <select id="selectedBarber">
+            <option value="Any">Any Available</option>
+            <option value="Obama">Obama</option>
+            <option value="Maurice">Maurice</option>
+            <option value="Scorpion">Scorpion</option>
           </select>
         </div>
         <div class="booking-form-group">
@@ -1594,7 +1611,12 @@
       updateTotal();
     }
 
-    window.openBookingModal = function openBookingModal(preSelectName) { document.getElementById("bookingModal").classList.add("open"); loadServices(preSelectName); setupDateTime(); }
+    window.openBookingModal = function openBookingModal(preSelectName, preSelectBarber) {
+      document.getElementById("bookingModal").classList.add("open");
+      loadServices(preSelectName);
+      setupDateTime();
+      if (preSelectBarber) document.getElementById('selectedBarber').value = preSelectBarber;
+    }
     window.closeBookingModal = function closeBookingModal() {
       document.getElementById("bookingModal").classList.remove("open");
       document.getElementById("bookingForm").style.display = "";
