@@ -89,7 +89,7 @@
   .sidebar-logout:hover { color: var(--danger); }
 
   /* MAIN */
-  .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .main { flex: 1; display: flex; flex-direction: column; min-width: 0; height: 100vh; overflow: hidden; }
   .topbar {
     background: transparent;
     padding: 16px 28px; display: flex; align-items: center; justify-content: space-between;
@@ -97,7 +97,7 @@
   }
   .topbar-title { font-size: 22px; font-weight: 700; color: #fff; }
   .topbar-date { color: #999; font-size: 12px; margin-top: 4px; }
-  .page-content { padding: 28px; flex: 1; }
+  .page-content { padding: 28px; flex: 1; overflow-y: auto; }
 
   /* TABS */
   .tab-panel { display: none; }
