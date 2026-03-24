@@ -1161,7 +1161,7 @@ async function updateBookingStatus(id, status) {
           booking_date:  b.date || '',
           booking_time:  b.time || '',
           price:         b.price != null ? '$' + Number(b.price).toFixed(2) : ''
-        }).catch(err => console.warn('Confirmation email failed:', err));
+        }, EMAILJS_PK).catch(err => console.warn('Confirmation email failed:', err.status, err.text, err));
       }
     }
 
