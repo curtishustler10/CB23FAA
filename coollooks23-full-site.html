@@ -407,12 +407,12 @@
   .service-row {
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
+    align-items: center;
     padding: 1rem 0;
     border-bottom: 1px solid var(--line);
     gap: 1rem;
     position: relative;
-    transition: background 0.2s, border-left 0.2s;
+    transition: background 0.2s, border-left 0.2s, padding 0.2s;
     border-left: 2px solid transparent;
   }
   .service-row:hover {
@@ -421,14 +421,38 @@
     padding-left: 0.5rem;
     padding-right: 0.5rem;
   }
-  .service-row::after {
-    content: '>';
-    position: absolute;
-    right: 0;
+
+  .service-chevron {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
     color: var(--gray);
-    transition: color 0.2s;
+    transition: color 0.2s, transform 0.2s;
   }
-  .service-row:hover::after { color: var(--accent); }
+  .service-chevron svg {
+    width: 14px;
+    height: 14px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .service-row:hover .service-chevron { color: var(--accent); transform: translateX(3px); }
+
+  .badge-popular {
+    display: inline-block;
+    font-size: 0.48rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--black);
+    background: var(--accent);
+    padding: 0.15rem 0.45rem;
+    margin-left: 0.5rem;
+    vertical-align: middle;
+    font-weight: 500;
+    font-family: 'Barlow', sans-serif;
+  }
 
   .service-info { flex: 1; }
   .service-name {
@@ -1055,184 +1079,6 @@
   .cal-d.cal-sel { background: #C9A84C; color: #000; font-weight: 700; border-color: #C9A84C; }
   .cal-d.cal-dis { color: #2a2a2a; cursor: default; }
   .cal-d.cal-empty { cursor: default; }
-
-/* ─── SERVICE MODAL ─── */
-.service-modal {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-  align-items: center;
-  justify-content: center;
-}
-.service-modal.open { display: flex; }
-
-.service-modal-backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.75);
-}
-
-.service-modal-content {
-  position: relative;
-  background: var(--dark, #111);
-  border: 1px solid var(--line, #2a2a2a);
-  max-width: 480px;
-  width: 90%;
-  max-height: 90vh;
-  overflow-y: auto;
-  padding: 32px 28px 28px;
-}
-
-/* Gold top bar */
-.service-modal-content::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, var(--accent), transparent);
-}
-
-.modal-close {
-  position: absolute;
-  top: 16px; right: 20px;
-  font-size: 24px;
-  color: var(--gray);
-  cursor: pointer;
-  background: none;
-  border: none;
-  line-height: 1;
-  transition: color 0.2s;
-  padding: 4px;
-}
-.modal-close:hover { color: var(--white); }
-
-.modal-cat {
-  font-size: 0.55rem;
-  letter-spacing: 0.4em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 0.4rem;
-}
-
-.modal-title {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 2rem;
-  letter-spacing: 0.1em;
-  color: var(--white);
-  margin-bottom: 0;
-  line-height: 1;
-}
-
-.modal-divider {
-  height: 1px;
-  background: var(--line);
-  margin: 1.2rem 0;
-}
-
-.modal-price-row {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  margin-bottom: 1.2rem;
-}
-
-.modal-price {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 3rem;
-  font-weight: 300;
-  color: var(--accent);
-  letter-spacing: 0.02em;
-  line-height: 1;
-}
-
-.modal-duration {
-  font-size: 0.7rem;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--gray);
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  border: 1px solid var(--line);
-  padding: 0.4rem 0.8rem;
-}
-.modal-duration svg { width: 11px; height: 11px; opacity: 0.6; }
-
-.modal-desc {
-  font-size: 0.85rem;
-  color: var(--light-gray);
-  line-height: 1.85;
-  margin-bottom: 1.5rem;
-}
-
-/* Detail grid — matches booking modal info style */
-.modal-details {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0;
-  border: 1px solid var(--line);
-  margin-bottom: 1.5rem;
-}
-
-.modal-detail-item {
-  padding: 0.85rem 1rem;
-  border-right: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-}
-.modal-detail-item:nth-child(even) { border-right: none; }
-.modal-detail-item:nth-last-child(-n+2) { border-bottom: none; }
-
-.modal-detail-label {
-  font-size: 0.55rem;
-  letter-spacing: 0.35em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 0.3rem;
-  font-weight: 500;
-}
-.modal-detail-value {
-  font-size: 0.8rem;
-  color: var(--light-gray);
-  letter-spacing: 0.05em;
-}
-
-/* Book button — exact match to site's .booking-submit */
-.modal-book-btn {
-  display: block;
-  width: 100%;
-  padding: 14px;
-  background: var(--accent);
-  color: #000;
-  border: none;
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 1rem;
-  letter-spacing: 0.25em;
-  cursor: pointer;
-  transition: background 0.2s;
-  text-align: center;
-  text-decoration: none;
-}
-.modal-book-btn:hover { background: #b8973f; }
-
-/* ─── FADE-IN (matches site) ─── */
-.fade-in {
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.8s ease, transform 0.8s ease;
-}
-.fade-in.visible { opacity: 1; transform: none; }
-
-/* ─── MOBILE ─── */
-@media (max-width: 900px) {
-  #services { padding: 3rem 1.5rem 4rem; }
-  .services-layout { grid-template-columns: 1fr; }
-  .services-gallery { max-height: 50vh; }
-  .services-header { flex-direction: column; align-items: flex-start; }
-  .service-modal-content { padding: 24px 20px; }
-  .modal-price { font-size: 2.4rem; }
-  .modal-details { grid-template-columns: 1fr 1fr; }
-}
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -1327,19 +1173,19 @@
       <div class="section-label">What We Offer</div>
       <h2 class="section-title">OUR SERVICES</h2>
     </div>
-    <p class="services-intro">Every cut is intentional. Walk in, walk out looking sharp.</p>
+    <p class="services-intro">Every service is tailored to you — precise, professional, and personal.</p>
   </div>
 
   <div class="services-layout fade-in">
     <!-- Menu Container -->
     <div class="services-menu">
-      <div class="services-menu-label">Tap a service to book</div>
+      <div class="services-menu-label">— Our Services —</div>
       <div id="public-services-list">
         <div style="color:var(--gray);font-size:0.85rem;padding:1rem 0;">Loading services…</div>
       </div>
       <div class="services-cta">
-        <p>Walk-ins welcome · Appointments preferred</p>
-        <a href="#" onclick="openBookingModal(); return false;" class="btn-primary">BOOK NOW</a>
+        <p>Walk-ins welcome — Appointments always preferred</p>
+        <a href="#" onclick="openBookingModal(); return false;" class="btn-primary">BOOK YOUR SESSION</a>
       </div>
     </div>
 
@@ -1797,7 +1643,15 @@
         list.innerHTML = Object.entries(cats).map(([cat, svcs]) =>
           '<div class="service-category"><p class="cat-title">' + cat + '</p>' +
           svcs.map(s =>
-            '<div class="service-row" data-name="' + s.name + '" onclick="openBookingModal(this.dataset.name)" style="cursor:pointer"><div class="service-info"><div class="service-name">' + s.name + '</div><div class="service-duration">' + (s.duration || 0) + ' min</div></div><div class="service-dots"></div><div class="service-price">$' + (s.price || 0) + '</div></div>'
+            '<div class="service-row" data-name="' + s.name + '" onclick="openBookingModal(this.dataset.name)" style="cursor:pointer">' +
+            '<div class="service-info">' +
+            '<div class="service-name">' + s.name + (s.popular ? '<span class="badge-popular">Popular</span>' : '') + '</div>' +
+            '<div class="service-duration">' + (s.duration || 0) + ' min</div>' +
+            '</div>' +
+            '<div class="service-dots"></div>' +
+            '<div class="service-price">$' + (s.price || 0) + '</div>' +
+            '<span class="service-chevron"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></span>' +
+            '</div>'
           ).join('') + '</div>'
         ).join('');
         console.log('[loadPublicServices] Done rendering.');
@@ -1927,32 +1781,5 @@
       } catch(err) { alert("Booking failed. Please try again."); btn.disabled = false; btn.textContent = "Book Now"; }
     });
   </script>
-
-<!-- Service Modal -->
-<div id="service-modal" class="service-modal">
-  <div class="service-modal-backdrop"></div>
-  <div class="service-modal-content">
-    <button class="modal-close">&times;</button>
-    <div class="modal-cat">CATEGORY</div>
-    <h3 class="modal-title">SERVICE NAME</h3>
-    <div class="modal-divider"></div>
-    <div class="modal-price-row">
-      <span class="modal-price">0</span>
-      <span class="modal-duration"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> 30 min</span>
-    </div>
-    <p class="modal-desc">Service description goes here.</p>
-    <div class="modal-details">
-      <div class="modal-detail-item">
-        <div class="modal-detail-label">Barber</div>
-        <div class="modal-detail-value">Any available</div>
-      </div>
-      <div class="modal-detail-item">
-        <div class="modal-detail-label">Location</div>
-        <div class="modal-detail-value">Coollooks23</div>
-      </div>
-    </div>
-    <button class="modal-book-btn">BOOK NOW</button>
-  </div>
-</div>
 </body>
 </html>
