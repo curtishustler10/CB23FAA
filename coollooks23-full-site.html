@@ -399,6 +399,7 @@
     font-weight:900;
     color: var(--accent);
     margin-bottom: 1rem;
+    padding-top: 0.25rem;
     padding-bottom: 0.5rem;
     border-bottom: 1px solid var(--line);
   }
@@ -406,13 +407,52 @@
   .service-row {
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
+    align-items: center;
     padding: 1rem 0;
     border-bottom: 1px solid var(--line);
     gap: 1rem;
-    transition: background 0.2s;
+    position: relative;
+    transition: background 0.2s, border-left 0.2s, padding 0.2s;
+    border-left: 2px solid transparent;
   }
-  .service-row:hover { background: rgba(255,255,255,0.02); padding-left: 0.5rem; padding-right: 0.5rem; }
+  .service-row:hover {
+    background: rgba(201,168,76,0.04);
+    border-left: 2px solid var(--accent);
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .service-chevron {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    color: var(--gray);
+    transition: color 0.2s, transform 0.2s;
+  }
+  .service-chevron svg {
+    width: 14px;
+    height: 14px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .service-row:hover .service-chevron { color: var(--accent); transform: translateX(3px); }
+
+  .badge-popular {
+    display: inline-block;
+    font-size: 0.48rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--black);
+    background: var(--accent);
+    padding: 0.15rem 0.45rem;
+    margin-left: 0.5rem;
+    vertical-align: middle;
+    font-weight: 500;
+    font-family: 'Barlow', sans-serif;
+  }
 
   .service-info { flex: 1; }
   .service-name {
@@ -426,7 +466,11 @@
     color: var(--gray);
     letter-spacing: 0.1em;
     margin-top: 0.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
   }
+  .service-duration::before { content: '⏱'; }
 
   .service-dots {
     flex: 1;
@@ -435,6 +479,7 @@
     margin: 0 1rem;
     opacity: 0.3;
     align-self: center;
+    display: none;
   }
 
   .service-price {
@@ -443,7 +488,9 @@
     font-weight: 300;
     color: var(--white);
     white-space: nowrap;
+    transition: color 0.2s;
   }
+  .service-row:hover .service-price { color: var(--accent); }
 
   .services-cta {
     margin-top: 2.5rem;
@@ -844,7 +891,7 @@
   }
   .ticker {
     display: flex;
-    animation: ticker 20s linear infinite;
+    animation: ticker 15s linear infinite;
     white-space: nowrap;
   }
   .ticker span {
@@ -1126,7 +1173,7 @@
       <div class="section-label">What We Offer</div>
       <h2 class="section-title">OUR SERVICES</h2>
     </div>
-    <p class="services-intro">Every service is tailored to you. Precise, professional, and personal.</p>
+    <p class="services-intro">Every service is tailored to you, precise, professional, and personal.</p>
   </div>
 
   <div class="services-layout fade-in">
@@ -1136,7 +1183,8 @@
         <div style="color:var(--gray);font-size:0.85rem;padding:1rem 0;">Loading services…</div>
       </div>
       <div class="services-cta">
-        <a href="#" onclick="openBookingModal(); return false;" class="btn-primary">BOOK NOW</a>
+        <p>Walk-ins welcome — Appointments always preferred</p>
+        <a href="#" onclick="openBookingModal(); return false;" class="btn-primary">BOOK YOUR SESSION</a>
       </div>
     </div>
 
@@ -1278,10 +1326,6 @@
       <div class="contact-item">
         <p class="contact-label">Phone</p>
         <p class="contact-value"><a href="tel:+61470224498">+61 470 224 498</a></p>
-      </div>
-      <div class="contact-item">
-        <p class="contact-label">Book</p>
-        <p class="contact-value"><a href="#" onclick="openBookingModal(); return false;" class="btn-primary" style="display:inline-block;margin-top:0.5rem;">CALL TO BOOK</a></p>
       </div>
     </div>
 
@@ -1611,10 +1655,26 @@
         const cats = {};
         active.forEach(s => { const c = s.category || 'Other'; if (!cats[c]) cats[c] = []; cats[c].push(s); });
         console.log('[loadPublicServices] Categories:', Object.keys(cats));
-        list.innerHTML = Object.entries(cats).map(([cat, svcs]) =>
+        const catOrder = ['MENS', 'STYLING', 'FACE', 'EXTRA'];
+        const sortedCats = Object.entries(cats).sort(([a], [b]) => {
+          const ai = catOrder.indexOf(a.toUpperCase()), bi = catOrder.indexOf(b.toUpperCase());
+          if (ai === -1 && bi === -1) return a.localeCompare(b);
+          if (ai === -1) return 1;
+          if (bi === -1) return -1;
+          return ai - bi;
+        });
+        list.innerHTML = sortedCats.map(([cat, svcs]) =>
           '<div class="service-category"><p class="cat-title">' + cat + '</p>' +
           svcs.map(s =>
-            '<div class="service-row" data-name="' + s.name + '" onclick="openBookingModal(this.dataset.name)" style="cursor:pointer"><div class="service-info"><div class="service-name">' + s.name + '</div><div class="service-duration">' + (s.duration || 0) + ' min</div></div><div class="service-dots"></div><div class="service-price">$' + (s.price || 0) + '</div></div>'
+            '<div class="service-row" data-name="' + s.name + '" onclick="openBookingModal(this.dataset.name)" style="cursor:pointer">' +
+            '<div class="service-info">' +
+            '<div class="service-name">' + s.name + (s.popular ? '<span class="badge-popular">Popular</span>' : '') + '</div>' +
+            '<div class="service-duration">' + (s.duration || 0) + ' min</div>' +
+            '</div>' +
+            '<div class="service-dots"></div>' +
+            '<div class="service-price">$' + (s.price || 0) + '</div>' +
+            '<span class="service-chevron"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></span>' +
+            '</div>'
           ).join('') + '</div>'
         ).join('');
         console.log('[loadPublicServices] Done rendering.');
