@@ -96,3 +96,33 @@ Gallery images are small. **Not a bottleneck.**
 | Email confirmations/month | **200 (hard cap)** |
 
 > **Recommendation:** Upgrade EmailJS to Basic ($15/mo). That is the only spend required at this scale. Everything else on free tier is fine for a local barbershop.
+
+---
+
+## Known Limitations
+
+- **EmailJS 3rd template blocked** — Free tier allows 2 templates only. The cancellation notification email template could not be added. EmailJS must be upgraded to Basic ($15/mo) to wire up the cancellation flow fully.
+
+---
+
+## Project Status
+
+**Website: Fully functional.** All core features are live — booking system, barber selection, slot availability, multi-service + heads counter, email confirmations (customer + admin), admin dashboard with role-based barber logins, gallery, blog, privacy policy.
+
+**Pending:** Customer to review, approve, and pay remaining project balance before handover.
+
+---
+
+## Post-Handover Options
+
+Once the remaining balance is settled, the customer needs to decide how they want to continue with the admin panel and booking system:
+
+### Option A — Monthly Retainer (recommended)
+Covers system hosting support, minor fixes, and availability if anything breaks.
+Suggested: **$79–$120/month**
+
+### Option B — One-Time Handover Fee
+Full ownership transferred, no ongoing support included. Future fixes billed separately.
+Suggested: **$400–$600**
+
+> **Note:** Option A is the better deal for both sides. The system runs on free/low-cost infrastructure so the monthly fee is pure margin. For the client it is cheaper than hiring a developer each time something needs attention. Recommend leading with Option A and offering Option B only if they push back on recurring costs.
