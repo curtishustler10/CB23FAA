@@ -399,6 +399,7 @@
     font-weight:900;
     color: var(--accent);
     margin-bottom: 1rem;
+    padding-top: 0.25rem;
     padding-bottom: 0.5rem;
     border-bottom: 1px solid var(--line);
   }
@@ -410,9 +411,24 @@
     padding: 1rem 0;
     border-bottom: 1px solid var(--line);
     gap: 1rem;
-    transition: background 0.2s;
+    position: relative;
+    transition: background 0.2s, border-left 0.2s;
+    border-left: 2px solid transparent;
   }
-  .service-row:hover { background: rgba(255,255,255,0.02); padding-left: 0.5rem; padding-right: 0.5rem; }
+  .service-row:hover {
+    background: rgba(201,168,76,0.04);
+    border-left: 2px solid var(--accent);
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+  .service-row::after {
+    content: '>';
+    position: absolute;
+    right: 0;
+    color: var(--gray);
+    transition: color 0.2s;
+  }
+  .service-row:hover::after { color: var(--accent); }
 
   .service-info { flex: 1; }
   .service-name {
@@ -426,7 +442,11 @@
     color: var(--gray);
     letter-spacing: 0.1em;
     margin-top: 0.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
   }
+  .service-duration::before { content: '⏱'; }
 
   .service-dots {
     flex: 1;
@@ -435,6 +455,7 @@
     margin: 0 1rem;
     opacity: 0.3;
     align-self: center;
+    display: none;
   }
 
   .service-price {
@@ -443,7 +464,9 @@
     font-weight: 300;
     color: var(--white);
     white-space: nowrap;
+    transition: color 0.2s;
   }
+  .service-row:hover .service-price { color: var(--accent); }
 
   .services-cta {
     margin-top: 2.5rem;
@@ -1126,16 +1149,18 @@
       <div class="section-label">What We Offer</div>
       <h2 class="section-title">OUR SERVICES</h2>
     </div>
-    <p class="services-intro">Every service is tailored to you. Precise, professional, and personal.</p>
+    <p class="services-intro">Every cut is intentional. Walk in, walk out looking sharp.</p>
   </div>
 
   <div class="services-layout fade-in">
     <!-- Menu Container -->
     <div class="services-menu">
+      <div class="services-menu-label">Tap a service to book</div>
       <div id="public-services-list">
         <div style="color:var(--gray);font-size:0.85rem;padding:1rem 0;">Loading services…</div>
       </div>
       <div class="services-cta">
+        <p>Walk-ins welcome · Appointments preferred</p>
         <a href="#" onclick="openBookingModal(); return false;" class="btn-primary">BOOK NOW</a>
       </div>
     </div>
