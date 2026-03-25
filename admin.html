@@ -484,7 +484,12 @@
     .sidebar.open { transform: translateX(0); }
 
     #app.visible { display: block; }
-    .main { width: 100%; }
+    .main { width: 100%; height: auto; min-height: 100vh; overflow: visible; }
+    .page-content { overflow: visible; }
+    .tab-panel.active { overflow: visible; min-height: auto; }
+    #tab-dashboard.active { overflow: visible; display: block; }
+    #tab-customers.active { overflow: visible; display: block; }
+    #tab-bookings.active { overflow: visible; display: block; }
     .topbar { background: #1a1a1a; border-bottom-color: #2d2d2d; padding: 12px 16px; left: 0; }
     .topbar-logo-img { display: block; }
     .topbar-brand-text { display: block; color: #fff; }
@@ -677,6 +682,13 @@
             <option value="completed">Completed</option>
             <option value="cancelled">Cancelled</option>
           </select>
+          <select class="filter-input" id="filter-barber" onchange="loadBookings()" style="display:none">
+            <option value="">All Barbers</option>
+            <option value="Any">Unassigned (Any)</option>
+            <option value="Obama">Obama</option>
+            <option value="Maurice">Maurice</option>
+            <option value="Scorpion">Scorpion</option>
+          </select>
           <button class="btn btn-outline btn-sm" onclick="filterToday()" id="btn-today">Today</button>
           <button class="btn btn-outline btn-sm" onclick="clearBookingFilters()">Clear</button>
           <button class="btn btn-gold btn-sm" onclick="loadBookings()" style="margin-left:auto">
@@ -687,8 +699,8 @@
         <div class="card">
           <div class="table-wrap">
             <table>
-              <thead><tr><th>Name</th><th>Service</th><th>Status</th><th class="actions-col">Actions</th></tr></thead>
-              <tbody id="bookings-body"><tr><td colspan="4" class="loading">Loading...</td></tr></tbody>
+              <thead><tr><th>Name</th><th>Service</th><th>Barber</th><th>Status</th><th class="actions-col">Actions</th></tr></thead>
+              <tbody id="bookings-body"><tr><td colspan="5" class="loading">Loading...</td></tr></tbody>
             </table>
           </div>
           <div class="status-legend">
@@ -911,6 +923,8 @@ const EMAILJS_TPL_CNF = 'template_taw0nt3';
 if (EMAILJS_PK !== 'YOUR_PUBLIC_KEY') emailjs.init(EMAILJS_PK);
 
 let currentAdmin = null;
+let currentRole = null;   // 'admin' | 'barber'
+let currentBarber = null; // 'Obama' | 'Maurice' | 'Scorpion' | null
 
 let allCustomers = [];
 let allBookings = [];
@@ -956,9 +970,13 @@ async function doLogin() {
     
     if (doc.exists) {
       const adminData = doc.data();
+      currentRole = adminData.role || 'admin';
+      currentBarber = adminData.barber || null;
       localStorage.setItem('cl_admin_auth', '1');
       localStorage.setItem('cl_admin_name', adminData.name || 'Admin');
       localStorage.setItem('cl_admin_pin', pin);
+      localStorage.setItem('cl_admin_role', currentRole);
+      localStorage.setItem('cl_admin_barber', currentBarber || '');
       document.getElementById('login-screen').classList.add('hidden');
       document.getElementById('app').classList.add('visible');
       initApp();
@@ -987,6 +1005,8 @@ function doLogout() {
   localStorage.removeItem('cl_admin_auth');
   localStorage.removeItem('cl_admin_name');
   localStorage.removeItem('cl_admin_pin');
+  localStorage.removeItem('cl_admin_role');
+  localStorage.removeItem('cl_admin_barber');
   location.reload();
 }
 
@@ -1010,8 +1030,13 @@ function initApp() {
   const initials = adminName.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
   document.querySelector('.profile-avatar').textContent = initials;
   document.querySelector('.profile-name').textContent = adminName;
-  
-  loadDashboard();
+
+  currentRole = localStorage.getItem('cl_admin_role') || 'admin';
+  currentBarber = localStorage.getItem('cl_admin_barber') || null;
+  if (currentBarber === '') currentBarber = null;
+  applyRoleRestrictions();
+  if (currentRole === 'admin') { seedBarberAccounts(); loadDashboard(); }
+  else switchTab('bookings');
 }
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -1021,6 +1046,42 @@ window.addEventListener('DOMContentLoaded', () => {
     initApp();
   }
 });
+
+// ─── ROLE RESTRICTIONS ───────────────────────────────────────────────────────
+function applyRoleRestrictions() {
+  if (currentRole === 'barber') {
+    document.getElementById('nav-dashboard').style.display = 'none';
+    document.getElementById('nav-customers').style.display = 'none';
+    document.getElementById('nav-services').style.display = 'none';
+    document.getElementById('nav-notifications').style.display = 'none';
+    document.querySelector('.sidebar-brand .sub').textContent = 'Barber Portal';
+  } else {
+    // Admin: show barber filter
+    const bf = document.getElementById('filter-barber');
+    if (bf) bf.style.display = '';
+  }
+}
+
+async function seedBarberAccounts() {
+  const barbers = [
+    { pin: '1111', name: 'Obama',    role: 'barber', barber: 'Obama' },
+    { pin: '2222', name: 'Maurice',  role: 'barber', barber: 'Maurice' },
+    { pin: '3333', name: 'Scorpion', role: 'barber', barber: 'Scorpion' },
+  ];
+  try {
+    for (const b of barbers) {
+      const ref = db.collection('admins').doc(b.pin);
+      const doc = await ref.get();
+      if (!doc.exists) await ref.set({ name: b.name, role: b.role, barber: b.barber });
+    }
+    // Ensure existing admin doc has role field
+    const adminRef = db.collection('admins').doc('9999');
+    const adminDoc = await adminRef.get();
+    if (adminDoc.exists && !adminDoc.data().role) await adminRef.update({ role: 'admin' });
+  } catch (e) {
+    console.warn('seedBarberAccounts failed:', e.message);
+  }
+}
 
 // ─── TABS ────────────────────────────────────────────────────────────────────
 const tabTitles = { dashboard: 'Dashboard', bookings: 'Bookings', customers: 'Customers', services: 'Services', notifications: 'Notifications' };
@@ -1113,7 +1174,7 @@ let totalBookingsPages = 1;
 
 async function loadBookings() {
   const tbody = document.getElementById('bookings-body');
-  tbody.innerHTML = '<tr><td colspan="4" class="loading">Loading...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="5" class="loading">Loading...</td></tr>';
   try {
     const filterDate   = document.getElementById('filter-date').value;
     const filterStatus = document.getElementById('filter-status').value;
@@ -1130,6 +1191,23 @@ async function loadBookings() {
     if (filterDate)   filtered = filtered.filter(b => (b.date || '').slice(0, 10) === filterDate);
     if (filterStatus) filtered = filtered.filter(b => b.status === filterStatus);
 
+    // Role-based barber filtering
+    if (currentRole === 'barber' && currentBarber) {
+      filtered = filtered.filter(b => {
+        const barber = b.barber || 'Any';
+        return barber === currentBarber || barber === 'Any';
+      });
+    } else {
+      const filterBarberEl = document.getElementById('filter-barber');
+      const filterBarber = filterBarberEl ? filterBarberEl.value : '';
+      if (filterBarber) {
+        filtered = filtered.filter(b => {
+          const barber = b.barber || 'Any';
+          return barber === filterBarber;
+        });
+      }
+    }
+
     // Calculate pagination
     totalBookingsPages = Math.ceil(filtered.length / ITEMS_PER_PAGE) || 1;
     if (bookingsPage > totalBookingsPages) bookingsPage = 1;
@@ -1137,20 +1215,25 @@ async function loadBookings() {
     const paginated = filtered.slice(startIdx, startIdx + ITEMS_PER_PAGE);
 
     if (!paginated.length) {
-      tbody.innerHTML = '<tr><td colspan="4" class="empty-state"><p>No bookings found</p></td></tr>';
+      tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><p>No bookings found</p></td></tr>';
     } else {
       tbody.innerHTML = paginated.map(b => {
-        const canConfirm = b.status === 'pending';
+        const canConfirm  = b.status === 'pending';
         const canComplete = b.status === 'confirmed';
-        const canCancel = b.status !== 'cancelled' && b.status !== 'completed';
+        const canCancel   = b.status !== 'cancelled' && b.status !== 'completed';
+        const barberLabel = b.barber || 'Any';
+        const isUnassigned = barberLabel === 'Any';
+        const isMyBooking  = currentRole === 'admin' || b.barber === currentBarber;
         return `<tr class="booking-row-clickable" onclick="openBookingById('${b.id}')">
           <td><span class="customer-link">${esc(b.user_name || 'N/A')}</span></td>
           <td>${esc(b.service_name || 'N/A')}</td>
+          <td><span class="badge" style="background:#f0f0e8;color:#555">${esc(barberLabel)}</span></td>
           <td>${statusBadge(b.status)}</td>
           <td class="actions-col"><div class="actions" onclick="event.stopPropagation()">
-            ${canConfirm  ? `<button class="btn btn-sm btn-confirm"  onclick="updateBookingStatus('${b.id}','confirmed')">Confirm</button>`  : ''}
-            ${canComplete ? `<button class="btn btn-sm btn-complete" onclick="updateBookingStatus('${b.id}','completed')">Complete</button>` : ''}
-            ${canCancel   ? `<button class="btn btn-sm btn-cancel"   onclick="updateBookingStatus('${b.id}','cancelled')">Cancel</button>`   : ''}
+            ${currentRole === 'barber' && isUnassigned ? `<button class="btn btn-sm btn-confirm" onclick="event.stopPropagation();acceptBooking('${b.id}')">Accept</button>` : ''}
+            ${isMyBooking && canConfirm  ? `<button class="btn btn-sm btn-confirm"  onclick="updateBookingStatus('${b.id}','confirmed')">Confirm</button>`  : ''}
+            ${isMyBooking && canComplete ? `<button class="btn btn-sm btn-complete" onclick="updateBookingStatus('${b.id}','completed')">Complete</button>` : ''}
+            ${isMyBooking && canCancel   ? `<button class="btn btn-sm btn-cancel"   onclick="updateBookingStatus('${b.id}','cancelled')">Cancel</button>`   : ''}
           </div></td>
         </tr>`;
       }).join('');
@@ -1162,7 +1245,7 @@ async function loadBookings() {
     document.getElementById('page-info').textContent = `Page ${bookingsPage} of ${totalBookingsPages}`;
   } catch (e) {
     console.error(e);
-    tbody.innerHTML = '<tr><td colspan="4" class="empty-state"><p>Error loading bookings</p></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><p>Error loading bookings</p></td></tr>';
     toast('Failed to load bookings: ' + e.message, 'error');
   }
 }
@@ -1472,6 +1555,9 @@ async function openBookingById(id) {
   const canConfirm  = b.status === 'pending';
   const canComplete = b.status === 'confirmed';
   const canCancel   = b.status !== 'cancelled' && b.status !== 'completed';
+  const barberLabel = b.barber || 'Any';
+  const isUnassigned = barberLabel === 'Any';
+  const isMyBooking  = currentRole === 'admin' || b.barber === currentBarber;
 
   document.getElementById('booking-modal-content').innerHTML = `
     <div class="form-group">
@@ -1498,15 +1584,28 @@ async function openBookingById(id) {
       <div class="form-label">Status</div>
       ${statusBadge(b.status)}
     </div>
+    <div class="form-group">
+      <div class="form-label">Barber</div>
+      ${currentRole === 'admin' ? `
+        <select class="form-input" id="reassign-barber-select">
+          <option value="Any" ${isUnassigned ? 'selected' : ''}>Any / Unassigned</option>
+          <option value="Obama" ${b.barber === 'Obama' ? 'selected' : ''}>Obama</option>
+          <option value="Maurice" ${b.barber === 'Maurice' ? 'selected' : ''}>Maurice</option>
+          <option value="Scorpion" ${b.barber === 'Scorpion' ? 'selected' : ''}>Scorpion</option>
+        </select>
+      ` : `<div style="font-size:15px">${esc(barberLabel)}</div>`}
+    </div>
     ${b.notes ? `<div class="form-group"><div class="form-label">Notes</div><div style="font-size:14px;color:var(--text-muted)">${esc(b.notes)}</div></div>` : ''}
     ${b.created_at ? `<div style="font-size:12px;color:#aaa;margin-top:8px">Booked: ${esc(formatDate(b.created_at))}</div>` : ''}
   `;
 
   document.getElementById('booking-modal-footer').innerHTML = `
     <button class="btn btn-secondary" onclick="closeBookingModal()">Close</button>
-    ${canConfirm  ? `<button class="btn btn-confirm"  onclick="updateBookingStatus('${b.id}','confirmed');closeBookingModal()">Confirm</button>`  : ''}
-    ${canComplete ? `<button class="btn btn-complete" onclick="updateBookingStatus('${b.id}','completed');closeBookingModal()">Complete</button>` : ''}
-    ${canCancel   ? `<button class="btn btn-cancel"   onclick="updateBookingStatus('${b.id}','cancelled');closeBookingModal()">Cancel</button>`   : ''}
+    ${currentRole === 'barber' && isUnassigned ? `<button class="btn btn-confirm" onclick="acceptBooking('${b.id}')">Accept Booking</button>` : ''}
+    ${currentRole === 'admin' ? `<button class="btn btn-gold" onclick="reassignBarber('${b.id}')">Save Barber</button>` : ''}
+    ${isMyBooking && canConfirm  ? `<button class="btn btn-confirm"  onclick="updateBookingStatus('${b.id}','confirmed');closeBookingModal()">Confirm</button>`  : ''}
+    ${isMyBooking && canComplete ? `<button class="btn btn-complete" onclick="updateBookingStatus('${b.id}','completed');closeBookingModal()">Complete</button>` : ''}
+    ${isMyBooking && canCancel   ? `<button class="btn btn-cancel"   onclick="updateBookingStatus('${b.id}','cancelled');closeBookingModal()">Cancel</button>`   : ''}
   `;
 
   document.getElementById('booking-modal-overlay').classList.remove('hidden');
@@ -1648,6 +1747,33 @@ function viewCustomerFile(name, email) {
       }
     }, 100);
   }, 300);
+}
+
+// ─── BARBER ACTIONS ──────────────────────────────────────────────────────────
+async function acceptBooking(id) {
+  if (!currentBarber) return;
+  try {
+    await db.collection('bookings').doc(id).update({ barber: currentBarber });
+    toast(`Booking accepted — assigned to ${currentBarber}`, 'success');
+    closeBookingModal();
+    loadBookings();
+  } catch (e) {
+    toast('Failed to accept booking: ' + e.message, 'error');
+  }
+}
+
+async function reassignBarber(id) {
+  const sel = document.getElementById('reassign-barber-select');
+  if (!sel) return;
+  const barber = sel.value;
+  try {
+    await db.collection('bookings').doc(id).update({ barber });
+    toast(`Booking assigned to ${barber}`, 'success');
+    closeBookingModal();
+    loadBookings();
+  } catch (e) {
+    toast('Failed to reassign barber: ' + e.message, 'error');
+  }
 }
 
 // Close modals on overlay click
