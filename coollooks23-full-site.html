@@ -1640,7 +1640,15 @@
         const cats = {};
         active.forEach(s => { const c = s.category || 'Other'; if (!cats[c]) cats[c] = []; cats[c].push(s); });
         console.log('[loadPublicServices] Categories:', Object.keys(cats));
-        list.innerHTML = Object.entries(cats).map(([cat, svcs]) =>
+        const catOrder = ['MENS', 'STYLING', 'FACE', 'EXTRA'];
+        const sortedCats = Object.entries(cats).sort(([a], [b]) => {
+          const ai = catOrder.indexOf(a.toUpperCase()), bi = catOrder.indexOf(b.toUpperCase());
+          if (ai === -1 && bi === -1) return a.localeCompare(b);
+          if (ai === -1) return 1;
+          if (bi === -1) return -1;
+          return ai - bi;
+        });
+        list.innerHTML = sortedCats.map(([cat, svcs]) =>
           '<div class="service-category"><p class="cat-title">' + cat + '</p>' +
           svcs.map(s =>
             '<div class="service-row" data-name="' + s.name + '" onclick="openBookingModal(this.dataset.name)" style="cursor:pointer">' +
