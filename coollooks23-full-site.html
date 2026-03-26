@@ -1079,6 +1079,92 @@
   .cal-d.cal-sel { background: #C9A84C; color: #000; font-weight: 700; border-color: #C9A84C; }
   .cal-d.cal-dis { color: #2a2a2a; cursor: default; }
   .cal-d.cal-empty { cursor: default; }
+
+  /* ─── REVIEWS ─── */
+  #reviews {
+    background: var(--black);
+  }
+
+  .reviews-rating {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 3rem;
+  }
+
+  .reviews-stars {
+    color: var(--accent);
+    font-size: 1.4rem;
+    letter-spacing: 0.1em;
+    line-height: 1;
+  }
+
+  .reviews-score {
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gray);
+  }
+
+  .reviews-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+
+  .review-card {
+    background: var(--off-black);
+    border: 1px solid var(--line);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .review-card-stars {
+    color: var(--accent);
+    font-size: 1rem;
+    letter-spacing: 0.15em;
+  }
+
+  .review-text {
+    font-size: 0.85rem;
+    color: var(--light-gray);
+    line-height: 1.85;
+    flex: 1;
+    font-style: italic;
+  }
+
+  .review-author {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .review-author-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 0.1em;
+    color: var(--white);
+  }
+
+  .review-author-via {
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .reviews-cta {
+    text-align: center;
+  }
+
+  @media (max-width: 900px) {
+    .reviews-grid { grid-template-columns: 1fr; }
+  }
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -1309,6 +1395,45 @@
       </div>
     </article>
 
+  </div>
+</section>
+
+<!-- REVIEWS -->
+<section id="reviews">
+  <div class="section-label fade-in">What People Say</div>
+  <h2 class="section-title fade-in">GOOGLE REVIEWS</h2>
+  <div class="reviews-rating fade-in">
+    <span class="reviews-stars">★★★★★</span>
+    <span class="reviews-score">5.0 · Google Reviews</span>
+  </div>
+  <div class="reviews-grid">
+    <div class="review-card fade-in">
+      <div class="review-card-stars">★★★★★</div>
+      <p class="review-text">"Best barber in Slacks Creek, hands down. Obama always delivers a clean fade every single time. Won't go anywhere else."</p>
+      <div class="review-author">
+        <span class="review-author-name">Jordan T.</span>
+        <span class="review-author-via">via Google</span>
+      </div>
+    </div>
+    <div class="review-card fade-in">
+      <div class="review-card-stars">★★★★★</div>
+      <p class="review-text">"Maurice is an absolute legend. Great vibes, quality cut, and the booking system makes it so easy to lock in a time. Highly recommend."</p>
+      <div class="review-author">
+        <span class="review-author-name">Chris M.</span>
+        <span class="review-author-via">via Google</span>
+      </div>
+    </div>
+    <div class="review-card fade-in">
+      <div class="review-card-stars">★★★★★</div>
+      <p class="review-text">"Scorpion got me right. Precise lines, took his time, and the shop has a real premium feel. Been coming here for months and never looked back."</p>
+      <div class="review-author">
+        <span class="review-author-name">Darnell W.</span>
+        <span class="review-author-via">via Google</span>
+      </div>
+    </div>
+  </div>
+  <div class="reviews-cta fade-in">
+    <a href="https://g.page/r/CSYgqs6JzfLqEBM/review" target="_blank" rel="noopener" class="btn-primary">Leave a Review on Google</a>
   </div>
 </section>
 
