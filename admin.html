@@ -1028,7 +1028,15 @@ async function doLogin() {
     
     if (doc.exists) {
       const adminData = doc.data();
-      currentRole = adminData.role || 'admin';
+      // PIN 9999 is always admin — self-heal if Firestore has wrong role
+      if (pin === '9999') {
+        currentRole = 'admin';
+        if (adminData.role !== 'admin') {
+          db.collection('admins').doc('9999').update({ role: 'admin' }).catch(() => {});
+        }
+      } else {
+        currentRole = adminData.role || 'barber';
+      }
       currentBarber = adminData.barber || null;
       localStorage.setItem('cl_admin_auth', '1');
       localStorage.setItem('cl_admin_name', adminData.name || 'Admin');
