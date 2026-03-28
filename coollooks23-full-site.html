@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>COOLLOOKS23 — Local Barbershop</title>
+<link rel="icon" type="image/png" href="https://res.cloudinary.com/ecom-hustler/image/upload/v1773556292/logo_off1_miizyk.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
@@ -1649,13 +1650,14 @@
     const db = firebase.firestore();
 
     // ─── EMAIL CONFIG (emailjs.com) ───────────────────────────────────────────
-    // 1. Sign up free at emailjs.com  2. Connect Gmail  3. Create two templates:
-    //    New booking template vars: {{to_email}} {{customer_name}} {{service_name}} {{booking_date}} {{booking_time}} {{price}}
-    //    Confirm template vars:     same as above
-    // 4. Paste your keys below.
-    const EMAILJS_PK      = '4TD6bNFXZ5s96pSVY';
-    const EMAILJS_SVC     = 'service_5uftud9';
-    const EMAILJS_TPL_NEW = 'template_0s3hqqf';
+    // Template vars for barber notification (EMAILJS_TPL_BARBER):
+    //   {{to_email}} {{barber_name}} {{customer_name}} {{service_name}}
+    //   {{booking_date}} {{booking_time}} {{price}} {{confirm_link}} {{decline_link}}
+    const EMAILJS_PK         = '4TD6bNFXZ5s96pSVY';
+    const EMAILJS_SVC        = 'service_5uftud9';
+    const EMAILJS_TPL_NEW    = 'template_0s3hqqf';
+    const EMAILJS_TPL_BARBER = 'template_lmtskhf';
+    const SITE_URL           = 'https://coollooksbarberz.com';
     if (EMAILJS_PK !== 'YOUR_PUBLIC_KEY') emailjs.init(EMAILJS_PK);
 
     // ─── CUSTOM CALENDAR ─────────────────────────────────────────────────────
@@ -1905,7 +1907,10 @@
       const totalPrice = servicesTotal * heads;
 
       try {
-        await db.collection('bookings').add({
+        const notifToken = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+        const selectedBarber = document.getElementById("selectedBarber").value;
+
+        const bookingRef = await db.collection('bookings').add({
           customer: {
             name: document.getElementById("customerName").value,
             email: document.getElementById("customerEmail").value,
@@ -1916,14 +1921,16 @@
           total_price: totalPrice,
           date: date,
           time: time,
-          barber: document.getElementById("selectedBarber").value,
+          barber: selectedBarber,
           status: "pending",
+          notifToken: notifToken,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
 
         document.getElementById("bookingForm").style.display = "none";
         document.getElementById("bookingSuccess").style.display = "block";
 
+        // Customer notification
         emailjs.send(EMAILJS_SVC, EMAILJS_TPL_NEW, {
           to_email: document.getElementById("customerEmail").value,
           customer_name: document.getElementById("customerName").value,
@@ -1931,7 +1938,42 @@
           booking_date: document.getElementById("bookingDateDisplay").value || date,
           booking_time: time,
           price: '$' + totalPrice + (heads > 1 ? ' (' + heads + ' heads)' : '')
-        }, EMAILJS_PK).catch(err => console.warn('Email send failed:', err.status, err.text, err));
+        }, EMAILJS_PK).catch(err => console.warn('Customer email failed:', err.status, err.text, err));
+
+        // Barber notification(s)
+        if (EMAILJS_TPL_BARBER !== 'YOUR_BARBER_TEMPLATE_ID') {
+          const adminSnap = await db.collection('admins').get();
+          const allBarbers = [];
+          adminSnap.forEach(doc => {
+            const d = doc.data();
+            if (d.role === 'barber' && d.email) allBarbers.push(d);
+          });
+
+          const targets = selectedBarber === 'Any'
+            ? allBarbers
+            : allBarbers.filter(b => b.barber === selectedBarber);
+
+          const bookingId    = bookingRef.id;
+          const serviceLabel = selectedList.map(s => s.name).join(', ');
+          const priceLabel   = '$' + totalPrice + (heads > 1 ? ' (' + heads + ' heads)' : '');
+          const dateLabel    = document.getElementById("bookingDateDisplay").value || date;
+          const custName     = document.getElementById("customerName").value;
+
+          for (const barberDoc of targets) {
+            const base = `${SITE_URL}/barber-action.html?id=${bookingId}&barber=${encodeURIComponent(barberDoc.barber)}&token=${notifToken}`;
+            emailjs.send(EMAILJS_SVC, EMAILJS_TPL_BARBER, {
+              to_email:     barberDoc.email,
+              barber_name:  barberDoc.barber,
+              customer_name: custName,
+              service_name: serviceLabel,
+              booking_date: dateLabel,
+              booking_time: time,
+              price:        priceLabel,
+              confirm_link: base + '&action=confirm',
+              decline_link: base + '&action=decline'
+            }, EMAILJS_PK).catch(err => console.warn('Barber email failed:', err.status, err.text, err));
+          }
+        }
       } catch(err) { alert("Booking failed. Please try again."); btn.disabled = false; btn.textContent = "Book Now"; }
     });
   </script>

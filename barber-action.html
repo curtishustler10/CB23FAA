@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coollooks Barberz — Booking Action</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #111; color: #fff;
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    padding: 24px;
+  }
+  .card {
+    background: #1a1a1a; border: 1px solid #2a2a2a;
+    border-radius: 4px; padding: 48px 40px;
+    max-width: 480px; width: 100%; text-align: center;
+  }
+  .logo { font-size: 13px; letter-spacing: 4px; text-transform: uppercase; color: #c9a84c; margin-bottom: 40px; }
+  .icon { font-size: 48px; margin-bottom: 20px; }
+  h1 { font-size: 22px; font-weight: 700; margin-bottom: 12px; }
+  p { color: rgba(255,255,255,0.6); font-size: 15px; line-height: 1.6; }
+  .detail-block {
+    background: #0f0f0f; border: 1px solid #2a2a2a;
+    border-radius: 4px; padding: 20px; margin: 28px 0;
+    text-align: left;
+  }
+  .detail-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px; }
+  .detail-row:not(:last-child) { border-bottom: 1px solid #1f1f1f; }
+  .detail-label { color: rgba(255,255,255,0.4); }
+  .detail-value { color: #fff; font-weight: 600; }
+  .btn {
+    display: inline-block; padding: 14px 32px;
+    background: #c9a84c; color: #000;
+    font-weight: 700; font-size: 15px; letter-spacing: 1px;
+    border: none; border-radius: 0; cursor: pointer;
+    text-decoration: none; margin-top: 8px;
+    width: 100%;
+  }
+  .btn:hover { background: #e4c170; }
+  .spinner {
+    width: 36px; height: 36px;
+    border: 3px solid #2a2a2a; border-top-color: #c9a84c;
+    border-radius: 50%; animation: spin 0.8s linear infinite;
+    margin: 0 auto 24px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .badge-success { color: #4ade80; }
+  .badge-decline { color: #f87171; }
+  .badge-warning { color: #c9a84c; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="logo">Coollooks Barberz</div>
+  <div id="state-loading">
+    <div class="spinner"></div>
+    <p>Processing your response...</p>
+  </div>
+  <div id="state-confirmed" style="display:none">
+    <div class="icon badge-success">✓</div>
+    <h1>Booking Confirmed</h1>
+    <p>You've confirmed this booking. The customer will receive a confirmation email.</p>
+    <div class="detail-block" id="detail-block-confirmed"></div>
+  </div>
+  <div id="state-declined" style="display:none">
+    <div class="icon badge-decline">✕</div>
+    <h1>Booking Declined</h1>
+    <p>You've declined this booking. It will remain open for other barbers.</p>
+  </div>
+  <div id="state-already-taken" style="display:none">
+    <div class="icon badge-warning">⚑</div>
+    <h1>Already Confirmed</h1>
+    <p>This booking has already been confirmed by another barber. The link is no longer active.</p>
+  </div>
+  <div id="state-already-declined" style="display:none">
+    <div class="icon" style="color:rgba(255,255,255,0.3)">○</div>
+    <h1>Already Actioned</h1>
+    <p>This booking has already been cancelled or is no longer pending.</p>
+  </div>
+  <div id="state-error" style="display:none">
+    <div class="icon badge-decline">!</div>
+    <h1>Something went wrong</h1>
+    <p id="error-msg">Unable to process this request. Please log into the admin panel.</p>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDRxXMVd2ZJmbbKZ-DsBEY7jd5_g493iOk",
+    authDomain: "coollooks-c76ec.firebaseapp.com",
+    projectId: "coollooks-c76ec",
+    storageBucket: "coollooks-c76ec.firebasestorage.app",
+    messagingSenderId: "749477472175",
+    appId: "1:749477472175:web:6b2591091cd914e30e315a"
+  };
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  const EMAILJS_PK      = '4TD6bNFXZ5s96pSVY';
+  const EMAILJS_SVC     = 'service_5uftud9';
+  const EMAILJS_TPL_CNF = 'template_taw0nt3'; // customer confirmation template
+  emailjs.init(EMAILJS_PK);
+
+  function show(id) {
+    ['loading','confirmed','declined','already-taken','already-declined','error'].forEach(s => {
+      document.getElementById('state-' + s).style.display = s === id ? '' : 'none';
+    });
+  }
+
+  function showError(msg) {
+    document.getElementById('error-msg').textContent = msg || 'Unable to process this request.';
+    show('error');
+  }
+
+  function renderDetails(b) {
+    const services = Array.isArray(b.services) ? b.services.map(s => s.name).join(', ') : (b.service_name || '—');
+    const price = b.total_price != null ? '$' + b.total_price : '—';
+    const el = document.getElementById('detail-block-confirmed');
+    el.innerHTML = [
+      ['Customer', b.customer?.name || b.user_name || '—'],
+      ['Service',  services],
+      ['Date',     b.date || '—'],
+      ['Time',     b.time || '—'],
+      ['Price',    price],
+    ].map(([label, value]) =>
+      `<div class="detail-row"><span class="detail-label">${label}</span><span class="detail-value">${value}</span></div>`
+    ).join('');
+  }
+
+  async function processAction() {
+    const params   = new URLSearchParams(window.location.search);
+    const id       = params.get('id');
+    const barber   = params.get('barber');
+    const action   = params.get('action');
+    const token    = params.get('token');
+
+    if (!id || !barber || !action || !token) {
+      showError('Invalid link — missing required parameters.'); return;
+    }
+    if (action !== 'confirm' && action !== 'decline') {
+      showError('Invalid action.'); return;
+    }
+
+    const ref = db.collection('bookings').doc(id);
+
+    try {
+      if (action === 'confirm') {
+        // Atomic transaction: only the first barber to confirm wins
+        await db.runTransaction(async (tx) => {
+          const doc = await tx.get(ref);
+          if (!doc.exists) throw { code: 'not_found' };
+
+          const data = doc.data();
+
+          if (data.notifToken !== token) throw { code: 'invalid_token' };
+          if (data.status !== 'pending')  throw { code: 'already_actioned', status: data.status };
+
+          // For specific-barber bookings, make sure this is the right barber
+          if (data.barber !== 'Any' && data.barber !== barber) throw { code: 'wrong_barber' };
+
+          tx.update(ref, {
+            status: 'confirmed',
+            barber: barber,
+            confirmedAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        });
+
+        // Send customer confirmation email
+        const snap = await ref.get();
+        const b = snap.data();
+        renderDetails(b);
+        const custEmail = b.customer?.email || b.user_email;
+        const custName  = b.customer?.name  || b.user_name || 'Valued Customer';
+        if (custEmail) {
+          const services = Array.isArray(b.services) ? b.services.map(s => s.name).join(', ') : (b.service_name || '');
+          emailjs.send(EMAILJS_SVC, EMAILJS_TPL_CNF, {
+            to_email:      custEmail,
+            customer_name: custName,
+            service_name:  services,
+            booking_date:  b.date  || '',
+            booking_time:  b.time  || '',
+            price:         b.total_price != null ? '$' + b.total_price : ''
+          }, EMAILJS_PK).catch(err => console.warn('Confirmation email failed:', err));
+        }
+
+        show('confirmed');
+
+      } else {
+        // Decline — just validate token then mark declined for this barber
+        const snap = await ref.get();
+        if (!snap.exists) { showError('Booking not found.'); return; }
+        const data = snap.data();
+
+        if (data.notifToken !== token)  { showError('Invalid or expired link.'); return; }
+        if (data.status !== 'pending') {
+          if (data.status === 'confirmed') { show('already-taken'); return; }
+          show('already-declined'); return;
+        }
+        // For "Any" bookings, a decline by one barber leaves it open for others.
+        // For a specific-barber booking, decline sets status to declined.
+        if (data.barber !== 'Any') {
+          await ref.update({ status: 'declined' });
+        }
+        show('declined');
+      }
+
+    } catch (e) {
+      if (e.code === 'already_actioned') {
+        if (e.status === 'confirmed') show('already-taken');
+        else show('already-declined');
+      } else if (e.code === 'not_found') {
+        showError('Booking not found.');
+      } else if (e.code === 'invalid_token') {
+        showError('This link is invalid or has expired.');
+      } else if (e.code === 'wrong_barber') {
+        showError('This booking is assigned to a different barber.');
+      } else {
+        showError(e.message || 'Unexpected error.');
+      }
+    }
+  }
+
+  processAction();
+</script>
+</body>
+</html>

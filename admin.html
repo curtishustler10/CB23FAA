@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CoolLooks Barberz - Admin</title>
+<link rel="icon" type="image/png" href="https://res.cloudinary.com/ecom-hustler/image/upload/v1773556292/logo_off1_miizyk.png">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   :root {
@@ -828,8 +829,8 @@
           </div>
           <div class="table-wrap">
             <table id="barbers-table">
-              <thead><tr><th>Name</th><th>Role</th><th>Barber</th><th>PIN</th><th></th></tr></thead>
-              <tbody id="barbers-tbody"><tr><td colspan="5" class="empty-state"><p>Loading...</p></td></tr></tbody>
+              <thead><tr><th>Name</th><th>Role</th><th>Barber</th><th>Email</th><th>PIN</th><th></th></tr></thead>
+              <tbody id="barbers-tbody"><tr><td colspan="6" class="empty-state"><p>Loading...</p></td></tr></tbody>
             </table>
           </div>
         </div>
@@ -864,6 +865,10 @@
         <option value="Scorpion">Scorpion</option>
         <option value="">None / Admin</option>
       </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Email (for booking notifications)</label>
+      <input type="email" class="form-input" id="barber-modal-email" placeholder="e.g. obama@coollooks.com">
     </div>
     <div class="form-group">
       <label class="form-label">PIN (4 digits)</label>
@@ -974,6 +979,7 @@ const db = firebase.firestore();
 const EMAILJS_PK      = '4TD6bNFXZ5s96pSVY';
 const EMAILJS_SVC     = 'service_5uftud9';
 const EMAILJS_TPL_CNF = 'template_taw0nt3';
+const EMAILJS_TPL_CAN = 'template_wpuxswb';
 if (EMAILJS_PK !== 'YOUR_PUBLIC_KEY') emailjs.init(EMAILJS_PK);
 
 let currentAdmin = null;
@@ -1008,21 +1014,64 @@ function checkAuth() {
   return localStorage.getItem('cl_admin_auth') === '1';
 }
 
+const MAX_ATTEMPTS  = 4;
+const LOCKOUT_MS    = 15 * 60 * 1000; // 15 minutes
+
+function getLockout() {
+  const until = parseInt(sessionStorage.getItem('cl_lockout_until') || '0', 10);
+  return until > Date.now() ? until : null;
+}
+
+function recordFailedAttempt() {
+  const attempts = parseInt(sessionStorage.getItem('cl_attempts') || '0', 10) + 1;
+  if (attempts >= MAX_ATTEMPTS) {
+    sessionStorage.setItem('cl_lockout_until', String(Date.now() + LOCKOUT_MS));
+    sessionStorage.removeItem('cl_attempts');
+  } else {
+    sessionStorage.setItem('cl_attempts', String(attempts));
+  }
+  return attempts;
+}
+
+function clearAttempts() {
+  sessionStorage.removeItem('cl_attempts');
+  sessionStorage.removeItem('cl_lockout_until');
+}
+
+function startLockoutTimer(errorEl) {
+  function tick() {
+    const until = getLockout();
+    if (!until) { errorEl.textContent = ''; return; }
+    const mins = Math.ceil((until - Date.now()) / 60000);
+    errorEl.textContent = `Too many attempts. Try again in ${mins} minute${mins !== 1 ? 's' : ''}.`;
+    setTimeout(tick, 10000);
+  }
+  tick();
+}
+
 async function doLogin() {
   const pin = document.getElementById('login-pin').value.trim();
   const errorEl = document.getElementById('login-error');
   errorEl.textContent = '';
-  
+
+  const lockoutUntil = getLockout();
+  if (lockoutUntil) {
+    startLockoutTimer(errorEl);
+    document.getElementById('login-pin').value = '';
+    return;
+  }
+
   if (!pin || pin.length !== 4 || !/^\d{4}$/.test(pin)) {
     errorEl.textContent = 'Please enter a valid 4-digit PIN';
     return;
   }
-  
+
   try {
     // Check PIN against admins collection
     const doc = await db.collection('admins').doc(pin).get();
-    
+
     if (doc.exists) {
+      clearAttempts();
       const adminData = doc.data();
       // PIN 9999 is always admin — self-heal if Firestore has wrong role
       if (pin === '9999') {
@@ -1043,7 +1092,13 @@ async function doLogin() {
       document.getElementById('app').classList.add('visible');
       initApp();
     } else {
-      errorEl.textContent = 'Invalid PIN. Contact administrator.';
+      const attempts = recordFailedAttempt();
+      if (getLockout()) {
+        startLockoutTimer(errorEl);
+      } else {
+        const remaining = MAX_ATTEMPTS - attempts;
+        errorEl.textContent = `Invalid PIN. ${remaining} attempt${remaining !== 1 ? 's' : ''} remaining.`;
+      }
       document.getElementById('login-pin').value = '';
     }
   } catch (e) {
@@ -1162,9 +1217,10 @@ async function loadBarbers() {
         <td><strong>${esc(a.name || '—')}</strong></td>
         <td><span class="status-badge ${a.role === 'admin' ? 'status-confirmed' : 'status-pending'}">${esc(a.role || 'barber')}</span></td>
         <td>${esc(a.barber || '—')}</td>
+        <td style="color:${a.email ? 'var(--text)' : 'var(--text-muted)'}; font-size:13px">${esc(a.email || '—')}</td>
         <td><span style="font-family:monospace;letter-spacing:4px">${'•'.repeat(a.pin ? a.pin.length : 4)}</span>
           <span style="color:var(--text-muted);font-size:12px;margin-left:6px">(${esc(a.pin)})</span></td>
-        <td><button class="btn btn-sm btn-gold" onclick="openEditBarberModal('${esc(a.pin)}','${esc(a.name||'')}','${esc(a.role||'barber')}','${esc(a.barber||'')}')">Edit</button>
+        <td><button class="btn btn-sm btn-gold" onclick="openEditBarberModal('${esc(a.pin)}','${esc(a.name||'')}','${esc(a.role||'barber')}','${esc(a.barber||'')}','${esc(a.email||'')}')">Edit</button>
             <button class="btn btn-sm" style="background:var(--danger);color:#fff;margin-left:6px" onclick="deleteBarberAccount('${esc(a.pin)}','${esc(a.name||'')}')">Delete</button></td>
       </tr>`).join('');
   } catch (e) {
@@ -1177,6 +1233,7 @@ function openAddBarberModal() {
   document.getElementById('barber-modal-name').value = '';
   document.getElementById('barber-modal-role').value = 'barber';
   document.getElementById('barber-modal-barber').value = 'Obama';
+  document.getElementById('barber-modal-email').value = '';
   document.getElementById('barber-modal-pin').value = '';
   document.getElementById('barber-modal-pin-original').value = '';
   document.getElementById('barber-modal-pin').removeAttribute('readonly');
@@ -1184,11 +1241,12 @@ function openAddBarberModal() {
   document.getElementById('barber-modal').style.display = 'flex';
 }
 
-function openEditBarberModal(pin, name, role, barber) {
+function openEditBarberModal(pin, name, role, barber, email) {
   document.getElementById('barber-modal-title').textContent = 'Edit Barber';
   document.getElementById('barber-modal-name').value = name;
   document.getElementById('barber-modal-role').value = role;
   document.getElementById('barber-modal-barber').value = barber;
+  document.getElementById('barber-modal-email').value = email || '';
   document.getElementById('barber-modal-pin').value = pin;
   document.getElementById('barber-modal-pin-original').value = pin;
   document.getElementById('barber-modal-error').textContent = '';
@@ -1203,6 +1261,7 @@ async function saveBarberAccount() {
   const name    = document.getElementById('barber-modal-name').value.trim();
   const role    = document.getElementById('barber-modal-role').value;
   const barber  = document.getElementById('barber-modal-barber').value;
+  const email   = document.getElementById('barber-modal-email').value.trim();
   const pin     = document.getElementById('barber-modal-pin').value.trim();
   const origPin = document.getElementById('barber-modal-pin-original').value;
   const errEl   = document.getElementById('barber-modal-error');
@@ -1215,7 +1274,7 @@ async function saveBarberAccount() {
     if (origPin && origPin !== pin) {
       await db.collection('admins').doc(origPin).delete();
     }
-    await db.collection('admins').doc(pin).set({ name, role, barber: role === 'admin' ? '' : barber });
+    await db.collection('admins').doc(pin).set({ name, role, barber: role === 'admin' ? '' : barber, email: email || '' });
     closeBarberModal();
     toast(`${name} saved`, 'success');
     loadBarbers();
@@ -1419,18 +1478,22 @@ async function updateBookingStatus(id, status) {
     await db.collection('bookings').doc(id).update({ status });
     toast(`Booking ${status}`, 'success');
 
-    // Email customer when booking is confirmed
-    if (status === 'confirmed' && EMAILJS_PK !== 'YOUR_PUBLIC_KEY') {
-      const b = allBookings.find(x => x.id === id);
-      if (b && b.user_email) {
-        emailjs.send(EMAILJS_SVC, EMAILJS_TPL_CNF, {
-          to_email:      b.user_email,
-          customer_name: b.user_name  || 'Valued Customer',
-          service_name:  b.service_name || '',
-          booking_date:  b.date || '',
-          booking_time:  b.time || '',
-          price:         b.price != null ? '$' + Number(b.price).toFixed(2) : ''
-        }, EMAILJS_PK).catch(err => console.warn('Confirmation email failed:', err.status, err.text, err));
+    const b = allBookings.find(x => x.id === id);
+    if (b && b.user_email) {
+      const payload = {
+        to_email:      b.user_email,
+        customer_name: b.user_name     || 'Valued Customer',
+        service_name:  b.service_name  || '',
+        booking_date:  b.date          || '',
+        booking_time:  b.time          || '',
+        price:         b.price != null ? '$' + Number(b.price).toFixed(2) : ''
+      };
+      if (status === 'confirmed') {
+        emailjs.send(EMAILJS_SVC, EMAILJS_TPL_CNF, payload, EMAILJS_PK)
+          .catch(err => console.warn('Confirmation email failed:', err.status, err.text, err));
+      } else if (status === 'cancelled') {
+        emailjs.send(EMAILJS_SVC, EMAILJS_TPL_CAN, payload, EMAILJS_PK)
+          .catch(err => console.warn('Cancellation email failed:', err.status, err.text, err));
       }
     }
 
