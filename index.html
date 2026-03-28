@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Coming Soon — COOLLOOKS23</title>
+<title>COOLLOOKS23 — Local Barbershop</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
@@ -27,14 +27,10 @@
     color: var(--white);
     font-family: 'Barlow', sans-serif;
     font-weight: 300;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     overflow-x: hidden;
   }
 
-  /* Geometric overlay */
+  /* ─── GEOMETRIC OVERLAY ─── */
   .geo-bg {
     position: fixed;
     inset: 0;
@@ -45,117 +41,1909 @@
   }
   .geo-bg svg { width: 100%; height: 100%; }
 
-  .container {
+  /* ─── NAV ─── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 4rem;
+    transition: background 0.4s;
+  }
+  nav.scrolled { background: rgba(5,5,5,0.97); border-bottom: 1px solid var(--line); }
+
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+  }
+  .nav-logo img {
+    height: 50px;
+    width: auto;
+  }
+  .nav-logo-text {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    letter-spacing: 0.2em;
+    color: var(--white);
+    line-height: 1.1;
+  }
+  .nav-logo-text span {
+    display: block;
+    font-size: 0.7rem;
+    letter-spacing: 0.35em;
+    color: var(--accent);
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 2.5rem;
+    list-style: none;
+  }
+  .nav-links a {
+    color: var(--light-gray);
+    text-decoration: none;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    transition: color 0.3s;
+  }
+  .nav-links a:hover { color: var(--white); }
+
+  .btn-nav {
+    background: var(--white);
+    color: var(--black) !important;
+    padding: 0.6rem 1.4rem;
+    font-weight: 500 !important;
+  }
+  .btn-nav:hover { background: var(--accent) !important; color: var(--black) !important; }
+
+  /* hamburger */
+  .hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+    background: none;
+    border: none;
+  }
+  .hamburger span {
+    display: block;
+    width: 26px;
+    height: 1px;
+    background: var(--white);
+    transition: all 0.3s;
+  }
+
+  /* mobile menu */
+  .mobile-menu {
+    display: flex;
+    position: fixed;
+    inset: 0;
+    background: var(--black);
+    z-index: 200;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease;
+  }
+  .mobile-menu.open { opacity: 1; pointer-events: auto; }
+  .mobile-menu a {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.6rem;
+    letter-spacing: 0.12em;
+    color: var(--light-gray);
+    text-decoration: none;
+    transition: color 0.2s;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--line);
+    width: 60%;
+    text-align: center;
+  }
+  .mobile-menu a:last-of-type { border-bottom: none; }
+  .mobile-menu a:hover { color: var(--white); }
+  .mobile-menu .btn-mobile {
+    margin-top: 2rem;
+    padding: 0.9rem 3rem;
+    background: var(--accent);
+    color: var(--black);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    border: none;
+    transition: background 0.2s;
+  }
+  .mobile-menu .btn-mobile:hover { background: #b8973f; color: var(--black); }
+  .close-btn {
+    position: absolute;
+    top: 1.5rem; right: 1.5rem;
+    font-size: 1.5rem;
+    color: var(--gray);
+    cursor: pointer;
+    background: none;
+    border: none;
+    line-height: 1;
+    transition: color 0.2s;
+    padding: 0.5rem;
+  }
+  .close-btn:hover { color: var(--white); }
+
+  /* ─── HERO ─── */
+  #hero {
     position: relative;
     z-index: 1;
-    text-align: center;
-    padding: 2rem;
-    max-width: 600px;
+    min-height: 92vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
   }
 
-  .logo {
+  .hero-left {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 4rem 5rem;
+    position: relative;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .hero-left.hero-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .hero-left.hero-scrolled-out {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+
+  .hero-eyebrow {
+    font-size: 0.65rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+  }
+
+  .hero-headline {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 4rem;
-    letter-spacing: 0.15em;
-    line-height: 1;
-    margin-bottom: 0.25rem;
+    font-size: clamp(5rem, 5vw, 9rem);
+    line-height: 0.95;
+    letter-spacing: 0.02em;
   }
-  .logo span {
-    display: block;
-    font-size: 1.2rem;
-    letter-spacing: 0.5em;
-    color: var(--accent);
-    font-family: 'Barlow', sans-serif;
-    font-weight: 300;
-  }
-
-  h1 {
+  .hero-headline em {
     font-family: 'Cormorant Garamond', serif;
-    font-size: 2.5rem;
-    font-weight: 300;
     font-style: italic;
+    font-weight: 300;
     color: var(--accent);
-    margin-top: 3rem;
-    margin-bottom: 1rem;
   }
 
-  .tagline {
-    font-size: 1.1rem;
+  .hero-sub {
+    margin-top: 2rem;
+    font-size: 0.9rem;
     color: var(--light-gray);
-    line-height: 1.6;
-    margin-bottom: 2.5rem;
+    line-height: 1.8;
+    max-width: 340px;
   }
 
-  .status {
+  .hero-address {
+    margin-top: 2.5rem;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gray);
+    line-height: 2;
+    border-left: 1px solid var(--accent);
+    padding-left: 1rem;
+  }
+
+  .hero-cta {
+    margin-top: 3rem;
     display: inline-block;
-    padding: 0.6rem 1.5rem;
-    border: 1px solid var(--accent);
-    color: var(--accent);
+    background: var(--white);
+    color: var(--black);
+    padding: 1rem 2.5rem;
     font-size: 0.7rem;
     letter-spacing: 0.3em;
     text-transform: uppercase;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.3s;
+    text-align: center;
+  }
+  .hero-cta:hover { background: var(--accent); }
+
+  .hero-right {
+    position: relative;
+    overflow: hidden;
+    background: #111;
   }
 
-  .contact {
-    margin-top: 3rem;
-    font-size: 0.9rem;
+  .hero-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* barbershop pole SVG decoration */
+  .hero-deco {
+    position: absolute;
+    bottom: 3rem;
+    right: 3rem;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
     color: var(--gray);
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
   }
-  .contact a {
+
+  .hero-number {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20vw;
+    color: rgba(255,255,255,0.03);
+    letter-spacing: -0.05em;
+    user-select: none;
+  }
+
+  /* ─── SECTION COMMON ─── */
+  section {
+    position: relative;
+    z-index: 1;
+    padding: 4rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .section-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.5em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .section-label::after {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    letter-spacing: 0.05em;
+    margin-bottom: 1rem;
+  }
+
+  /* ─── SERVICES ─── */
+  #services {
+    background: var(--off-black);
+  }
+
+  .services-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin: 0 auto 3rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+    max-width: 1400px;
+  }
+
+  .services-intro {
+    font-size: 0.85rem;
+    color: var(--gray);
+    max-width: 300px;
+    line-height: 1.8;
+  }
+
+  .services-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: start;
+    max-width: 1400px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  /* Menu container */
+  .services-menu {
+    min-width: 0;
+    max-height: 80vh;
+    overflow-y: auto;
+    padding-right: 1.5rem;
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent) transparent;
+  }
+  .services-menu::-webkit-scrollbar { width: 3px; }
+  .services-menu::-webkit-scrollbar-track { background: transparent; }
+  .services-menu::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+
+  .services-menu-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--gray);
+    margin-bottom: 2rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .service-category {
+    margin-bottom: 2.5rem;
+  }
+
+  .cat-title {
+    font-size: 0.6rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    font-weight:900;
+    color: var(--accent);
+    margin-bottom: 1rem;
+    padding-top: 0.25rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .service-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--line);
+    gap: 1rem;
+    position: relative;
+    transition: background 0.2s, border-left 0.2s, padding 0.2s;
+    border-left: 2px solid transparent;
+  }
+  .service-row:hover {
+    background: rgba(201,168,76,0.04);
+    border-left: 2px solid var(--accent);
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .service-chevron {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    color: var(--gray);
+    transition: color 0.2s, transform 0.2s;
+  }
+  .service-chevron svg {
+    width: 14px;
+    height: 14px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .service-row:hover .service-chevron { color: var(--accent); transform: translateX(3px); }
+
+  .badge-popular {
+    display: inline-block;
+    font-size: 0.48rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--black);
+    background: var(--accent);
+    padding: 0.15rem 0.45rem;
+    margin-left: 0.5rem;
+    vertical-align: middle;
+    font-weight: 500;
+    font-family: 'Barlow', sans-serif;
+  }
+
+  .service-info { flex: 1; }
+  .service-name {
+    font-size: 0.9rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
     color: var(--white);
-    text-decoration: none;
-    transition: color 0.3s;
   }
-  .contact a:hover {
+  .service-duration {
+    font-size: 0.65rem;
+    color: var(--gray);
+    letter-spacing: 0.1em;
+    margin-top: 0.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+  .service-duration::before { content: '⏱'; }
+
+  .service-dots {
+    flex: 1;
+    height: 1px;
+    background: repeating-linear-gradient(90deg, var(--gray) 0, var(--gray) 2px, transparent 2px, transparent 8px);
+    margin: 0 1rem;
+    opacity: 0.3;
+    align-self: center;
+    display: none;
+  }
+
+  .service-price {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.2rem;
+    font-weight: 300;
+    color: var(--white);
+    white-space: nowrap;
+    transition: color 0.2s;
+  }
+  .service-row:hover .service-price { color: var(--accent); }
+
+  .services-cta {
+    margin-top: 2.5rem;
+    text-align: center;
+    padding: 2rem;
+  }
+  .services-cta p {
+    font-size: 0.8rem;
+    color: var(--gray);
+    letter-spacing: 0.1em;
+    margin-bottom: 1.5rem;
+  }
+  .btn-primary {
+    display: inline-block;
+    background: var(--white);
+    color: var(--black);
+    padding: 1rem 2.5rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.3s;
+    cursor: pointer;
+    border: none;
+  }
+  .btn-primary:hover { background: var(--accent); }
+
+  /* Gallery container */
+  .services-gallery {
+    position: relative;
+    min-width: 0;
+    max-height: 80vh;
+    overflow: hidden;
+    border-radius: 2px;
+  }
+
+  .services-gallery-label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 2;
+    font-size: 0.6rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--white);
+    padding: 1rem 1.5rem;
+    background: linear-gradient(to bottom, rgba(5,5,5,0.8) 0%, transparent 100%);
+  }
+
+  .gallery-scroll-track {
+    display: flex;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+
+  .gallery-masonry-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    animation: galleryScroll 40s linear infinite;
+  }
+  .gallery-masonry-col:nth-child(2) {
+    animation-direction: reverse;
+    animation-duration: 50s;
+  }
+  .gallery-masonry-col:nth-child(3) {
+    animation-duration: 45s;
+  }
+
+  .gallery-masonry-col img {
+    width: 100%;
+    display: block;
+    border-radius: 2px;
+    object-fit: cover;
+  }
+
+  .services-gallery::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 80px;
+    background: linear-gradient(to top, var(--off-black) 0%, transparent 100%);
+    z-index: 1;
+    pointer-events: none;
+  }
+  .services-gallery::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 80px;
+    background: linear-gradient(to bottom, var(--off-black) 0%, transparent 100%);
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  @keyframes galleryScroll {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-50%); }
+  }
+
+  /* ─── BLOG ─── */
+  .blog-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    margin-top: 1rem;
+  }
+
+  .blog-card {
+    border: 1px solid var(--line);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    transition: border-color 0.3s;
+  }
+  .blog-card:hover { border-color: var(--accent); }
+
+  .blog-card-top {
+    height: 3px;
+    background: var(--accent);
+    width: 40px;
+  }
+
+  .blog-category {
+    font-size: 0.55rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
     color: var(--accent);
   }
 
-  .divider {
-    width: 60px;
-    height: 1px;
-    background: var(--accent);
-    margin: 2rem auto;
+  .blog-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    letter-spacing: 0.05em;
+    line-height: 1.1;
+    color: var(--white);
   }
 
-  @media (max-width: 768px) {
-    .logo { font-size: 3rem; }
-    h1 { font-size: 2rem; }
-    .container { padding: 1.5rem; }
+  .blog-excerpt {
+    font-size: 0.82rem;
+    color: var(--light-gray);
+    line-height: 1.85;
+    flex: 1;
+  }
+
+  .blog-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1rem;
+    border-top: 1px solid var(--line);
+    margin-top: auto;
+  }
+
+.blog-link {
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+  .blog-link:hover { color: var(--white); }
+
+  /* ─── TEAM ─── */
+  #masters {
+    background: var(--off-black);
+  }
+
+  .masters-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+  }
+
+  .master-card {
+    position: relative;
+    aspect-ratio: 3/4;
+    overflow: hidden;
+    background: #1a1a1a;
+    cursor: pointer;
+  }
+
+  .master-card-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 1;
+  }
+
+  .master-card-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(160deg, #1e1e1e, #0a0a0a);
+    z-index: 1;
+  }
+  .master-card-placeholder img {
+    width: 80px;
+    height: auto;
+    opacity: 0.6;
+  }
+
+  .master-overlay {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 2rem 1.5rem;
+    background: linear-gradient(transparent, rgba(0,0,0,0.9));
+    z-index: 2;
+  }
+  .master-card-book {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(0,0,0,0.45);
+    opacity: 0; transition: opacity 0.2s;
+    z-index: 3;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.9rem; letter-spacing: 0.3em;
+    color: var(--accent);
+  }
+  .master-card:hover .master-card-book { opacity: 1; }
+  .master-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    letter-spacing: 0.1em;
+    display: block;
+  }
+  .master-role {
+    font-size: 0.6rem;
+    letter-spacing: 0.25em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-top: 0.3rem;
+  }
+
+  /* ─── CONTACT ─── */
+  #contact {
+    display: block;
+  }
+
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr 1fr;
+    gap: 3rem;
+    align-items: start;
+  }
+
+  .contact-item {
+    margin-bottom: 2.5rem;
+  }
+  .contact-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+  .contact-value {
+    font-size: 0.9rem;
+    color: var(--light-gray);
+    line-height: 1.8;
+  }
+  .contact-value a {
+    color: var(--light-gray);
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+  .contact-value a:hover { color: var(--white); }
+
+  .hours-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.4rem 2rem;
+    font-size: 0.8rem;
+  }
+  .hours-day { color: var(--gray); text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.7rem; }
+
+  .social-links {
+    display: flex;
+    gap: 1.2rem;
+    margin-top: 0.5rem;
+  }
+  .social-links a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    transition: border-color 0.3s, background 0.3s;
+  }
+  .social-links a:hover {
+    border-color: var(--accent);
+    background: rgba(201,168,76,0.1);
+  }
+  .social-links a svg {
+    width: 18px;
+    height: 18px;
+    fill: var(--light-gray);
+    transition: fill 0.3s;
+  }
+  .social-links a:hover svg { fill: var(--accent); }
+  .hours-time { color: var(--light-gray); }
+
+  /* ─── MAP ─── */
+  .contact-map iframe {
+    width: 100%;
+    height: 100%;
+    min-height: 320px;
+    border: 1px solid var(--line);
+    filter: grayscale(100%) invert(90%) contrast(85%);
+    display: block;
+  }
+
+  /* ─── FOOTER ─── */
+  footer {
+    border-top: 1px solid var(--line);
+    padding: 2rem 4rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .footer-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .footer-logo img {
+    height: 40px;
+    width: auto;
+    opacity: 0.7;
+  }
+  .footer-logo-text {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.2em;
+    color: var(--gray);
+    line-height: 1.1;
+  }
+  .footer-logo-text span {
+    display: block;
+    font-size: 0.55rem;
+    letter-spacing: 0.35em;
+    color: var(--accent);
+    opacity: 0.7;
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+    flex-wrap: wrap;
+  }
+  .footer-links a {
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gray);
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+  .footer-links a:hover { color: var(--white); }
+
+  .footer-copy {
+    font-size: 0.6rem;
+    color: var(--gray);
+    letter-spacing: 0.1em;
+  }
+
+  /* ─── SCROLLING TICKER ─── */
+  .ticker-wrap {
+    overflow: hidden;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    padding: 0.8rem 0;
+    position: relative;
+    z-index: 1;
+    background: var(--black);
+  }
+  .ticker {
+    display: flex;
+    animation: ticker 15s linear infinite;
+    white-space: nowrap;
+  }
+  .ticker span {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.9rem;
+    letter-spacing: 0.4em;
+    color: var(--gray);
+    padding: 0 3rem;
+  }
+  .ticker span em { color: var(--accent); font-style: normal; }
+  @keyframes ticker {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  /* ─── ANIMATIONS ─── */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .fade-in.visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 900px) {
+    nav { padding: 0.8rem 1rem; }
+    .nav-links { display: none; }
+    .hamburger { display: flex; }
+
+    #hero { grid-template-columns: 1fr; position: relative; height: 60svh; height: 60vh; max-height: 60svh; max-height: 60vh; }
+    .hero-right { position: absolute; inset: 0; min-height: unset; }
+    .hero-left {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      padding: 1.5rem 2rem 2rem;
+      min-height: unset;
+      height: unset;
+      justify-content: flex-end;
+      background: linear-gradient(to bottom, rgba(5,5,5,0.1) 0%, rgba(5,5,5,0.65) 50%, rgba(5,5,5,0.92) 100%);
+    }
+.hero-headline {
+  font-size: 3.8rem;
+}
+
+    section { padding: 3rem 2rem; }
+    section.hero { padding: 0 !important; }
+    .services-layout { grid-template-columns: 1fr; max-width: none; }
+    .services-gallery { max-height: 50vh; }
+    .gallery-scroll-track { gap: 0.4rem; }
+    .services-header { flex-direction: column; align-items: flex-start; }
+
+    .blog-grid { grid-template-columns: 1fr; gap: 2rem; }
+    .masters-grid { grid-template-columns: 1fr; }
+    .contact-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+    .contact-grid > div:nth-child(3) { order: 2; }
+    .contact-map { order: 3; }
+    .contact-map iframe { min-height: 240px; }
+
+    footer { padding: 2rem; flex-direction: column; align-items: flex-start; gap: 1.5rem; }
+    .footer-links { gap: 1rem; }
+  }
+  /* BOOKING MODAL */
+  .booking-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; overflow-y: auto; overflow-x: hidden; padding: 20px; -webkit-overflow-scrolling: touch; }
+  .booking-modal.open { display: flex; flex-direction: column; }
+  .booking-modal-content { max-width: 500px; width: 100%; margin: 40px auto; background: #1a1a1a; border: 1px solid rgba(201,168,76,0.15); padding: 30px; position: relative; flex-shrink: 0; }
+  .booking-modal-close { position: absolute; top: 15px; right: 20px; font-size: 28px; color: var(--gray); cursor: pointer; background: none; border: none; transition: color 0.2s; }
+  .booking-modal-close:hover { color: var(--white); }
+  .booking-modal h2 { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; letter-spacing: 0.2em; color: var(--accent); margin-bottom: 6px; }
+  .booking-modal-subtitle { font-size: 0.7rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gray); margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+  .booking-form-group { margin-bottom: 16px; }
+  .booking-form-group label { display: block; font-size: 0.6rem; letter-spacing: 0.35em; text-transform: uppercase; color: var(--gray); margin-bottom: 6px; }
+  .booking-form-group input, .booking-form-group select { width: 100%; padding: 12px; background: #111; border: 1px solid rgba(255,255,255,0.08); color: var(--white); border-radius: 0; font-family: 'Barlow', sans-serif; font-size: 0.9rem; font-weight: 300; transition: border-color 0.2s; }
+  .booking-form-group input:focus, .booking-form-group select:focus { outline: none; border-color: var(--accent); }
+  .booking-form-group input::placeholder { color: #555; }
+  .booking-form-group select option { background: #1a1a1a; }
+  .booking-service-option { display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--line); cursor: pointer; transition: background 0.15s; gap: 1rem; }
+  .booking-service-option:hover { background: rgba(201,168,76,0.04); padding-left: 4px; }
+  .booking-service-option.selected { padding-left: 4px; }
+  .booking-service-option.selected .bso-name { color: var(--accent); }
+  .booking-service-option.selected .bso-price { color: var(--accent); }
+  .booking-service-option.selected .bso-check { opacity: 1; }
+  .bso-left { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
+  .bso-check { width: 14px; height: 14px; flex-shrink: 0; opacity: 0; transition: opacity 0.15s; color: var(--accent); }
+  .bso-check svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.5; }
+  .bso-name { font-size: 0.85rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--white); }
+  .bso-price { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; font-weight: 300; color: var(--white); white-space: nowrap; }
+  .booking-submit { width: 100%; padding: 14px; background: var(--accent); color: #000; border: none; font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 0.25em; cursor: pointer; transition: background 0.2s; margin-top: 8px; }
+  .booking-submit:hover { background: #b8973f; }
+  .booking-success { display: none; text-align: center; padding: 40px 20px; }
+  .booking-success .success-icon { font-size: 2rem; color: var(--accent); margin-bottom: 16px; }
+  .booking-success h3 { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 0.25em; color: var(--accent); margin-bottom: 8px; }
+  .booking-success .success-sub { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1rem; color: var(--white); margin-bottom: 16px; letter-spacing: 0.05em; }
+  .booking-success p { font-size: 0.78rem; color: var(--gray); letter-spacing: 0.1em; text-transform: uppercase; line-height: 1.8; }
+  .booking-success .success-divider { width: 40px; height: 1px; background: var(--accent); margin: 16px auto; }
+
+  /* ─── HEADS COUNTER ─── */
+  .heads-counter { display: flex; align-items: center; gap: 14px; }
+  .heads-adj { background: none; border: 1px solid rgba(255,255,255,0.15); color: var(--white); width: 30px; height: 30px; cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; transition: border-color 0.2s, color 0.2s; flex-shrink: 0; }
+  .heads-adj:hover { border-color: var(--accent); color: var(--accent); }
+  .heads-display { display: flex; align-items: center; gap: 6px; font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; color: var(--white); min-width: 32px; }
+  .heads-display svg { width: 15px; height: 15px; fill: none; stroke: var(--accent); stroke-width: 1.5; flex-shrink: 0; }
+
+  /* ─── BOOKING TOTAL ─── */
+  .booking-total { display: none; justify-content: space-between; align-items: baseline; padding: 12px 0 0; border-top: 1px solid var(--line); margin-top: 4px; }
+  .booking-total-label { font-size: 0.6rem; letter-spacing: 0.35em; text-transform: uppercase; color: var(--gray); }
+  .booking-total-amount { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; font-weight: 300; color: var(--accent); }
+
+  /* ─── SERVICES LIST SCROLLABLE ─── */
+  #bookingServices { max-height: 180px; overflow-y: auto; padding-right: 4px; }
+  #bookingServices::-webkit-scrollbar { width: 3px; }
+  #bookingServices::-webkit-scrollbar-track { background: transparent; }
+  #bookingServices::-webkit-scrollbar-thumb { background: var(--accent); }
+
+  /* ─── CUSTOM DATE PICKER ──────────────────────────────────────────────── */
+  .date-picker-wrap { position: relative; }
+  .date-picker-field {
+    display: flex; align-items: center;
+    background: #333; border: 1px solid #444;
+    transition: border-color 0.2s;
+  }
+  .date-picker-field:focus-within { border-color: #C9A84C; }
+  .date-picker-text {
+    flex: 1; padding: 12px; background: transparent; border: none;
+    color: #fff; cursor: pointer; font-family: 'Barlow', sans-serif;
+    font-size: 14px; outline: none; caret-color: transparent;
+  }
+  .date-picker-text::placeholder { color: #666; }
+  .date-picker-icon-btn {
+    background: none; border: none; cursor: pointer;
+    padding: 0 14px; display: flex; align-items: center; height: 100%;
+  }
+  .date-picker-icon-btn svg {
+    width: 24px; height: 24px; fill: #C9A84C; display: block;
+    transition: transform 0.2s ease;
+  }
+  .date-picker-icon-btn:hover svg { transform: scale(1.18); }
+  .custom-cal {
+    position: fixed; z-index: 9999;
+    background: #0d0d0d; border: 1px solid #C9A84C;
+    padding: 18px; box-shadow: 0 12px 40px rgba(0,0,0,0.75);
+    opacity: 0; transform: translateY(-6px) scale(0.97);
+    pointer-events: none;
+    transition: opacity 0.22s ease, transform 0.22s ease;
+  }
+  .custom-cal.open {
+    opacity: 1; transform: translateY(0) scale(1);
+    pointer-events: auto;
+  }
+  .cal-head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .cal-my {
+    font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem;
+    letter-spacing: 0.2em; color: #C9A84C; user-select: none;
+  }
+  .cal-arrow {
+    background: none; border: 1px solid rgba(201,168,76,0.35);
+    color: #C9A84C; width: 28px; height: 28px; cursor: pointer;
+    font-size: 13px; display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .cal-arrow:hover { background: rgba(201,168,76,0.15); border-color: #C9A84C; }
+  .cal-wdays {
+    display: grid; grid-template-columns: repeat(7, 1fr);
+    margin-bottom: 8px; padding-bottom: 8px;
+    border-bottom: 1px solid rgba(201,168,76,0.15);
+  }
+  .cal-wdays span {
+    text-align: center; font-size: 0.58rem; letter-spacing: 0.12em;
+    color: #8a8880; font-weight: 500; font-family: 'Barlow', sans-serif;
+  }
+  .cal-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+  .cal-d {
+    text-align: center; padding: 7px 2px; font-size: 0.8rem;
+    cursor: pointer; color: #c8c5bf; font-family: 'Barlow', sans-serif;
+    border: 1px solid transparent; user-select: none;
+    transition: background 0.12s, color 0.12s, border-color 0.12s;
+  }
+  .cal-d:hover:not(.cal-dis):not(.cal-sel):not(.cal-empty) {
+    background: rgba(201,168,76,0.12); border-color: rgba(201,168,76,0.45);
+  }
+  .cal-d.cal-today { color: #C9A84C; font-weight: 600; }
+  .cal-d.cal-sel { background: #C9A84C; color: #000; font-weight: 700; border-color: #C9A84C; }
+  .cal-d.cal-dis { color: #2a2a2a; cursor: default; }
+  .cal-d.cal-empty { cursor: default; }
+
+  /* ─── REVIEWS ─── */
+  #reviews {
+    background: var(--black);
+  }
+
+  .reviews-rating {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 3rem;
+  }
+
+  .reviews-stars {
+    color: var(--accent);
+    font-size: 1.4rem;
+    letter-spacing: 0.1em;
+    line-height: 1;
+  }
+
+  .reviews-score {
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gray);
+  }
+
+  .reviews-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+
+  .review-card {
+    background: var(--off-black);
+    border: 1px solid var(--line);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .review-card-stars {
+    color: var(--accent);
+    font-size: 1rem;
+    letter-spacing: 0.15em;
+  }
+
+  .review-text {
+    font-size: 0.85rem;
+    color: var(--light-gray);
+    line-height: 1.85;
+    flex: 1;
+    font-style: italic;
+  }
+
+  .review-author {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .review-author-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 0.1em;
+    color: var(--white);
+  }
+
+  .review-author-via {
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .reviews-cta {
+    text-align: center;
+  }
+
+  @media (max-width: 900px) {
+    .reviews-grid { grid-template-columns: 1fr; }
   }
 </style>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 </head>
 <body>
-  <div class="geo-bg">
-    <svg viewBox="0 0 100 100" preserveAspectRatio="none">
-      <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
-        <path d="M 10 0 L 0 0 0 10" fill="none" stroke="currentColor" stroke-width="0.5"/>
-      </pattern>
-      <rect width="100%" height="100%" fill="url(#grid)"/>
-    </svg>
+
+<!-- Geometric BG -->
+<div class="geo-bg" aria-hidden="true">
+  <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
+    <polygon points="0,0 600,0 200,400" fill="none" stroke="white" stroke-width="0.5"/>
+    <polygon points="1440,0 800,300 1440,700" fill="none" stroke="white" stroke-width="0.5"/>
+    <polygon points="200,900 700,400 900,900" fill="none" stroke="white" stroke-width="0.5"/>
+    <line x1="0" y1="450" x2="400" y2="200" stroke="white" stroke-width="0.3"/>
+    <line x1="1000" y1="100" x2="1440" y2="500" stroke="white" stroke-width="0.3"/>
+    <polygon points="600,50 900,150 750,400 450,350" fill="none" stroke="white" stroke-width="0.4"/>
+  </svg>
+</div>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobileMenu">
+  <button class="close-btn" onclick="closeMenu()" aria-label="Close menu">✕</button>
+  <a href="#services" onclick="closeMenu()">Services</a>
+  <a href="#masters" onclick="closeMenu()">Our Team</a>
+  <a href="#blog" onclick="closeMenu()">Blog</a>
+  <a href="#contact" onclick="closeMenu()">Contact</a>
+  <a href="#" onclick="openBookingModal(); return false;" class="btn-mobile">Book Now</a>
+</div>
+
+<!-- NAV -->
+<nav id="navbar">
+  <a href="#" class="nav-logo"><img src="https://res.cloudinary.com/ecom-hustler/image/upload/v1773556292/logo_off1_miizyk.png" alt="Coollooks 23"><div class="nav-logo-text">COOLLOOKS<span>BARBERZ</span></div></a>
+  <ul class="nav-links">
+    <li><a href="#services">Services</a></li>
+    <li><a href="#masters">Hair Stylists</a></li>
+    <li><a href="#blog">Blog</a></li>
+    <li><a href="#contact">Contact</a></li>
+    <li><a href="#" onclick="openBookingModal(); return false;" class="btn-nav">BOOK NOW</a></li>
+  </ul>
+  <button class="hamburger" onclick="openMenu()" aria-label="Open menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-left">
+    <p class="hero-eyebrow">Local Barbershop — Slacks Creek</p>
+    <h1 class="hero-headline">COOL<br><em>LOOKS</em><br>23</h1>
+    <a href="#services" onclick="document.getElementById('services').scrollIntoView({behavior:'smooth'}); return false;" class="hero-cta">BOOK NOW</a>
+    <div class="hero-address">
+      1-3 Noel Street, Slacks Creek QLD 4127<br>
+      +61 470 224 498<br>
+      Open 7 Days · 8AM–6PM
+    </div>
+  </div>
+  <div class="hero-right">
+    <video class="hero-video" autoplay muted loop playsinline>
+      <source src="https://res.cloudinary.com/ecom-hustler/video/upload/v1772255035/Video-837_tt8smo.mp4" type="video/mp4">
+    </video>
+    <div class="hero-deco">EST. QUEENSLAND</div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker-wrap" aria-hidden="true">
+  <div class="ticker">
+    <span>PRECISION CUTS <em>✦</em></span>
+    <span>SKIN FADES <em>✦</em></span>
+    <span>BEARD TRIMS <em>✦</em></span>
+    <span>HAIR DYE <em>✦</em></span>
+    <span>FACIALS <em>✦</em></span>
+    <span>BRAIDING <em>✦</em></span>
+    <span>COOLLOOKS23 <em>✦</em></span>
+    <span>SLACKS CREEK QLD <em>✦</em></span>
+    <!-- duplicate for seamless loop -->
+    <span>PRECISION CUTS <em>✦</em></span>
+    <span>SKIN FADES <em>✦</em></span>
+    <span>BEARD TRIMS <em>✦</em></span>
+    <span>HAIR DYE <em>✦</em></span>
+    <span>FACIALS <em>✦</em></span>
+    <span>BRAIDING <em>✦</em></span>
+    <span>COOLLOOKS23 <em>✦</em></span>
+    <span>SLACKS CREEK QLD <em>✦</em></span>
+  </div>
+</div>
+
+<!-- SERVICES -->
+<section id="services">
+  <div class="services-header fade-in">
+    <div>
+      <div class="section-label">What We Offer</div>
+      <h2 class="section-title">OUR SERVICES</h2>
+    </div>
+    <p class="services-intro">Every service is tailored to you, precise, professional, and personal.</p>
   </div>
 
-  <div class="container">
-    <div class="logo">
-      COOLLOOKS
-      <span>BARBERZ</span>
+  <div class="services-layout fade-in">
+    <!-- Menu Container -->
+    <div class="services-menu">
+      <div id="public-services-list">
+        <div style="color:var(--gray);font-size:0.85rem;padding:1rem 0;">Loading services…</div>
+      </div>
+      <div class="services-cta">
+        <p>Walk-ins welcome — Appointments always preferred</p>
+        <a href="#" onclick="openBookingModal(); return false;" class="btn-primary">BOOK YOUR SESSION</a>
+      </div>
     </div>
 
-    <div class="divider"></div>
-
-    <h1>Coming Soon</h1>
-
-    <p class="tagline">
-      We're putting the finishing touches on something special.
-    </p>
-
-    <div class="status">Under Construction</div>
-
-    <div class="contact">
-      <p>In the meantime, call us to book:</p>
-      <p style="margin-top: 0.5rem;">
-        <a href="tel:+61470224498">+61 470 224 498</a>
-      </p>
+    <!-- Gallery Container -->
+    <div class="services-gallery">
+      <div class="services-gallery-label">The Gallery</div>
+      <div class="gallery-scroll-track">
+        <div class="gallery-masonry-col">
+          <img src="https://res.cloudinary.com/dzojvywap/image/upload/v1774426418/Screenshot_From_2026-03-25_18-09-53_okc31n.png" alt="Barbershop work">
+          <img src="https://res.cloudinary.com/dzojvywap/image/upload/v1774426418/Screenshot_From_2026-03-25_18-12-59_mx6dtr.png" alt="Barbershop work">
+          <img src="https://res.cloudinary.com/dzojvywap/image/upload/v1774426417/Screenshot_From_2026-03-25_18-12-35_cm0mzk.png" alt="Barbershop work">
+          <img src="https://res.cloudinary.com/dzojvywap/image/upload/v1774426417/Screenshot_From_2026-03-25_18-11-51_jh9jph.png" alt="Barbershop work">
+          <img src="https://res.cloudinary.com/dzojvywap/image/upload/v1774426416/Screenshot_From_2026-03-25_18-11-12_efuuoj.png" alt="Barbershop work">
+          <img src="https://res.cloudinary.com/dzojvywap/image/upload/v1774426416/Screenshot_From_2026-03-25_18-08-59_mntocz.png" alt="Barbershop work">
+          <img src="https://res.cloudinary.com/dzojvywap/image/upload/v1774426416/Screenshot_From_2026-03-25_18-10-35_ozgpfu.png" alt="Barbershop work">
+          <img src="https://res.cloudinary.com/dzojvywap/image/upload/v1774426418/Screenshot_From_2026-03-25_18-09-53_okc31n.png" alt="Barbershop work">
+          <img src="https://res.cloudinary.com/dzojvywap/image/upload/v1774426418/Screenshot_From_2026-03-25_18-12-59_mx6dtr.png" alt="Barbershop work">
+          <img src="https://res.cloudinary.com/dzojvywap/image/upload/v1774426417/Screenshot_From_2026-03-25_18-12-35_cm0mzk.png" alt="Barbershop work">
+          <img src="https://res.cloudinary.com/dzojvywap/image/upload/v1774426417/Screenshot_From_2026-03-25_18-11-51_jh9jph.png" alt="Barbershop work">
+          <img src="https://res.cloudinary.com/dzojvywap/image/upload/v1774426416/Screenshot_From_2026-03-25_18-11-12_efuuoj.png" alt="Barbershop work">
+          <img src="https://res.cloudinary.com/dzojvywap/image/upload/v1774426416/Screenshot_From_2026-03-25_18-08-59_mntocz.png" alt="Barbershop work">
+          <img src="https://res.cloudinary.com/dzojvywap/image/upload/v1774426416/Screenshot_From_2026-03-25_18-10-35_ozgpfu.png" alt="Barbershop work">
+        </div>
+        <div class="gallery-masonry-col">
+          <img src="https://res.cloudinary.com/dzojvywap/image/upload/v1774426415/Screenshot_From_2026-03-25_18-08-11_v1mjfe.png" alt="Barbershop work">
+          <img src="https://res.cloudinary.com/dzojvywap/image/upload/v1774426415/Screenshot_From_2026-03-25_18-06-30_webjqf.png" alt="Barbershop work">
+          <img src="https://res.cloudinary.com/dzojvywap/image/upload/v1774426391/Screenshot_From_2026-03-25_17-51-52_bdhi2v.png" alt="Barbershop work">
+          <img src="https://res.cloudinary.com/dzojvywap/image/upload/v1774426391/Screenshot_From_2026-03-25_18-00-45_ay3wyy.png" alt="Barbershop work">
+          <img src="https://res.cloudinary.com/dzojvywap/image/upload/v1774426391/Screenshot_From_2026-03-25_17-57-19_gr4v6w.png" alt="Barbershop work">
+          <img src="https://res.cloudinary.com/dzojvywap/image/upload/v1774426391/Screenshot_From_2026-03-25_17-59-56_khrden.png" alt="Barbershop work">
+          <img src="https://res.cloudinary.com/dzojvywap/image/upload/v1774426415/Screenshot_From_2026-03-25_18-08-11_v1mjfe.png" alt="Barbershop work">
+          <img src="https://res.cloudinary.com/dzojvywap/image/upload/v1774426415/Screenshot_From_2026-03-25_18-06-30_webjqf.png" alt="Barbershop work">
+          <img src="https://res.cloudinary.com/dzojvywap/image/upload/v1774426391/Screenshot_From_2026-03-25_17-51-52_bdhi2v.png" alt="Barbershop work">
+          <img src="https://res.cloudinary.com/dzojvywap/image/upload/v1774426391/Screenshot_From_2026-03-25_18-00-45_ay3wyy.png" alt="Barbershop work">
+          <img src="https://res.cloudinary.com/dzojvywap/image/upload/v1774426391/Screenshot_From_2026-03-25_17-57-19_gr4v6w.png" alt="Barbershop work">
+          <img src="https://res.cloudinary.com/dzojvywap/image/upload/v1774426391/Screenshot_From_2026-03-25_17-59-56_khrden.png" alt="Barbershop work">
+        </div>
+        <div class="gallery-masonry-col">
+          <img src="https://res.cloudinary.com/dzojvywap/image/upload/v1774426391/Screenshot_From_2026-03-25_17-53-37_mm5qxo.png" alt="Barbershop work">
+          <img src="https://res.cloudinary.com/dzojvywap/image/upload/v1774426391/Screenshot_From_2026-03-25_18-02-14_cmpuax.png" alt="Barbershop work">
+          <img src="https://res.cloudinary.com/dzojvywap/image/upload/v1774425991/Screenshot_From_2026-03-25_17-51-20_godjem.png" alt="Barbershop work">
+          <img src="https://res.cloudinary.com/dzojvywap/image/upload/v1774425961/Screenshot_From_2026-03-25_17-50-07_cnl0os.png" alt="Barbershop work">
+          <img src="https://res.cloudinary.com/dzojvywap/image/upload/v1774425943/Screenshot_From_2026-03-25_17-49-19_gjybsm.png" alt="Barbershop work">
+          <img src="https://res.cloudinary.com/dzojvywap/image/upload/v1774425943/Screenshot_From_2026-03-25_17-48-24_p5f0ee.png" alt="Barbershop work">
+          <img src="https://res.cloudinary.com/dzojvywap/image/upload/v1774426391/Screenshot_From_2026-03-25_17-53-37_mm5qxo.png" alt="Barbershop work">
+          <img src="https://res.cloudinary.com/dzojvywap/image/upload/v1774426391/Screenshot_From_2026-03-25_18-02-14_cmpuax.png" alt="Barbershop work">
+          <img src="https://res.cloudinary.com/dzojvywap/image/upload/v1774425991/Screenshot_From_2026-03-25_17-51-20_godjem.png" alt="Barbershop work">
+          <img src="https://res.cloudinary.com/dzojvywap/image/upload/v1774425961/Screenshot_From_2026-03-25_17-50-07_cnl0os.png" alt="Barbershop work">
+          <img src="https://res.cloudinary.com/dzojvywap/image/upload/v1774425943/Screenshot_From_2026-03-25_17-49-19_gjybsm.png" alt="Barbershop work">
+          <img src="https://res.cloudinary.com/dzojvywap/image/upload/v1774425943/Screenshot_From_2026-03-25_17-48-24_p5f0ee.png" alt="Barbershop work">
+        </div>
+      </div>
     </div>
   </div>
+</section>
+
+<!-- HAIR STYLISTS -->
+<section id="masters">
+  <div class="section-label fade-in">Our Team</div>
+  <h2 class="section-title fade-in">Barbers</h2>
+  <div class="masters-grid">
+    <div class="master-card fade-in" onclick="openBookingModal(null, 'Obama')">
+      <img class="master-card-img" src="https://res.cloudinary.com/ecom-hustler/image/upload/v1773556798/Obama_founder_main_barber_z6nj6y.jpg" alt="Obama">
+      <div class="master-card-book">BOOK</div>
+      <div class="master-overlay">
+        <span class="master-name">OBAMA</span>
+        <p class="master-role">Founder & Main Barber</p>
+      </div>
+    </div>
+    <div class="master-card fade-in" onclick="openBookingModal(null, 'Maurice')">
+      <img class="master-card-img" src="https://res.cloudinary.com/ecom-hustler/image/upload/v1773556798/Maurice_barber_evn589.jpg" alt="Maurice">
+      <div class="master-card-book">BOOK</div>
+      <div class="master-overlay">
+        <span class="master-name">MAURICE</span>
+        <p class="master-role">Barber</p>
+      </div>
+    </div>
+    <div class="master-card fade-in" onclick="openBookingModal(null, 'Scorpion')">
+      <img class="master-card-img" src="https://res.cloudinary.com/ecom-hustler/image/upload/v1773556798/Scorpion_barber_ft5bsu.jpg" alt="Scorpion">
+      <div class="master-card-book">BOOK</div>
+      <div class="master-overlay">
+        <span class="master-name">SCORPION</span>
+        <p class="master-role">Barber</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BLOG -->
+<section id="blog">
+  <div class="section-label fade-in">From The Chair</div>
+  <h2 class="section-title fade-in">THE BLOG</h2>
+  <div class="blog-grid">
+
+    <article class="blog-card fade-in">
+      <div class="blog-card-top"></div>
+      <p class="blog-category">Hair Style</p>
+      <h3 class="blog-title">Buzz Cuts: Top Styles Trending This Year</h3>
+      <p class="blog-excerpt">Explore the top buzz cut styles trending in 2026. From the classic number 2 to the textured buzz, find out which style suits you.</p>
+      <div class="blog-footer">
+        <a href="blog/buzzcut.html" class="blog-link">Read More →</a>
+      </div>
+    </article>
+
+    <article class="blog-card fade-in">
+      <div class="blog-card-top"></div>
+      <p class="blog-category">Hair Care</p>
+      <h3 class="blog-title">How to Make Your Haircut Last Longer</h3>
+      <p class="blog-excerpt">Simple tips to keep your haircut looking fresh between barber visits. Expert grooming advice from Coollooks23 Barberz in Slacks Creek, Brisbane.</p>
+      <div class="blog-footer">
+        <a href="blog/maintain.html" class="blog-link">Read More →</a>
+      </div>
+    </article>
+
+    <article class="blog-card fade-in">
+      <div class="blog-card-top"></div>
+      <p class="blog-category">Hair Style</p>
+      <h3 class="blog-title">Taper Fade Haircuts: The Ultimate Guide for 2026</h3>
+      <p class="blog-excerpt">Everything you need to know about taper fade haircuts — low, mid, and high fades explained. Book your taper fade at Coollooks23 in Slacks Creek, Brisbane.</p>
+      <div class="blog-footer">
+        <a href="blog/taper.html" class="blog-link">Read More →</a>
+      </div>
+    </article>
+
+  </div>
+</section>
+
+<!-- REVIEWS -->
+<section id="reviews">
+  <div class="section-label fade-in">What People Say</div>
+  <h2 class="section-title fade-in">GOOGLE REVIEWS</h2>
+  <div class="reviews-rating fade-in">
+    <span class="reviews-stars">★★★★★</span>
+    <span class="reviews-score">5.0 · Google Reviews</span>
+  </div>
+  <div class="reviews-grid">
+    <div class="review-card fade-in">
+      <div class="review-card-stars">★★★★★</div>
+      <p class="review-text">"Best barber in Slacks Creek, hands down. Obama always delivers a clean fade every single time. Won't go anywhere else."</p>
+      <div class="review-author">
+        <span class="review-author-name">Jordan T.</span>
+        <span class="review-author-via">via Google</span>
+      </div>
+    </div>
+    <div class="review-card fade-in">
+      <div class="review-card-stars">★★★★★</div>
+      <p class="review-text">"Maurice is an absolute legend. Great vibes, quality cut, and the booking system makes it so easy to lock in a time. Highly recommend."</p>
+      <div class="review-author">
+        <span class="review-author-name">Chris M.</span>
+        <span class="review-author-via">via Google</span>
+      </div>
+    </div>
+    <div class="review-card fade-in">
+      <div class="review-card-stars">★★★★★</div>
+      <p class="review-text">"Scorpion got me right. Precise lines, took his time, and the shop has a real premium feel. Been coming here for months and never looked back."</p>
+      <div class="review-author">
+        <span class="review-author-name">Darnell W.</span>
+        <span class="review-author-via">via Google</span>
+      </div>
+    </div>
+  </div>
+  <div class="reviews-cta fade-in">
+    <a href="https://g.page/r/CSYgqs6JzfLqEBM/review" target="_blank" rel="noopener" class="btn-primary">Leave a Review on Google</a>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="section-label fade-in">Find Us</div>
+  <h2 class="section-title fade-in">CONTACT</h2>
+  <div class="contact-grid">
+    <!-- Left: Address & Phone -->
+    <div class="fade-in">
+      <div class="contact-item">
+        <p class="contact-label">Address</p>
+        <p class="contact-value">1-3 Noel Street<br>Slacks Creek QLD 4127<br>Australia</p>
+      </div>
+      <div class="contact-item">
+        <p class="contact-label">Phone</p>
+        <p class="contact-value"><a href="tel:+61470224498">+61 470 224 498</a></p>
+      </div>
+    </div>
+
+    <!-- Middle: Map -->
+    <div class="contact-map fade-in">
+      <iframe
+        src="https://maps.google.com/maps?q=1-3+Noel+Street,+Slacks+Creek+QLD+4127,+Australia&output=embed&z=16"
+        title="Coollooks23 Location"
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+        allowfullscreen>
+      </iframe>
+    </div>
+
+    <!-- Right: Hours & Socials -->
+    <div class="fade-in">
+      <div class="contact-item">
+        <p class="contact-label">Opening Hours</p>
+        <div class="hours-grid">
+          <span class="hours-day">Mon</span><span class="hours-time">8:00 AM – 6:00 PM</span>
+          <span class="hours-day">Tue</span><span class="hours-time">8:00 AM – 6:00 PM</span>
+          <span class="hours-day">Wed</span><span class="hours-time">8:00 AM – 6:00 PM</span>
+          <span class="hours-day">Thu</span><span class="hours-time">8:00 AM – 6:00 PM</span>
+          <span class="hours-day">Fri</span><span class="hours-time">8:00 AM – 6:00 PM</span>
+          <span class="hours-day">Sat</span><span class="hours-time">8:00 AM – 6:00 PM</span>
+          <span class="hours-day">Sun</span><span class="hours-time">8:00 AM – 6:00 PM</span>
+        </div>
+      </div>
+      <div class="contact-item">
+        <p class="contact-label">Our Socials</p>
+        <div class="social-links">
+          <a href="https://www.instagram.com/coollooks_23_barberz" target="_blank" rel="noopener" aria-label="Instagram">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+          </a>
+          <a href="https://www.tiktok.com/@coollooks_23" target="_blank" rel="noopener" aria-label="TikTok">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 00-.79-.05A6.34 6.34 0 003.15 15.2a6.34 6.34 0 0010.86 4.46V13.2a8.16 8.16 0 005.58 2.17V11.9a4.84 4.84 0 01-3.77-1.44V6.69h3.77z"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo"><img src="https://res.cloudinary.com/ecom-hustler/image/upload/v1773556292/logo_off1_miizyk.png" alt="Coollooks 23"><div class="footer-logo-text">COOLLOOKS<span>BARBERZ</span></div></div>
+  <ul class="footer-links">
+    <li><a href="#services">Services</a></li>
+    <li><a href="#masters">Hair Stylists</a></li>
+    <li><a href="#blog">Blog</a></li>
+    <li><a href="#contact">Contact</a></li>
+    <li><a href="privacy-policy.html">Privacy Policy</a></li>
+  </ul>
+  <p class="footer-copy">© 2025 COOLLOOKS23. All rights reserved.</p>
+</footer>
+
+<script>
+  // Sticky nav
+  const navbar = document.getElementById('navbar');
+  // hero-left: fade in 500ms after load, fade out on deep scroll
+  const heroLeft = document.querySelector('.hero-left');
+  const HERO_SCROLL_OUT = Math.round(window.innerHeight * 0.4);
+  setTimeout(() => heroLeft.classList.add('hero-visible'), 500);
+
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 50);
+    if (heroLeft.classList.contains('hero-visible')) {
+      heroLeft.classList.toggle('hero-scrolled-out', window.scrollY > HERO_SCROLL_OUT);
+    }
+  });
+
+  // Mobile menu
+  window.openMenu = function openMenu() { document.getElementById('mobileMenu').classList.add('open'); }
+  window.closeMenu = function closeMenu() { document.getElementById('mobileMenu').classList.remove('open'); }
+
+  // Fade-in on scroll
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => {
+          entry.target.classList.add('visible');
+        }, i * 80);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+</script>
+
+  <!-- BOOKING MODAL -->
+  <div class="booking-modal" id="bookingModal">
+    <div class="booking-modal-content">
+      <button class="booking-modal-close" onclick="closeBookingModal()">×</button>
+      <h2>Book Your Appointment</h2>
+      <p class="booking-modal-subtitle">Coollooks Barberz — Slacks Creek</p>
+      <form id="bookingForm">
+        <div class="booking-form-group">
+          <label>Number of Heads</label>
+          <div class="heads-counter">
+            <button type="button" class="heads-adj" id="headsDecBtn" onclick="adjustHeads(-1)" style="visibility:hidden">−</button>
+            <div class="heads-display">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+              <span id="headsCountDisplay">1</span>
+            </div>
+            <button type="button" class="heads-adj" onclick="adjustHeads(1)">+</button>
+          </div>
+          <input type="hidden" id="headCount" value="1">
+        </div>
+        <div class="booking-form-group">
+          <label>Select Services</label>
+          <div id="bookingServices"></div>
+          <div class="booking-total" id="bookingTotal">
+            <span class="booking-total-label">Total</span>
+            <span class="booking-total-amount" id="bookingTotalAmount">$0</span>
+          </div>
+        </div>
+        <div class="booking-form-group">
+          <label>Your Name</label>
+          <input type="text" id="customerName" placeholder="John Smith" required>
+        </div>
+        <div class="booking-form-group">
+          <label>Email</label>
+          <input type="email" id="customerEmail" placeholder="john@example.com" required>
+        </div>
+        <div class="booking-form-group">
+          <label>Phone</label>
+          <input type="tel" id="customerPhone" placeholder="+61 400 000 000" required>
+        </div>
+        <div class="booking-form-group">
+          <label>Select Barber</label>
+          <select id="selectedBarber">
+            <option value="Any">Any Available</option>
+            <option value="Obama">Obama</option>
+            <option value="Maurice">Maurice</option>
+            <option value="Scorpion">Scorpion</option>
+          </select>
+        </div>
+        <div class="booking-form-group">
+          <label>Date</label>
+          <div class="date-picker-wrap">
+            <div class="date-picker-field">
+              <input type="text" id="bookingDateDisplay" class="date-picker-text" placeholder="Select a date" readonly onclick="toggleCal()">
+              <button type="button" class="date-picker-icon-btn" onclick="toggleCal()">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M19 4h-1V2h-2v2H8V2H6v2H5C3.9 4 3 4.9 3 6v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11zM5 7V6h14v1H5zm2 4h10v2H7zm0 4h7v2H7z"/>
+                </svg>
+              </button>
+            </div>
+            <input type="hidden" id="bookingDate">
+            <div class="custom-cal" id="customCal">
+              <div class="cal-head">
+                <button type="button" class="cal-arrow" onclick="calNav(-1)">&#8592;</button>
+                <span class="cal-my" id="calMY"></span>
+                <button type="button" class="cal-arrow" onclick="calNav(1)">&#8594;</button>
+              </div>
+              <div class="cal-wdays">
+                <span>SU</span><span>MO</span><span>TU</span><span>WE</span><span>TH</span><span>FR</span><span>SA</span>
+              </div>
+              <div class="cal-days" id="calDays"></div>
+            </div>
+          </div>
+        </div>
+        <div class="booking-form-group">
+          <label>Time</label>
+          <select id="bookingTime" required>
+            <option value="">Select time</option>
+          </select>
+        </div>
+        <button type="submit" class="booking-submit" id="bookingSubmit">Book Now</button>
+      </form>
+      <div class="booking-success" id="bookingSuccess">
+        <div class="success-icon">✦</div>
+        <h3>You're Booked</h3>
+        <div class="success-divider"></div>
+        <p class="success-sub">We'll have you looking right.</p>
+        <p>A confirmation has been sent to your email.<br>See you at Coollooks Barberz.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ─── FIREBASE INIT ───────────────────────────────────────────────────────
+    const firebaseConfig = {
+      apiKey: "AIzaSyDRxXMVd2ZJmbbKZ-DsBEY7jd5_g493iOk",
+      authDomain: "coollooks-c76ec.firebaseapp.com",
+      projectId: "coollooks-c76ec",
+      storageBucket: "coollooks-c76ec.firebasestorage.app",
+      messagingSenderId: "749477472175",
+      appId: "1:749477472175:web:6b2591091cd914e30e315a"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // ─── EMAIL CONFIG (emailjs.com) ───────────────────────────────────────────
+    // 1. Sign up free at emailjs.com  2. Connect Gmail  3. Create two templates:
+    //    New booking template vars: {{to_email}} {{customer_name}} {{service_name}} {{booking_date}} {{booking_time}} {{price}}
+    //    Confirm template vars:     same as above
+    // 4. Paste your keys below.
+    const EMAILJS_PK      = '4TD6bNFXZ5s96pSVY';
+    const EMAILJS_SVC     = 'service_5uftud9';
+    const EMAILJS_TPL_NEW = 'template_0s3hqqf';
+    if (EMAILJS_PK !== 'YOUR_PUBLIC_KEY') emailjs.init(EMAILJS_PK);
+
+    // ─── CUSTOM CALENDAR ─────────────────────────────────────────────────────
+    let _calView = new Date();
+    let _calMin = null, _calMax = null, _calSel = null;
+    const _MON = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+    // ─── HEADS COUNTER ───────────────────────────────────────────────────────
+    let _headCount = 1;
+
+    window.adjustHeads = function(delta) {
+      _headCount = Math.max(1, Math.min(6, _headCount + delta));
+      document.getElementById('headCount').value = _headCount;
+      document.getElementById('headsCountDisplay').textContent = _headCount;
+      document.getElementById('headsDecBtn').style.visibility = _headCount === 1 ? 'hidden' : 'visible';
+      updateTotal();
+    };
+
+    // ─── MULTI-SERVICE SELECT ─────────────────────────────────────────────────
+    let _selectedServices = {};
+
+    function updateTotal() {
+      const sum = Object.values(_selectedServices).reduce((t, s) => t + parseFloat(s.price), 0);
+      const total = sum * _headCount;
+      const el = document.getElementById('bookingTotal');
+      el.style.display = Object.keys(_selectedServices).length ? 'flex' : 'none';
+      document.getElementById('bookingTotalAmount').textContent = '$' + total.toFixed(2).replace(/\.00$/, '');
+    }
+
+    window.toggleCal = function() {
+      const cal = document.getElementById('customCal');
+      if (cal.classList.contains('open')) { cal.classList.remove('open'); return; }
+      const field = document.querySelector('.date-picker-field');
+      const rect = field.getBoundingClientRect();
+      cal.style.left  = rect.left + 'px';
+      cal.style.width = rect.width + 'px';
+      renderCal();
+      cal.classList.add('open');
+      // position above or below depending on available space
+      const calH = cal.offsetHeight || 280;
+      const spaceBelow = window.innerHeight - rect.bottom - 6;
+      if (spaceBelow < calH && rect.top > calH) {
+        cal.style.top = (rect.top - calH - 6) + 'px';
+      } else {
+        cal.style.top = (rect.bottom + 6) + 'px';
+      }
+    };
+
+    window.calNav = function(dir) {
+      _calView = new Date(_calView.getFullYear(), _calView.getMonth() + dir, 1);
+      renderCal();
+    };
+
+    window.calPickDay = function(ds) {
+      _calSel = ds;
+      document.getElementById('bookingDate').value = ds;
+      const dt = new Date(ds + 'T00:00:00');
+      document.getElementById('bookingDateDisplay').value =
+        dt.toLocaleDateString('en-AU', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
+      document.getElementById('customCal').classList.remove('open');
+      updateAvailableSlots();
+    };
+
+    async function updateAvailableSlots() {
+      const date = document.getElementById('bookingDate').value;
+      const barber = document.getElementById('selectedBarber').value;
+      if (!date) return;
+      const timeSelect = document.getElementById('bookingTime');
+      // reset all options to enabled first
+      Array.from(timeSelect.options).forEach(o => { o.disabled = false; o.text = o.value || 'Select time'; });
+      try {
+        let query = db.collection('bookings').where('date', '==', date).where('status', 'in', ['pending', 'confirmed']);
+        if (barber !== 'Any') query = query.where('barber', '==', barber);
+        const snap = await query.get();
+        const takenTimes = new Set(snap.docs.map(d => d.data().time));
+        Array.from(timeSelect.options).forEach(o => {
+          if (o.value && takenTimes.has(o.value)) {
+            o.disabled = true;
+            o.text = o.value + ' — Booked';
+          }
+        });
+      } catch(err) { console.warn('Availability check failed:', err); }
+    }
+
+    function renderCal() {
+      const y = _calView.getFullYear(), m = _calView.getMonth();
+      document.getElementById('calMY').textContent = _MON[m] + ' ' + y;
+      const firstDay = new Date(y, m, 1).getDay();
+      const days = new Date(y, m + 1, 0).getDate();
+      const today = new Date(); today.setHours(0,0,0,0);
+      let html = '';
+      for (let i = 0; i < firstDay; i++) html += '<span class="cal-d cal-empty"></span>';
+      for (let d = 1; d <= days; d++) {
+        const nd = new Date(y, m, d); nd.setHours(0,0,0,0);
+        const ds = nd.toISOString().slice(0,10);
+        const dis = (_calMin && nd < _calMin) || (_calMax && nd > _calMax);
+        let cls = 'cal-d' + (dis ? ' cal-dis' : '') +
+                  (nd.getTime() === today.getTime() ? ' cal-today' : '') +
+                  (_calSel === ds ? ' cal-sel' : '');
+        html += `<span class="${cls}"${!dis ? ` onclick="calPickDay('${ds}')"` : ''}>${d}</span>`;
+      }
+      document.getElementById('calDays').innerHTML = html;
+    }
+
+    document.addEventListener('click', function(e) {
+      const wrap = document.querySelector('.date-picker-wrap');
+      const cal  = document.getElementById('customCal');
+      if (cal && cal.classList.contains('open') && !cal.contains(e.target) && wrap && !wrap.contains(e.target)) {
+        cal.classList.remove('open');
+      }
+    });
+
+    // ─── PUBLIC SERVICES (services section) ──────────────────────────────────
+    window.loadPublicServices = async function loadPublicServices() {
+      console.log('[loadPublicServices] Starting...');
+      const list = document.getElementById('public-services-list');
+      try {
+        console.log('[loadPublicServices] Fetching services from Firestore...');
+        const snap = await db.collection('services').orderBy('name').get();
+        console.log('[loadPublicServices] Snapshot received, docs count:', snap.docs.length);
+        const active = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })).filter(s => s.active !== false);
+        console.log('[loadPublicServices] Active services:', active.length, active);
+        if (!active.length) {
+          console.log('[loadPublicServices] No active services found.');
+          list.innerHTML = '<div style="color:var(--gray);font-size:0.85rem;padding:1rem 0;">No services available.</div>';
+          return;
+        }
+        const cats = {};
+        active.forEach(s => { const c = s.category || 'Other'; if (!cats[c]) cats[c] = []; cats[c].push(s); });
+        console.log('[loadPublicServices] Categories:', Object.keys(cats));
+        const catOrder = ['MENS', 'STYLING', 'FACE', 'EXTRA'];
+        const sortedCats = Object.entries(cats).sort(([a], [b]) => {
+          const ai = catOrder.indexOf(a.toUpperCase()), bi = catOrder.indexOf(b.toUpperCase());
+          if (ai === -1 && bi === -1) return a.localeCompare(b);
+          if (ai === -1) return 1;
+          if (bi === -1) return -1;
+          return ai - bi;
+        });
+        list.innerHTML = sortedCats.map(([cat, svcs]) =>
+          '<div class="service-category"><p class="cat-title">' + cat + '</p>' +
+          svcs.map(s =>
+            '<div class="service-row" data-name="' + s.name + '" onclick="openBookingModal(this.dataset.name)" style="cursor:pointer">' +
+            '<div class="service-info">' +
+            '<div class="service-name">' + s.name + (s.popular ? '<span class="badge-popular">Popular</span>' : '') + '</div>' +
+            '<div class="service-duration">' + (s.duration || 0) + ' min</div>' +
+            '</div>' +
+            '<div class="service-dots"></div>' +
+            '<div class="service-price">$' + (s.price || 0) + '</div>' +
+            '<span class="service-chevron"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></span>' +
+            '</div>'
+          ).join('') + '</div>'
+        ).join('');
+        console.log('[loadPublicServices] Done rendering.');
+      } catch(e) {
+        console.error('[loadPublicServices] Error loading public services:', e);
+        list.innerHTML = '<div style="color:var(--gray);font-size:0.85rem;padding:1rem 0;">Unable to load services.</div>';
+      }
+    }
+    loadPublicServices();
+
+    // ─── BOOKING MODAL SERVICES ───────────────────────────────────────────────
+    let services = [];
+
+    window.loadServices = async function loadServices(preSelectName) {
+      try {
+        const snap = await db.collection('services').get();
+        services = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })).filter(s => s.active !== false);
+        renderServices();
+        if (preSelectName) {
+          document.querySelectorAll('.booking-service-option').forEach(el => {
+            if (el.dataset.name === preSelectName && !_selectedServices[el.dataset.id]) selectService(el);
+          });
+        }
+      } catch(e) { console.error(e); }
+    }
+
+    const CHECK_SVG = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
+
+    window.renderServices = function renderServices() {
+      const container = document.getElementById("bookingServices");
+      container.innerHTML = services.map(s =>
+        '<div class="booking-service-option" data-id="' + s.id + '" data-name="' + s.name + '" data-price="' + s.price + '" onclick="selectService(this)">' +
+        '<div class="bso-left"><span class="bso-check">' + CHECK_SVG + '</span><span class="bso-name">' + s.name + '</span></div>' +
+        '<span class="bso-price">$' + s.price + '</span></div>'
+      ).join("");
+    }
+
+    window.selectService = function selectService(el) {
+      const id = el.dataset.id;
+      if (_selectedServices[id]) {
+        delete _selectedServices[id];
+        el.classList.remove("selected");
+      } else {
+        _selectedServices[id] = { id, name: el.dataset.name, price: parseFloat(el.dataset.price) };
+        el.classList.add("selected");
+      }
+      updateTotal();
+    }
+
+    window.openBookingModal = function openBookingModal(preSelectName, preSelectBarber) {
+      document.getElementById("bookingModal").classList.add("open");
+      loadServices(preSelectName);
+      setupDateTime();
+      if (preSelectBarber) document.getElementById('selectedBarber').value = preSelectBarber;
+    }
+    window.closeBookingModal = function closeBookingModal() {
+      document.getElementById("bookingModal").classList.remove("open");
+      document.getElementById("bookingForm").style.display = "";
+      document.getElementById("bookingSuccess").style.display = "none";
+      document.getElementById("bookingForm").reset();
+      document.getElementById("bookingSubmit").disabled = false;
+      document.getElementById("bookingSubmit").textContent = "Book Now";
+      _calSel = null;
+      _selectedServices = {};
+      _headCount = 1;
+      document.getElementById('headsCountDisplay').textContent = '1';
+      document.getElementById('headsDecBtn').style.visibility = 'hidden';
+      document.getElementById('bookingTotal').style.display = 'none';
+      document.getElementById('customCal').classList.remove('open');
+    }
+
+    window.setupDateTime = function setupDateTime() {
+      const today = new Date(); today.setHours(0,0,0,0);
+      const maxDate = new Date(); maxDate.setMonth(maxDate.getMonth() + 2); maxDate.setHours(23,59,59,999);
+      _calMin = today;
+      _calMax = maxDate;
+      _calView = new Date(today);
+      const timeSelect = document.getElementById("bookingTime");
+      let slots = "";
+      for(let h=8; h<18; h++) { slots += '<option value="' + h + ':00">' + h + ':00</option><option value="' + h + ':30">' + h + ':30</option>'; }
+      timeSelect.innerHTML = '<option value="">Select time</option>' + slots;
+      document.getElementById('selectedBarber').addEventListener('change', updateAvailableSlots);
+    }
+    
+    document.getElementById("bookingForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const selectedList = Object.values(_selectedServices);
+      if (!selectedList.length) { alert("Please select at least one service."); return; }
+
+      const btn = document.getElementById("bookingSubmit");
+      btn.disabled = true; btn.textContent = "Booking...";
+
+      const date = document.getElementById("bookingDate").value;
+      const time = document.getElementById("bookingTime").value;
+      const heads = _headCount;
+      const servicesTotal = selectedList.reduce((t, s) => t + s.price, 0);
+      const totalPrice = servicesTotal * heads;
+
+      try {
+        await db.collection('bookings').add({
+          customer: {
+            name: document.getElementById("customerName").value,
+            email: document.getElementById("customerEmail").value,
+            phone: document.getElementById("customerPhone").value
+          },
+          services: selectedList,
+          heads: heads,
+          total_price: totalPrice,
+          date: date,
+          time: time,
+          barber: document.getElementById("selectedBarber").value,
+          status: "pending",
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        document.getElementById("bookingForm").style.display = "none";
+        document.getElementById("bookingSuccess").style.display = "block";
+
+        emailjs.send(EMAILJS_SVC, EMAILJS_TPL_NEW, {
+          to_email: document.getElementById("customerEmail").value,
+          customer_name: document.getElementById("customerName").value,
+          service_name: selectedList.map(s => s.name).join(', '),
+          booking_date: document.getElementById("bookingDateDisplay").value || date,
+          booking_time: time,
+          price: '$' + totalPrice + (heads > 1 ? ' (' + heads + ' heads)' : '')
+        }, EMAILJS_PK).catch(err => console.warn('Email send failed:', err.status, err.text, err));
+      } catch(err) { alert("Booking failed. Please try again."); btn.disabled = false; btn.textContent = "Book Now"; }
+    });
+  </script>
+
+  <!-- ANTI-INSPECT -->
+  <script>
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    document.addEventListener('keydown', e => {
+      if (e.key === 'F12') { e.preventDefault(); return; }
+      if (e.ctrlKey && e.shiftKey && ['I','J','C','U'].includes(e.key.toUpperCase())) { e.preventDefault(); return; }
+      if (e.ctrlKey && e.key.toUpperCase() === 'U') { e.preventDefault(); }
+    });
+  </script>
 </body>
 </html>

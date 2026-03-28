@@ -985,8 +985,11 @@
   .booking-submit { width: 100%; padding: 14px; background: var(--accent); color: #000; border: none; font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 0.25em; cursor: pointer; transition: background 0.2s; margin-top: 8px; }
   .booking-submit:hover { background: #b8973f; }
   .booking-success { display: none; text-align: center; padding: 40px 20px; }
-  .booking-success h3 { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; letter-spacing: 0.2em; color: #4CAF50; margin-bottom: 10px; }
-  .booking-success p { font-size: 0.85rem; color: var(--gray); letter-spacing: 0.05em; }
+  .booking-success .success-icon { font-size: 2rem; color: var(--accent); margin-bottom: 16px; }
+  .booking-success h3 { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 0.25em; color: var(--accent); margin-bottom: 8px; }
+  .booking-success .success-sub { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1rem; color: var(--white); margin-bottom: 16px; letter-spacing: 0.05em; }
+  .booking-success p { font-size: 0.78rem; color: var(--gray); letter-spacing: 0.1em; text-transform: uppercase; line-height: 1.8; }
+  .booking-success .success-divider { width: 40px; height: 1px; background: var(--accent); margin: 16px auto; }
 
   /* ─── HEADS COUNTER ─── */
   .heads-counter { display: flex; align-items: center; gap: 14px; }
@@ -1623,8 +1626,11 @@
         <button type="submit" class="booking-submit" id="bookingSubmit">Book Now</button>
       </form>
       <div class="booking-success" id="bookingSuccess">
-        <h3>✓ Booking Confirmed!</h3>
-        <p>We'll see you soon!</p>
+        <div class="success-icon">✦</div>
+        <h3>You're Booked</h3>
+        <div class="success-divider"></div>
+        <p class="success-sub">We'll have you looking right.</p>
+        <p>A confirmation has been sent to your email.<br>See you at Coollooks Barberz.</p>
       </div>
     </div>
   </div>
