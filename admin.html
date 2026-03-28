@@ -580,10 +580,6 @@
       <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
       Services
     </div>
-    <div class="nav-item" onclick="switchTab('notifications')" id="nav-notifications">
-      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-      Notifications
-    </div>
     <div class="nav-item" onclick="switchTab('barbers')" id="nav-barbers">
       <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="23" y2="12"/><line x1="23" y1="8" x2="19" y2="12"/></svg>
       Barbers
@@ -1117,7 +1113,6 @@ window.addEventListener('DOMContentLoaded', () => {
 function applyRoleRestrictions() {
   if (currentRole === 'barber') {
     document.getElementById('nav-services').style.display = 'none';
-    document.getElementById('nav-notifications').style.display = 'none';
     document.getElementById('nav-barbers').style.display = 'none';
     document.querySelector('.sidebar-brand .sub').textContent = 'Barber Portal';
   } else {
@@ -1241,7 +1236,7 @@ async function deleteBarberAccount(pin, name) {
 }
 
 // ─── TABS ────────────────────────────────────────────────────────────────────
-const tabTitles = { dashboard: 'Dashboard', bookings: 'Bookings', customers: 'Customers', services: 'Services', notifications: 'Notifications', barbers: 'Barbers' };
+const tabTitles = { dashboard: 'Dashboard', bookings: 'Bookings', customers: 'Customers', services: 'Services', barbers: 'Barbers' };
 
 function switchTab(tab) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
@@ -1253,7 +1248,6 @@ function switchTab(tab) {
   if (tab === 'bookings') loadBookings();
   if (tab === 'customers') loadCustomers();
   if (tab === 'services') loadServices();
-  if (tab === 'notifications') loadNotificationSettings();
   if (tab === 'barbers') loadBarbers();
   closeSidebar();
 }
