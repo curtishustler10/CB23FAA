@@ -998,6 +998,10 @@ function normalizeBooking(data, id) {
     if (!d.user_email) d.user_email = d.customer.email || '';
     if (!d.user_phone) d.user_phone = d.customer.phone || '';
   }
+  if (d.services && Array.isArray(d.services) && d.services.length) {
+    if (!d.service_name) d.service_name = d.services.map(s => s.name).join(', ');
+    if (d.price == null) d.price = d.services.reduce((t, s) => t + (parseFloat(s.price) || 0), 0);
+  }
   if (d.service) {
     if (!d.service_name) d.service_name = d.service.name || '';
     if (d.price == null) d.price = d.service.price || 0;
