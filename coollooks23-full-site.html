@@ -1930,93 +1930,16 @@
         document.getElementById("bookingForm").style.display = "none";
         document.getElementById("bookingSuccess").style.display = "block";
 
-        // Fire notifications independently — never block or break the booking UX
-        (async () => {
-          const bookingId    = bookingRef.id;
-          const serviceLabel = selectedList.map(s => s.name).join(', ');
-          const priceLabel   = '$' + totalPrice + (heads > 1 ? ' (' + heads + ' heads)' : '');
-          const dateLabel    = document.getElementById("bookingDateDisplay").value || date;
-          const custName     = document.getElementById("customerName").value;
-          const custEmail    = document.getElementById("customerEmail").value;
-          const emailLog     = [];
-
-          // ── Customer confirmation ──
-          try {
-            await emailjs.send(EMAILJS_SVC, EMAILJS_TPL_NEW, {
-              to_email:      custEmail,
-              customer_name: custName,
-              service_name:  serviceLabel,
-              booking_date:  dateLabel,
-              booking_time:  time,
-              price:         priceLabel
-            }, EMAILJS_PK);
-            emailLog.push({ to: custEmail, role: 'customer', status: 'sent' });
-          } catch (err) {
-            emailLog.push({ to: custEmail, role: 'customer', status: 'failed', error: err.text || String(err) });
-          }
-
-          // ── Barber + Admin notifications ──
-          try {
-            const adminSnap = await db.collection('admins').get();
-            const allBarbers = [], adminAccounts = [];
-            adminSnap.forEach(doc => {
-              const d = doc.data();
-              if (d.role === 'barber' && d.email) allBarbers.push(d);
-              if (d.role === 'admin'  && d.email) adminAccounts.push(d);
-            });
-
-            const targets = selectedBarber === 'Any'
-              ? allBarbers
-              : allBarbers.filter(b => b.barber === selectedBarber);
-
-            for (const barberDoc of targets) {
-              const base = `${SITE_URL}/barber-action.html?id=${bookingId}&barber=${encodeURIComponent(barberDoc.barber)}&token=${notifToken}`;
-              try {
-                await emailjs.send(EMAILJS_SVC, EMAILJS_TPL_BARBER, {
-                  to_email:      barberDoc.email,
-                  barber_name:   barberDoc.barber,
-                  customer_name: custName,
-                  customer_email: custEmail,
-                  service_name:  serviceLabel,
-                  booking_date:  dateLabel,
-                  booking_time:  time,
-                  price:         priceLabel,
-                  confirm_link:  base + '&action=confirm',
-                  decline_link:  base + '&action=decline'
-                }, EMAILJS_PK);
-                emailLog.push({ to: barberDoc.email, role: 'barber', name: barberDoc.barber, status: 'sent' });
-              } catch (err) {
-                emailLog.push({ to: barberDoc.email, role: 'barber', name: barberDoc.barber, status: 'failed', error: err.text || String(err) });
-              }
-            }
-
-            for (const adminDoc of adminAccounts) {
-              const base = `${SITE_URL}/barber-action.html?id=${bookingId}&barber=${encodeURIComponent(selectedBarber)}&token=${notifToken}`;
-              try {
-                await emailjs.send(EMAILJS_SVC, EMAILJS_TPL_BARBER, {
-                  to_email:      adminDoc.email,
-                  barber_name:   adminDoc.name || 'Admin',
-                  customer_name: custName,
-                  customer_email: custEmail,
-                  service_name:  serviceLabel,
-                  booking_date:  dateLabel,
-                  booking_time:  time,
-                  price:         priceLabel,
-                  confirm_link:  base + '&action=confirm',
-                  decline_link:  base + '&action=decline'
-                }, EMAILJS_PK);
-                emailLog.push({ to: adminDoc.email, role: 'admin', name: adminDoc.name || 'Admin', status: 'sent' });
-              } catch (err) {
-                emailLog.push({ to: adminDoc.email, role: 'admin', name: adminDoc.name || 'Admin', status: 'failed', error: err.text || String(err) });
-              }
-            }
-          } catch (err) {
-            emailLog.push({ role: 'system', status: 'failed', error: 'admins fetch failed: ' + (err.message || String(err)) });
-          }
-
-          // Write log back to booking so admin can see delivery status
-          db.collection('bookings').doc(bookingId).update({ email_log: emailLog }).catch(() => {});
-        })();
+        // Customer confirmation email (fire and forget)
+        // Barber + admin notifications are handled server-side by the Cloud Function
+        emailjs.send(EMAILJS_SVC, EMAILJS_TPL_NEW, {
+          to_email:      document.getElementById("customerEmail").value,
+          customer_name: document.getElementById("customerName").value,
+          service_name:  selectedList.map(s => s.name).join(', '),
+          booking_date:  document.getElementById("bookingDateDisplay").value || date,
+          booking_time:  time,
+          price:         '$' + totalPrice + (heads > 1 ? ' (' + heads + ' heads)' : '')
+        }, EMAILJS_PK).catch(err => console.warn('Customer email failed:', err.text || err));
 
       } catch(err) { alert("Booking failed. Please try again."); btn.disabled = false; btn.textContent = "Book Now"; }
     });
