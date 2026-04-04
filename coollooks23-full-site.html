@@ -1940,13 +1940,15 @@
           price: '$' + totalPrice + (heads > 1 ? ' (' + heads + ' heads)' : '')
         }, EMAILJS_PK).catch(err => console.warn('Customer email failed:', err.status, err.text, err));
 
-        // Barber notification(s)
+        // Barber + Admin notification(s)
         if (EMAILJS_TPL_BARBER !== 'YOUR_BARBER_TEMPLATE_ID') {
           const adminSnap = await db.collection('admins').get();
           const allBarbers = [];
+          const adminAccounts = [];
           adminSnap.forEach(doc => {
             const d = doc.data();
             if (d.role === 'barber' && d.email) allBarbers.push(d);
+            if (d.role === 'admin'  && d.email) adminAccounts.push(d);
           });
 
           const targets = selectedBarber === 'Any'
@@ -1959,19 +1961,36 @@
           const dateLabel    = document.getElementById("bookingDateDisplay").value || date;
           const custName     = document.getElementById("customerName").value;
 
+          // Notify matched barber(s)
           for (const barberDoc of targets) {
             const base = `${SITE_URL}/barber-action.html?id=${bookingId}&barber=${encodeURIComponent(barberDoc.barber)}&token=${notifToken}`;
             emailjs.send(EMAILJS_SVC, EMAILJS_TPL_BARBER, {
-              to_email:     barberDoc.email,
-              barber_name:  barberDoc.barber,
+              to_email:      barberDoc.email,
+              barber_name:   barberDoc.barber,
               customer_name: custName,
-              service_name: serviceLabel,
-              booking_date: dateLabel,
-              booking_time: time,
-              price:        priceLabel,
-              confirm_link: base + '&action=confirm',
-              decline_link: base + '&action=decline'
+              service_name:  serviceLabel,
+              booking_date:  dateLabel,
+              booking_time:  time,
+              price:         priceLabel,
+              confirm_link:  base + '&action=confirm',
+              decline_link:  base + '&action=decline'
             }, EMAILJS_PK).catch(err => console.warn('Barber email failed:', err.status, err.text, err));
+          }
+
+          // Notify admin(s)
+          for (const adminDoc of adminAccounts) {
+            const base = `${SITE_URL}/barber-action.html?id=${bookingId}&barber=${encodeURIComponent(selectedBarber)}&token=${notifToken}`;
+            emailjs.send(EMAILJS_SVC, EMAILJS_TPL_BARBER, {
+              to_email:      adminDoc.email,
+              barber_name:   adminDoc.name || 'Admin',
+              customer_name: custName,
+              service_name:  serviceLabel,
+              booking_date:  dateLabel,
+              booking_time:  time,
+              price:         priceLabel,
+              confirm_link:  base + '&action=confirm',
+              decline_link:  base + '&action=decline'
+            }, EMAILJS_PK).catch(err => console.warn('Admin email failed:', err.status, err.text, err));
           }
         }
       } catch(err) { alert("Booking failed. Please try again."); btn.disabled = false; btn.textContent = "Book Now"; }
