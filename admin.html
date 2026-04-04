@@ -1815,6 +1815,18 @@ async function openBookingById(id) {
       ` : `<div style="font-size:15px">${esc(barberLabel)}</div>`}
     </div>
     ${b.notes ? `<div class="form-group"><div class="form-label">Notes</div><div style="font-size:14px;color:var(--text-muted)">${esc(b.notes)}</div></div>` : ''}
+    ${b.email_log && b.email_log.length ? `
+      <div class="form-group">
+        <div class="form-label">Email Log</div>
+        ${b.email_log.map(e => `
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+            <span style="color:${e.status === 'sent' ? 'var(--success, #4caf50)' : 'var(--danger, #e53935)'};font-weight:700;min-width:44px">${e.status === 'sent' ? '✓ sent' : '✗ fail'}</span>
+            <span style="color:var(--text-muted)">${esc(e.role)}${e.name ? ' · ' + esc(e.name) : ''}</span>
+            ${e.error ? `<span style="color:var(--danger, #e53935);font-size:11px">${esc(e.error)}</span>` : ''}
+          </div>
+        `).join('')}
+      </div>
+    ` : ''}
     ${b.created_at ? `<div style="font-size:12px;color:#aaa;margin-top:8px">Booked: ${esc(formatDate(b.created_at))}</div>` : ''}
   `;
 
