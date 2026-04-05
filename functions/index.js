@@ -11,15 +11,19 @@ const EMAILJS_TPL_BARBER = 'template_lmtskhf';
 const SITE_URL           = 'https://coollooksbarberz.com';
 
 async function sendEmailJS(templateId, params) {
+  const body = {
+    service_id:      EMAILJS_SVC,
+    template_id:     templateId,
+    user_id:         EMAILJS_PK,
+    template_params: params
+  };
+  if (process.env.EMAILJS_PRIVATE_KEY) {
+    body.accessToken = process.env.EMAILJS_PRIVATE_KEY;
+  }
   const res = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
     method:  'POST',
     headers: { 'Content-Type': 'application/json' },
-    body:    JSON.stringify({
-      service_id:      EMAILJS_SVC,
-      template_id:     templateId,
-      user_id:         EMAILJS_PK,
-      template_params: params
-    })
+    body:    JSON.stringify(body)
   });
   if (!res.ok) {
     const text = await res.text();
