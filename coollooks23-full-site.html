@@ -1740,6 +1740,21 @@
           }
         });
       } catch(err) { console.warn('Availability check failed:', err); }
+
+      // Disable past time slots when booking for today
+      const now = new Date();
+      const todayStr = now.toISOString().slice(0, 10);
+      if (date === todayStr) {
+        const nowMins = now.getHours() * 60 + now.getMinutes();
+        Array.from(timeSelect.options).forEach(o => {
+          if (!o.value || o.disabled) return;
+          const [h, m] = o.value.split(':').map(Number);
+          if (h * 60 + m <= nowMins) {
+            o.disabled = true;
+            o.text = o.value + ' — Passed';
+          }
+        });
+      }
     }
 
     function renderCal() {
