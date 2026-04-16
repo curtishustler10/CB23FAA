@@ -1372,7 +1372,10 @@ async function saveBarberAccount() {
 async function toggleBarberActive(pin, name, currentActive) {
   const next = !currentActive;
   const verb = next ? 'Reactivate' : 'Deactivate';
-  if (!confirm(`${verb} ${name}?${next ? '' : ' They will no longer appear in booking assignment dropdowns, but can still log in to admin.'}`)) return;
+  const msg = next
+    ? `Reactivate ${name}? They will be bookable for today again.`
+    : `Deactivate ${name}? Customers won't be able to book them for today, but future dates stay open. They can still log in to admin.`;
+  if (!confirm(msg)) return;
   try {
     await db.collection('admins').doc(pin).update({ active: next });
     toast(`${name} ${next ? 'reactivated' : 'deactivated'}`, 'success');

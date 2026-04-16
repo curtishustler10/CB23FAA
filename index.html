@@ -1719,13 +1719,58 @@
       updateAvailableSlots();
     };
 
+    const _inactiveBarbers = new Set();
+    async function loadInactiveBarbers() {
+      try {
+        const snap = await db.collection('admins').where('role', '==', 'barber').get();
+        _inactiveBarbers.clear();
+        snap.forEach(doc => {
+          const d = doc.data();
+          if (d.active === false && d.barber) _inactiveBarbers.add(d.barber);
+        });
+      } catch (e) { console.warn('loadInactiveBarbers failed:', e.message); }
+    }
+
+    function _todayStr() {
+      const d = new Date(); d.setHours(0,0,0,0);
+      const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), dd = String(d.getDate()).padStart(2,'0');
+      return `${y}-${m}-${dd}`;
+    }
+
+    function _annotateBarberOptions(date) {
+      const sel = document.getElementById('selectedBarber');
+      if (!sel) return;
+      const isToday = date && date === _todayStr();
+      Array.from(sel.options).forEach(o => {
+        if (!o.value || o.value === 'Any') return;
+        const away = isToday && _inactiveBarbers.has(o.value);
+        o.text = away ? `${o.value} — away today` : o.value;
+        o.disabled = away;
+      });
+      // If the currently-selected barber just became disabled, fall back to Any
+      if (sel.options[sel.selectedIndex] && sel.options[sel.selectedIndex].disabled) {
+        sel.value = 'Any';
+      }
+    }
+
     async function updateAvailableSlots() {
       const date = document.getElementById('bookingDate').value;
       const barber = document.getElementById('selectedBarber').value;
-      if (!date) return;
       const timeSelect = document.getElementById('bookingTime');
+      _annotateBarberOptions(date);
+      if (!date) return;
       // reset all options to enabled first
       Array.from(timeSelect.options).forEach(o => { o.disabled = false; o.text = o.value || 'Select time'; });
+
+      // If the selected barber is away today, block every slot
+      if (barber !== 'Any' && date === _todayStr() && _inactiveBarbers.has(barber)) {
+        Array.from(timeSelect.options).forEach(o => {
+          if (o.value) { o.disabled = true; o.text = o.value + ' — away today'; }
+        });
+        timeSelect.value = '';
+        return;
+      }
+
       try {
         let query = db.collection('bookings').where('date', '==', date).where('status', 'in', ['pending', 'confirmed']);
         if (barber !== 'Any') query = query.where('barber', '==', barber);
@@ -1860,6 +1905,7 @@
       loadServices(preSelectName);
       setupDateTime();
       if (preSelectBarber) document.getElementById('selectedBarber').value = preSelectBarber;
+      loadInactiveBarbers().then(() => _annotateBarberOptions(document.getElementById('bookingDate').value));
     }
     window.closeBookingModal = function closeBookingModal() {
       document.getElementById("bookingModal").classList.remove("open");
@@ -1903,6 +1949,15 @@
       const heads = _headCount;
       const servicesTotal = selectedList.reduce((t, s) => t + s.price, 0);
       const totalPrice = servicesTotal * heads;
+      const barberChoice = document.getElementById("selectedBarber").value;
+
+      // Refresh inactive list in case admin toggled while the modal was open
+      await loadInactiveBarbers();
+      if (barberChoice !== 'Any' && date === _todayStr() && _inactiveBarbers.has(barberChoice)) {
+        alert(`${barberChoice} is away today. Please pick another barber or another date.`);
+        btn.disabled = false; btn.textContent = "Book Now";
+        return;
+      }
 
       try {
         await db.collection('bookings').add({
