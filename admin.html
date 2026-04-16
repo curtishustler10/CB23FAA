@@ -686,9 +686,6 @@
           <select class="filter-input" id="filter-barber" onchange="loadBookings()" style="display:none">
             <option value="">All Barbers</option>
             <option value="Any">Unassigned (Any)</option>
-            <option value="Obama">Obama</option>
-            <option value="Maurice">Maurice</option>
-            <option value="Scorpion">Scorpion</option>
           </select>
           <button class="btn btn-outline btn-sm" onclick="filterToday()" id="btn-today">Today</button>
           <button class="btn btn-outline btn-sm" onclick="clearBookingFilters()">Clear</button>
@@ -829,8 +826,8 @@
           </div>
           <div class="table-wrap">
             <table id="barbers-table">
-              <thead><tr><th>Name</th><th>Role</th><th>Barber</th><th>Email</th><th>PIN</th><th></th></tr></thead>
-              <tbody id="barbers-tbody"><tr><td colspan="6" class="empty-state"><p>Loading...</p></td></tr></tbody>
+              <thead><tr><th>Name</th><th>Role</th><th>Barber</th><th>Email</th><th>PIN</th><th>Status</th><th></th></tr></thead>
+              <tbody id="barbers-tbody"><tr><td colspan="7" class="empty-state"><p>Loading...</p></td></tr></tbody>
             </table>
           </div>
         </div>
@@ -869,6 +866,13 @@
     <div class="form-group">
       <label class="form-label">Email (for booking notifications)</label>
       <input type="email" class="form-input" id="barber-modal-email" placeholder="e.g. obama@coollooks.com">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Status</label>
+      <select class="form-input" id="barber-modal-active">
+        <option value="true">Active</option>
+        <option value="false">Inactive</option>
+      </select>
     </div>
     <div class="form-group">
       <label class="form-label">PIN (4 digits)</label>
@@ -1156,8 +1160,8 @@ function initApp() {
   currentBarber = localStorage.getItem('cl_admin_barber') || null;
   if (currentBarber === '') currentBarber = null;
   applyRoleRestrictions();
-  if (currentRole === 'admin') { seedBarberAccounts(); loadDashboard(); }
-  else switchTab('dashboard');
+  if (currentRole === 'admin') { seedBarberAccounts().then(refreshBarberDropdowns); loadDashboard(); }
+  else { refreshBarberDropdowns(); switchTab('dashboard'); }
 }
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -1204,19 +1208,61 @@ async function seedBarberAccounts() {
 
 // ─── BARBERS ─────────────────────────────────────────────────────────────────
 
+let activeBarberNames = ['Obama', 'Maurice', 'Scorpion'];
+
+async function refreshBarberDropdowns() {
+  try {
+    const snap = await db.collection('admins').where('role', '==', 'barber').get();
+    const names = [];
+    snap.forEach(doc => {
+      const d = doc.data();
+      if (d.active !== false && d.barber) names.push(d.barber);
+    });
+    if (names.length) {
+      names.sort();
+      activeBarberNames = [...new Set(names)];
+    }
+    const fb = document.getElementById('filter-barber');
+    if (fb) {
+      const cur = fb.value;
+      fb.innerHTML = '<option value="">All Barbers</option><option value="Any">Unassigned (Any)</option>'
+        + activeBarberNames.map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join('');
+      if ([...fb.options].some(o => o.value === cur)) fb.value = cur;
+    }
+    const bmb = document.getElementById('barber-modal-barber');
+    if (bmb) {
+      const cur = bmb.value;
+      bmb.innerHTML = activeBarberNames.map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join('')
+        + '<option value="">None / Admin</option>';
+      if ([...bmb.options].some(o => o.value === cur)) bmb.value = cur;
+    }
+  } catch (e) {
+    console.warn('refreshBarberDropdowns failed:', e.message);
+  }
+}
+
 async function loadBarbers() {
   const tbody = document.getElementById('barbers-tbody');
-  tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><p>Loading...</p></td></tr>';
+  tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><p>Loading...</p></td></tr>';
   try {
     const snap = await db.collection('admins').get();
     if (snap.empty) {
-      tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><p>No accounts found</p></td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><p>No accounts found</p></td></tr>';
       return;
     }
     const accounts = [];
     snap.forEach(doc => accounts.push({ pin: doc.id, ...doc.data() }));
     accounts.sort((a, b) => (a.role === 'admin' ? -1 : 1));
-    tbody.innerHTML = accounts.map(a => `
+    tbody.innerHTML = accounts.map(a => {
+      const isBarber = a.role !== 'admin';
+      const isActive = a.active !== false;
+      const statusCell = isBarber
+        ? `<span class="badge ${isActive ? 'badge-confirmed' : 'badge-cancelled'}">${isActive ? 'Active' : 'Inactive'}</span>`
+        : '<span style="color:var(--text-muted);font-size:12px">—</span>';
+      const toggleBtn = isBarber
+        ? `<button class="btn btn-sm" style="background:${isActive ? 'var(--warning)' : 'var(--success)'};color:#fff;margin-left:6px" onclick="toggleBarberActive('${esc(a.pin)}','${esc(a.name||'')}',${isActive})">${isActive ? 'Deactivate' : 'Reactivate'}</button>`
+        : '';
+      return `
       <tr>
         <td><strong>${esc(a.name || '—')}</strong></td>
         <td><span class="status-badge ${a.role === 'admin' ? 'status-confirmed' : 'status-pending'}">${esc(a.role || 'barber')}</span></td>
@@ -1224,11 +1270,14 @@ async function loadBarbers() {
         <td style="color:${a.email ? 'var(--text)' : 'var(--text-muted)'}; font-size:13px">${esc(a.email || '—')}</td>
         <td><span style="font-family:monospace;letter-spacing:4px">${'•'.repeat(a.pin ? a.pin.length : 4)}</span>
           <span style="color:var(--text-muted);font-size:12px;margin-left:6px">(${esc(a.pin)})</span></td>
-        <td><button class="btn btn-sm btn-gold" onclick="openEditBarberModal('${esc(a.pin)}','${esc(a.name||'')}','${esc(a.role||'barber')}','${esc(a.barber||'')}','${esc(a.email||'')}')">Edit</button>
+        <td>${statusCell}</td>
+        <td><button class="btn btn-sm btn-gold" onclick="openEditBarberModal('${esc(a.pin)}','${esc(a.name||'')}','${esc(a.role||'barber')}','${esc(a.barber||'')}','${esc(a.email||'')}',${isActive})">Edit</button>
+            ${toggleBtn}
             <button class="btn btn-sm" style="background:var(--danger);color:#fff;margin-left:6px" onclick="deleteBarberAccount('${esc(a.pin)}','${esc(a.name||'')}')">Delete</button></td>
-      </tr>`).join('');
+      </tr>`;
+    }).join('');
   } catch (e) {
-    tbody.innerHTML = `<tr><td colspan="5" class="empty-state"><p>Error: ${esc(e.message)}</p></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" class="empty-state"><p>Error: ${esc(e.message)}</p></td></tr>`;
   }
 }
 
@@ -1236,8 +1285,9 @@ function openAddBarberModal() {
   document.getElementById('barber-modal-title').textContent = 'Add Barber';
   document.getElementById('barber-modal-name').value = '';
   document.getElementById('barber-modal-role').value = 'barber';
-  document.getElementById('barber-modal-barber').value = 'Obama';
+  document.getElementById('barber-modal-barber').value = activeBarberNames[0] || '';
   document.getElementById('barber-modal-email').value = '';
+  document.getElementById('barber-modal-active').value = 'true';
   document.getElementById('barber-modal-pin').value = '';
   document.getElementById('barber-modal-pin-original').value = '';
   document.getElementById('barber-modal-pin').removeAttribute('readonly');
@@ -1245,12 +1295,20 @@ function openAddBarberModal() {
   document.getElementById('barber-modal').style.display = 'flex';
 }
 
-function openEditBarberModal(pin, name, role, barber, email) {
+function openEditBarberModal(pin, name, role, barber, email, active) {
   document.getElementById('barber-modal-title').textContent = 'Edit Barber';
   document.getElementById('barber-modal-name').value = name;
   document.getElementById('barber-modal-role').value = role;
-  document.getElementById('barber-modal-barber').value = barber;
+  const bmb = document.getElementById('barber-modal-barber');
+  // Ensure the current barber name is selectable even if inactive / missing from list
+  if (barber && ![...bmb.options].some(o => o.value === barber)) {
+    const opt = document.createElement('option');
+    opt.value = barber; opt.textContent = barber;
+    bmb.insertBefore(opt, bmb.firstChild);
+  }
+  bmb.value = barber;
   document.getElementById('barber-modal-email').value = email || '';
+  document.getElementById('barber-modal-active').value = active === false ? 'false' : 'true';
   document.getElementById('barber-modal-pin').value = pin;
   document.getElementById('barber-modal-pin-original').value = pin;
   document.getElementById('barber-modal-error').textContent = '';
@@ -1266,6 +1324,7 @@ async function saveBarberAccount() {
   const role    = document.getElementById('barber-modal-role').value;
   const barber  = document.getElementById('barber-modal-barber').value;
   const email   = document.getElementById('barber-modal-email').value.trim();
+  const active  = document.getElementById('barber-modal-active').value === 'true';
   const pin     = document.getElementById('barber-modal-pin').value.trim();
   const origPin = document.getElementById('barber-modal-pin-original').value;
   const errEl   = document.getElementById('barber-modal-error');
@@ -1278,12 +1337,33 @@ async function saveBarberAccount() {
     if (origPin && origPin !== pin) {
       await db.collection('admins').doc(origPin).delete();
     }
-    await db.collection('admins').doc(pin).set({ name, role, barber: role === 'admin' ? '' : barber, email: email || '' });
+    await db.collection('admins').doc(pin).set({
+      name,
+      role,
+      barber: role === 'admin' ? '' : barber,
+      email: email || '',
+      active,
+    });
     closeBarberModal();
     toast(`${name} saved`, 'success');
+    await refreshBarberDropdowns();
     loadBarbers();
   } catch (e) {
     errEl.textContent = 'Save failed: ' + e.message;
+  }
+}
+
+async function toggleBarberActive(pin, name, currentActive) {
+  const next = !currentActive;
+  const verb = next ? 'Reactivate' : 'Deactivate';
+  if (!confirm(`${verb} ${name}?${next ? '' : ' They will no longer appear in booking assignment dropdowns, but can still log in to admin.'}`)) return;
+  try {
+    await db.collection('admins').doc(pin).update({ active: next });
+    toast(`${name} ${next ? 'reactivated' : 'deactivated'}`, 'success');
+    await refreshBarberDropdowns();
+    loadBarbers();
+  } catch (e) {
+    toast('Update failed: ' + e.message, 'error');
   }
 }
 
@@ -1292,6 +1372,7 @@ async function deleteBarberAccount(pin, name) {
   try {
     await db.collection('admins').doc(pin).delete();
     toast(`${name} deleted`, 'success');
+    await refreshBarberDropdowns();
     loadBarbers();
   } catch (e) {
     toast('Delete failed: ' + e.message, 'error');
@@ -1808,9 +1889,8 @@ async function openBookingById(id) {
       ${currentRole === 'admin' ? `
         <select class="form-input" id="reassign-barber-select">
           <option value="Any" ${isUnassigned ? 'selected' : ''}>Any / Unassigned</option>
-          <option value="Obama" ${b.barber === 'Obama' ? 'selected' : ''}>Obama</option>
-          <option value="Maurice" ${b.barber === 'Maurice' ? 'selected' : ''}>Maurice</option>
-          <option value="Scorpion" ${b.barber === 'Scorpion' ? 'selected' : ''}>Scorpion</option>
+          ${activeBarberNames.map(n => `<option value="${esc(n)}" ${b.barber === n ? 'selected' : ''}>${esc(n)}</option>`).join('')}
+          ${b.barber && b.barber !== 'Any' && !activeBarberNames.includes(b.barber) ? `<option value="${esc(b.barber)}" selected>${esc(b.barber)} (inactive)</option>` : ''}
         </select>
       ` : `<div style="font-size:15px">${esc(barberLabel)}</div>`}
     </div>
