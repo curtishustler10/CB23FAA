@@ -143,6 +143,14 @@
   .row-actions .btn-sm { white-space: nowrap; }
   #barbers-table td, #barbers-table th { vertical-align: middle; }
   #barbers-table td:last-child, #barbers-table th:last-child { text-align: right; min-width: 260px; }
+  @media (max-width: 768px) {
+    #barbers-table th:first-child, #barbers-table td:first-child {
+      position: sticky; left: 0; z-index: 2;
+      box-shadow: 2px 0 4px -2px rgba(0,0,0,0.12);
+    }
+    #barbers-table th:first-child { background: #f8f8f6; }
+    #barbers-table td:first-child { background: var(--card); }
+  }
   .btn-confirm { background: #e6f4ea; color: var(--success); }
   .btn-confirm:hover { background: var(--success); color: #fff; }
   .btn-complete { background: #e8f0fe; color: var(--info); }
