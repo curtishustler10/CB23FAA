@@ -139,6 +139,10 @@
   .btn-gold { background: var(--gold); color: #fff; }
   .btn-gold:hover { background: var(--gold-dark); }
   .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 0; }
+  .row-actions { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; justify-content: flex-end; }
+  .row-actions .btn-sm { white-space: nowrap; }
+  #barbers-table td, #barbers-table th { vertical-align: middle; }
+  #barbers-table td:last-child, #barbers-table th:last-child { text-align: right; min-width: 260px; }
   .btn-confirm { background: #e6f4ea; color: var(--success); }
   .btn-confirm:hover { background: var(--success); color: #fff; }
   .btn-complete { background: #e8f0fe; color: var(--info); }
@@ -1260,7 +1264,7 @@ async function loadBarbers() {
         ? `<span class="badge ${isActive ? 'badge-confirmed' : 'badge-cancelled'}">${isActive ? 'Active' : 'Inactive'}</span>`
         : '<span style="color:var(--text-muted);font-size:12px">—</span>';
       const toggleBtn = isBarber
-        ? `<button class="btn btn-sm" style="background:${isActive ? 'var(--warning)' : 'var(--success)'};color:#fff;margin-left:6px" onclick="toggleBarberActive('${esc(a.pin)}','${esc(a.name||'')}',${isActive})">${isActive ? 'Deactivate' : 'Reactivate'}</button>`
+        ? `<button class="btn btn-sm" style="background:${isActive ? 'var(--warning)' : 'var(--success)'};color:#fff" onclick="toggleBarberActive('${esc(a.pin)}','${esc(a.name||'')}',${isActive})">${isActive ? 'Deactivate' : 'Reactivate'}</button>`
         : '';
       return `
       <tr>
@@ -1271,9 +1275,13 @@ async function loadBarbers() {
         <td><span style="font-family:monospace;letter-spacing:4px">${'•'.repeat(a.pin ? a.pin.length : 4)}</span>
           <span style="color:var(--text-muted);font-size:12px;margin-left:6px">(${esc(a.pin)})</span></td>
         <td>${statusCell}</td>
-        <td><button class="btn btn-sm btn-gold" onclick="openEditBarberModal('${esc(a.pin)}','${esc(a.name||'')}','${esc(a.role||'barber')}','${esc(a.barber||'')}','${esc(a.email||'')}',${isActive})">Edit</button>
+        <td>
+          <div class="row-actions">
+            <button class="btn btn-sm btn-gold" onclick="openEditBarberModal('${esc(a.pin)}','${esc(a.name||'')}','${esc(a.role||'barber')}','${esc(a.barber||'')}','${esc(a.email||'')}',${isActive})">Edit</button>
             ${toggleBtn}
-            <button class="btn btn-sm" style="background:var(--danger);color:#fff;margin-left:6px" onclick="deleteBarberAccount('${esc(a.pin)}','${esc(a.name||'')}')">Delete</button></td>
+            <button class="btn btn-sm" style="background:var(--danger);color:#fff" onclick="deleteBarberAccount('${esc(a.pin)}','${esc(a.name||'')}')">Delete</button>
+          </div>
+        </td>
       </tr>`;
     }).join('');
   } catch (e) {
