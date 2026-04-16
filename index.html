@@ -1753,14 +1753,38 @@
       }
     }
 
+    function _rebuildTimeOptions(date) {
+      const timeSelect = document.getElementById('bookingTime');
+      const previous = timeSelect.value;
+      let minMinutes = -1;
+      if (date === _todayStr()) {
+        const now = new Date();
+        minMinutes = now.getHours() * 60 + now.getMinutes();
+      }
+      let opts = '<option value="">Select time</option>';
+      for (let h = 8; h < 18; h++) {
+        for (const mm of [0, 30]) {
+          const slotMin = h * 60 + mm;
+          if (slotMin <= minMinutes) continue;
+          const t = `${h}:${String(mm).padStart(2, '0')}`;
+          opts += `<option value="${t}">${t}</option>`;
+        }
+      }
+      timeSelect.innerHTML = opts;
+      if (previous && [...timeSelect.options].some(o => o.value === previous)) {
+        timeSelect.value = previous;
+      }
+    }
+
     async function updateAvailableSlots() {
       const date = document.getElementById('bookingDate').value;
       const barber = document.getElementById('selectedBarber').value;
       const timeSelect = document.getElementById('bookingTime');
       _annotateBarberOptions(date);
       if (!date) return;
-      // reset all options to enabled first
-      Array.from(timeSelect.options).forEach(o => { o.disabled = false; o.text = o.value || 'Select time'; });
+      // Rebuild slots (omits past times when date is today) and enable them
+      _rebuildTimeOptions(date);
+      Array.from(timeSelect.options).forEach(o => { o.disabled = false; if (o.value) o.text = o.value; });
 
       // If the selected barber is away today, block every slot
       if (barber !== 'Any' && date === _todayStr() && _inactiveBarbers.has(barber)) {
@@ -1795,7 +1819,7 @@
       for (let i = 0; i < firstDay; i++) html += '<span class="cal-d cal-empty"></span>';
       for (let d = 1; d <= days; d++) {
         const nd = new Date(y, m, d); nd.setHours(0,0,0,0);
-        const ds = nd.toISOString().slice(0,10);
+        const ds = `${y}-${String(m + 1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
         const dis = (_calMin && nd < _calMin) || (_calMax && nd > _calMax);
         let cls = 'cal-d' + (dis ? ' cal-dis' : '') +
                   (nd.getTime() === today.getTime() ? ' cal-today' : '') +
